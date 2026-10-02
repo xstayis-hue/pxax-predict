@@ -764,13 +764,14 @@ if (tg) { try { tg.expand(); tg.disableVerticalSwipes?.(); } catch(e) {} }
 const user = tg?.initDataUnsafe?.user;
 
 /* ================= реальные данные (GitHub Actions -> data/*.json) ================= */
-const REAL = { date: null, free: [], pro: [], results: null };
+const REAL = { loaded: false, date: null, free: [], pro: [], results: null };
 async function loadReal() {
   try {
     const r = await fetch('data/predictions.json', { cache: 'no-store' });
     if (r.ok) {
       const d = await r.json();
-      if (d.date === today && Array.isArray(d.predictions) && d.predictions.length) {
+      REAL.loaded = true;
+      if (d.date === today && Array.isArray(d.predictions)) {
         REAL.date = d.date;
         REAL.free = d.predictions.filter(p => p.tier === 'free');
         REAL.pro = d.predictions.filter(p => p.tier === 'pro');
@@ -1111,15 +1112,26 @@ function render() {
   document.getElementById('payProTitle').textContent = `💎 Ещё ${proToday.length} ${plural(proToday.length, 'прогноз', 'прогноза', 'прогнозов')} — у Pro-ИИ`;
   document.getElementById('proCnt').textContent = `${proToday.length} ${plural(proToday.length, 'прогноз', 'прогноза', 'прогнозов')} в VIP на сегодня`;
 
-  // колоды
-  document.getElementById('freeTrack').innerHTML =
-    freeToday.map(p => slideHTML(p, true, false, false)).join('');
-  document.getElementById('proTrack').innerHTML =
-    proToday.map(p => slideHTML(p, pro, true, false)).join('');
-  freeDeckObj = makeDeck(document.getElementById('freeTrack'), document.getElementById('freeNav'), freeToday.length, 'free');
-  proDeckObj = makeDeck(document.getElementById('proTrack'), document.getElementById('proNav'), proToday.length, 'pro');
-  document.getElementById('paywallCta').style.display = pro ? 'none' : 'block';
-  document.getElementById('proPaywall').style.display = pro ? 'none' : 'block';
+  // колоды (+ честные пустые состояния, если матчей в окне нет)
+  const EMPTY_DECK = `<div class="empty" style="margin:0">🕐 В окне 6–48 часов подходящих матчей нет — прогнозы появятся в ближайшем обновлении.</div>`;
+  const ft = document.getElementById('freeTrack');
+  const pt = document.getElementById('proTrack');
+  if (freeToday.length) {
+    ft.innerHTML = freeToday.map(p => slideHTML(p, true, false, false)).join('');
+    freeDeckObj = makeDeck(ft, document.getElementById('freeNav'), freeToday.length, 'free');
+  } else {
+    ft.innerHTML = EMPTY_DECK;
+    document.getElementById('freeNav').innerHTML = '';
+  }
+  if (proToday.length) {
+    pt.innerHTML = proToday.map(p => slideHTML(p, pro, true, false)).join('');
+    proDeckObj = makeDeck(pt, document.getElementById('proNav'), proToday.length, 'pro');
+  } else {
+    pt.innerHTML = `<div class="empty" style="margin:0">💎 Сигналы Pro-ИИ появятся перед ближайшими матчами.</div>`;
+    document.getElementById('proNav').innerHTML = '';
+  }
+  document.getElementById('paywallCta').style.display = (pro || !proToday.length) ? 'none' : 'block';
+  document.getElementById('proPaywall').style.display = (pro || !proToday.length) ? 'none' : 'block';
 
   // статистика прошедших прогнозов
   const hEl = document.getElementById('historyList');
@@ -1429,8 +1441,12 @@ if (sessionStorage.getItem('intro_' + today)) {
 (async () => {
   const serverPro = await loadServerPro();
   await loadReal();
-  if (REAL.free.length) freeToday = REAL.free.slice(0, 5).map(p => ({ ...p, kind: 'free', league: p.lgName }));
-  if (REAL.pro.length) proToday = REAL.pro.slice(0, 5).map(p => ({ ...p, kind: 'pro', league: p.lgName }));
+  // если с прод-сервера пришёл свежий файл на сегодня — используем его (даже пустой);
+  // мок остаётся только для локального превью без хостинга (fetch не сработал)
+  if (REAL.loaded && REAL.date === today) {
+    freeToday = REAL.free.slice(0, 5).map(p => ({ ...p, kind: 'free', league: p.lgName }));
+    proToday = REAL.pro.slice(0, 5).map(p => ({ ...p, kind: 'pro', league: p.lgName }));
+  }
   render();
   if (serverPro) toast('💎 PRO активна — спасибо за поддержку!');
 })();

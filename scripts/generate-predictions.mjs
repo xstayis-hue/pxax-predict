@@ -8,6 +8,17 @@ const LEAGUES = [
   { key: 'soccer/ita.1', sport: '⚽', name: 'Серия А', type: 'soccer' },
   { key: 'soccer/ger.1', sport: '⚽', name: 'Бундеслига', type: 'soccer' },
   { key: 'soccer/fra.1', sport: '⚽', name: 'Ligue 1', type: 'soccer' },
+  { key: 'soccer/eng.2', sport: '⚽', name: 'Championship', type: 'soccer' },
+  { key: 'soccer/esp.2', sport: '⚽', name: 'La Liga 2', type: 'soccer' },
+  { key: 'soccer/ger.2', sport: '⚽', name: '2. Бундеслига', type: 'soccer' },
+  { key: 'soccer/ned.1', sport: '⚽', name: 'Эредивизи', type: 'soccer' },
+  { key: 'soccer/por.1', sport: '⚽', name: 'Португалия', type: 'soccer' },
+  { key: 'soccer/bra.1', sport: '⚽', name: 'Бразилия · Серия A', type: 'soccer' },
+  { key: 'soccer/arg.1', sport: '⚽', name: 'Аргентина', type: 'soccer' },
+  { key: 'soccer/usa.1', sport: '⚽', name: 'MLS', type: 'soccer' },
+  { key: 'soccer/mex.1', sport: '⚽', name: 'Лига MX', type: 'soccer' },
+  { key: 'soccer/uefa.champions', sport: '⚽', name: 'Лига чемпионов', type: 'soccer' },
+  { key: 'soccer/uefa.europa', sport: '⚽', name: 'Лига Европы', type: 'soccer' },
   { key: 'basketball/nba', sport: '🏀', name: 'NBA', type: 'us' },
   { key: 'hockey/nhl', sport: '🏒', name: 'NHL', type: 'us' },
 ];
@@ -16,9 +27,9 @@ const mskNow = Date.now() + 3 * 3600e3;
 const dateStr = new Date(mskNow).toISOString().slice(0, 10);
 const ymd = (d) => new Date(d).toISOString().slice(0, 10).replaceAll('-', '');
 
-async function scoreboard(key) {
-  // без dates-параметра: ESPN отдаёт сегодняшние + ближайшие события (с рекордами)
-  const url = `https://site.api.espn.com/apis/site/v2/sports/${key}/scoreboard`;
+async function scoreboard(key, ds) {
+  // без dates-параметра ESPN отдаёт ближайший тур (с рекордами); для лиг США можно запросить конкретный день
+  const url = `https://site.api.espn.com/apis/site/v2/sports/${key}/scoreboard${ds ? `?dates=${ds}` : ''}`;
   const res = await fetch(url, { headers: UA });
   if (!res.ok) throw new Error('HTTP ' + res.status);
   const j = await res.json();
@@ -36,14 +47,15 @@ function parseRec(c) {
   else if (p.length === 2) { [w, l] = p; }
   else return null;
   const g = w + d + l;
-  if (g < 5) return null;
+  if (g < 1) return null; // начало сезона: принимаем даже 1 игру
   return { w, d, l, g, s };
 }
 
-// сила команды: доля набранных очков
+// сила команды: доля набранных очков со сжатием к 50% при малой выборке
+// (шринк: 1 игра учитывается на 1/3, 5 игр — на 5/7 и т.д.)
 function strength(type, r) {
-  if (type === 'soccer') return (3 * r.w + r.d) / (3 * r.g);
-  return r.w / r.g;
+  const raw = type === 'soccer' ? (3 * r.w + r.d) / (3 * r.g) : r.w / r.g;
+  return 0.5 + (raw - 0.5) * (r.g / (r.g + 2));
 }
 
 function fmtTime(iso) {
@@ -54,12 +66,25 @@ function fmtTime(iso) {
 const preds = [];
 for (const lg of LEAGUES) {
   try {
-    const events = await scoreboard(lg.key);
+    // лиги США: дефолтный скорборд + по дням (сегодня/завтра), дедуп по id
+    let events;
+    if (lg.type === 'us') {
+      const m = new Map();
+      for (const e of [
+        ...(await scoreboard(lg.key)),
+        ...(await scoreboard(lg.key, ymd(Date.now() + 3 * 3600e3))),
+        ...(await scoreboard(lg.key, ymd(Date.now() + 3 * 3600e3 + 86400e3))),
+      ]) m.set(String(e.id), e);
+      events = [...m.values()];
+    } else {
+      events = await scoreboard(lg.key);
+    }
     let taken = 0;
     for (const e of events) {
-      if (taken >= 2) break;
-      // событие должно начинаться минимум через 6 часов — чтобы юзер успел поставить
-      if (new Date(e.date).getTime() < Date.now() + 6 * 3600e3) continue;
+      if (taken >= 5) break; // до 5 сигналов с лиги за прогон
+      // окно свежести: старт минимум через 6 часов и не позже чем через 48 часов
+      const t = new Date(e.date).getTime();
+      if (t < Date.now() + 6 * 3600e3 || t > Date.now() + 48 * 3600e3) continue;
       const comp = e.competitions?.[0];
       const home = comp?.competitors?.find(c => c.homeAway === 'home');
       const away = comp?.competitors?.find(c => c.homeAway === 'away');
