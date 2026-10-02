@@ -1098,8 +1098,8 @@ function render() {
   document.getElementById('pMiss').textContent = hasReal ? statsAll.miss : '—';
   document.getElementById('pRate').textContent = hasReal ? statsAll.rate + '%' : '—';
   // динамические счётчики вместо захардкоженных
-  document.getElementById('payProTitle').textContent = `💎 Ещё ${proToday.length} ${plural(proToday.length)} — у Pro-ИИ`;
-  document.getElementById('proCnt').textContent = `${proToday.length} ${plural(proToday.length)} в VIP на сегодня`;
+  document.getElementById('payProTitle').textContent = `💎 Ещё ${proToday.length} ${plural(proToday.length, 'прогноз', 'прогноза', 'прогнозов')} — у Pro-ИИ`;
+  document.getElementById('proCnt').textContent = `${proToday.length} ${plural(proToday.length, 'прогноз', 'прогноза', 'прогнозов')} в VIP на сегодня`;
 
   // колоды
   document.getElementById('freeTrack').innerHTML =
