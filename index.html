@@ -140,6 +140,18 @@
     padding:3px 8px; border-radius:12px; border:1px solid rgba(157,107,255,.3);
   }
   .ai-tag.pro { color:var(--gold); background:rgba(255,201,60,.1); border-color:rgba(255,201,60,.4); animation:proPulse 2.4s infinite; }
+  .soon-tag {
+    font-size:10px; font-weight:800; color:#ff6b6b;
+    background:rgba(255,82,82,.12); border:1px solid rgba(255,82,82,.45);
+    padding:3px 8px; border-radius:12px; white-space:nowrap;
+    animation: soonPulse 1.4s ease-in-out infinite;
+  }
+  @keyframes soonPulse { 50% { box-shadow:0 0 12px rgba(255,82,82,.55); } }
+  .rel-tag {
+    font-size:10px; font-weight:700; color:var(--muted);
+    background:rgba(139,163,199,.1); border:1px solid rgba(139,163,199,.28);
+    padding:3px 8px; border-radius:12px; white-space:nowrap;
+  }
   .p-body { padding: 16px 14px 4px; text-align:center; position:relative; z-index:1; }
   .league-line { display:flex; align-items:center; justify-content:center; gap:7px; font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); }
   .lg-dot { width:6px; height:6px; border-radius:50%; background:var(--neon); box-shadow:0 0 8px var(--neon); flex:none; }
@@ -846,17 +858,20 @@ function dayKey(d = new Date()) {
   // всё приложение живёт по МСК (как генератор и аудитория) — иначе после полуночи даты разъезжаются с data/*.json
   return new Date((d instanceof Date ? d.getTime() : d) + 3 * 3600e3).toISOString().slice(0, 10);
 }
-// точная дата всегда: сегодня, 03.10 · 02:00 МСК / сб, 10.10 · 16:00 МСК
-function matchDateLabel(iso) {
-  if (!iso) return '';
-  const d = new Date(new Date(iso).getTime() + 3 * 3600e3); // -> МСК
-  const todayMsk = new Date(Date.now() + 3 * 3600e3);
-  const dd = d.toISOString().slice(0, 10);
+// дата матчасти: только цифры в чипе + относительность (сегодня/завтра/скорость) отдельным тегом
+function matchDateInfo(iso) {
+  if (!iso) return { chip: '', rel: null, hours: null };
+  const ms = new Date(iso).getTime();
+  const d = new Date(ms + 3 * 3600e3); // -> МСК
   const dm = d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', timeZone: 'UTC' });
-  if (dd === todayMsk.toISOString().slice(0, 10)) return `сегодня, ${dm} · `;
-  if (dd === new Date(todayMsk.getTime() + 86400e3).toISOString().slice(0, 10)) return `завтра, ${dm} · `;
-  const wd = d.toLocaleDateString('ru-RU', { weekday: 'short', timeZone: 'UTC' });
-  return `${wd}, ${dm} · `;
+  const hours = (ms - Date.now()) / 3600e3;
+  const dd = d.toISOString().slice(0, 10);
+  const todayMsk = new Date(Date.now() + 3 * 3600e3).toISOString().slice(0, 10);
+  const tomorrowMsk = new Date(Date.now() + 3 * 3600e3 + 86400e3).toISOString().slice(0, 10);
+  let rel = null;
+  if (dd === todayMsk) rel = 'today';
+  else if (dd === tomorrowMsk) rel = 'tomorrow';
+  return { chip: `${dm} · `, rel, hours };
 }
 // русская плюрализация: plural(5, 'прогноз', 'прогноза', 'прогнозов')
 function plural(n, one, few, many) {
@@ -1027,6 +1042,14 @@ function teamInitials(name) {
 
 function slideHTML(p, unlocked, isPro, isHistory) {
   const res = isHistory && p.result ? `<div class="res-chip ${p.result.cls}">${p.result.label}</div>` : '';
+  const mdi = matchDateInfo(p.matchDate);
+  // тег срочности: <24ч — красный пульсирующий «через N ч», иначе нейтральное «завтра»
+  let statusTag = '';
+  if (!isHistory && mdi.hours !== null) {
+    statusTag = mdi.hours < 24
+      ? `<span class="soon-tag">⚡ через ${Math.max(1, Math.round(mdi.hours))} ч</span>`
+      : `<span class="rel-tag">завтра</span>`;
+  }
   return `
     <div class="slide ${unlocked ? '' : 'locked'}">
       <div class="p-card ${isPro ? 'pro-card' : ''}">
@@ -1036,6 +1059,7 @@ function slideHTML(p, unlocked, isPro, isHistory) {
           <div class="p-top">
             <span class="sport">${p.sport}</span><span>${p.league}</span>
             <span class="ai-tag ${isPro ? 'pro' : ''}">${isPro ? '💎 Pro AI' : '🤖 AI'}</span>
+            ${statusTag}
           </div>
           <div class="p-body">
             <div class="league-line"><span class="lg-dot"></span>${p.league}</div>
@@ -1050,7 +1074,7 @@ function slideHTML(p, unlocked, isPro, isHistory) {
                 <div class="tname">${p.away}</div>
               </div>
             </div>
-            <div class="time-chip">🕐 ${isHistory ? 'вчера · ' : ''}${matchDateLabel(p.matchDate)}${p.time}</div>
+            <div class="time-chip">🕐 ${isHistory ? 'вчера · ' : ''}${mdi.chip}${p.time}</div>
           </div>
           <div class="p-picks">
             <div class="pick">
