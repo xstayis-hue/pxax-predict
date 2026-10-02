@@ -825,8 +825,23 @@ if (last !== today) {
 let freeToday = generateDay(today, 'free');
 let proToday = generateDay(today, 'pro');
 
+/* ================= учёт реально просмотренных прогнозов ================= */
+function markViewed(deck, i) {
+  let seen = { d: today, keys: [] };
+  try {
+    const s = JSON.parse(localStorage.getItem('pxax_seen') || 'null');
+    if (s && s.d === today) seen = s;
+  } catch (e) {}
+  const key = deck + ':' + i;
+  if (seen.keys.includes(key)) return;
+  seen.keys.push(key);
+  if (seen.keys.length > 300) seen.keys = seen.keys.slice(-300);
+  localStorage.setItem('pxax_seen', JSON.stringify(seen));
+  localStorage.setItem('pxax_viewed', +(localStorage.getItem('pxax_viewed') || 0) + 1);
+}
+
 /* ================= swipe deck component ================= */
-function makeDeck(trackEl, navEl, count) {
+function makeDeck(trackEl, navEl, count, deckId) {
   // нативный scroll-snap: свайп делает сам браузер — работает в любом webview
   let index = 0, moved = false, lastLeft = 0, drag = null;
   const dots = [];
@@ -848,7 +863,7 @@ function makeDeck(trackEl, navEl, count) {
     if (Math.abs(left - lastLeft) > 8) moved = true;
     lastLeft = left;
     const i = Math.round(left / (trackEl.clientWidth || 1));
-    if (i !== index) { index = i; setDots(); }
+    if (i !== index) { index = i; setDots(); markViewed(deckId, i); }
     clearTimeout(trackEl._movedT);
     trackEl._movedT = setTimeout(() => moved = false, 250);
   }, { passive: true });
@@ -875,6 +890,7 @@ function makeDeck(trackEl, navEl, count) {
     if (moved) { e.preventDefault(); e.stopPropagation(); moved = false; }
   }, true);
   goTo(0, true);
+  markViewed(deckId, 0); // первая карточка видна сразу
   return { goTo };
 }
 
@@ -960,8 +976,8 @@ function render() {
     freeToday.map(p => slideHTML(p, true, false, false)).join('');
   document.getElementById('proTrack').innerHTML =
     proToday.map(p => slideHTML(p, pro, true, false)).join('');
-  freeDeckObj = makeDeck(document.getElementById('freeTrack'), document.getElementById('freeNav'), freeToday.length);
-  proDeckObj = makeDeck(document.getElementById('proTrack'), document.getElementById('proNav'), proToday.length);
+  freeDeckObj = makeDeck(document.getElementById('freeTrack'), document.getElementById('freeNav'), freeToday.length, 'free');
+  proDeckObj = makeDeck(document.getElementById('proTrack'), document.getElementById('proNav'), proToday.length, 'pro');
   document.getElementById('paywallCta').style.display = pro ? 'none' : 'block';
   document.getElementById('proPaywall').style.display = pro ? 'none' : 'block';
 
@@ -1038,8 +1054,9 @@ const LEVELS = [
 ];
 
 function renderProfileExtras(statsAll) {
-  // XP: визиты + стрик + подписка
-  const xp = visits * 10 + streak * 15 + (store.pro ? 60 : 0);
+  // XP: визиты + стрик + просмотренные прогнозы + подписка
+  const viewed = +(localStorage.getItem('pxax_viewed') || 0);
+  const xp = visits * 10 + streak * 15 + viewed + (store.pro ? 60 : 0);
   let li = 0;
   for (let i = 0; i < LEVELS.length; i++) if (xp >= LEVELS[i].xp) li = i;
   const cur = LEVELS[li];
@@ -1062,7 +1079,7 @@ function renderProfileExtras(statsAll) {
     { i: '⚡', t: '7 дней подряд', ok: streak >= 7 },
     { i: '💎', t: 'PRO-игрок', ok: store.pro },
     { i: '📅', t: 'Неделя с нами', ok: daysWith >= 7 },
-    { i: '🧠', t: '100 прогнозов', ok: statsAll.total >= 100 },
+    { i: '🧠', t: '100 прогнозов', ok: viewed >= 100 },
   ];
   document.getElementById('achGrid').innerHTML =
     achs.map(a => `<div class="ach ${a.ok ? 'on' : ''}"><div class="i">${a.i}</div><div class="t">${a.t}</div></div>`).join('');
