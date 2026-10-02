@@ -8,16 +8,17 @@
 <style>
   :root {
     --bg: #0a0d16; --card: #121728; --card2: #171d33;
-    --neon: #00e5ff; --neon2: #ff2bd6; --gold: #ffc93c;
+    --neon: #00e5ff; --neon2: #ff2bd6; --gold: #ffc93c; --violet: #9d6bff;
     --text: #e6f1ff; --muted: #8ba3c7; --ok: #00e676; --warn: #ff5252;
-    --radius: 16px;
+    --radius: 18px;
   }
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   html, body { height:100%; }
   body {
     background: var(--bg); color: var(--text);
     font-family: -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
-    padding-bottom: 76px; overscroll-behavior: none;
+    padding-bottom: 78px; overscroll-behavior: none;
+    user-select: none;
   }
 
   /* ---------- header ---------- */
@@ -34,7 +35,9 @@
     display:flex; align-items:center; justify-content:center;
     font-weight:900; font-size:13px; color:var(--neon);
     box-shadow: 0 0 14px rgba(0,229,255,.35), inset 0 0 8px rgba(0,229,255,.25);
+    animation: logoGlow 3s ease-in-out infinite;
   }
+  @keyframes logoGlow { 50% { box-shadow: 0 0 22px rgba(0,229,255,.6), inset 0 0 12px rgba(0,229,255,.4); } }
   .brand h1 { font-size:17px; letter-spacing:.06em; }
   .brand h1 b { color: var(--neon); }
   .brand small { display:block; font-size:11px; color:var(--muted); font-weight:400; }
@@ -43,146 +46,289 @@
     padding:5px 10px; border-radius:20px; text-transform:uppercase;
   }
   .sub-badge.free { color:#9fb3d4; background:rgba(139,163,199,.12); border:1px solid rgba(139,163,199,.3); }
-  .sub-badge.pro  { color:#0a0d16; background:linear-gradient(135deg,var(--gold),#ffb01f); box-shadow:0 0 12px rgba(255,201,60,.4); }
+  .sub-badge.pro  { color:#0a0d16; background:linear-gradient(135deg,var(--gold),#ffb01f); box-shadow:0 0 12px rgba(255,201,60,.4); animation:proPulse 2s infinite; }
+  @keyframes proPulse { 50% { box-shadow:0 0 20px rgba(255,201,60,.65); } }
 
   /* ---------- AI disclaimer ---------- */
   .ai-disclaimer {
-    margin: 10px 16px 0; padding: 10px 12px;
+    margin: 10px 16px 0; padding: 9px 12px;
     background: rgba(255,82,82,.07);
     border: 1px solid rgba(255,82,82,.35); border-radius: 12px;
-    font-size: 11.5px; line-height: 1.45; color: #ffb3b3;
+    font-size: 11px; line-height: 1.45; color: #ffb3b3;
     display: flex; gap: 8px; align-items: flex-start;
   }
   .ai-disclaimer .ico { flex:none; font-size:14px; line-height:1.2; }
   .ai-disclaimer b { color:#ff7b7b; }
 
-  /* ---------- stats row ---------- */
-  .stats { display:flex; gap:10px; padding: 14px 16px 4px; }
-  .stat {
-    flex:1; background:var(--card); border-radius:var(--radius); padding:10px 12px;
-    border:1px solid rgba(0,229,255,.12);
-  }
-  .stat .v { font-size:19px; font-weight:800; color:var(--neon); }
-  .stat .l { font-size:10.5px; color:var(--muted); margin-top:2px; letter-spacing:.03em; }
-
-  .section-title {
-    padding: 18px 16px 10px; font-size:13px; font-weight:800;
-    letter-spacing:.12em; text-transform:uppercase; color:var(--muted);
-    display:flex; align-items:center; gap:8px;
-  }
-  .section-title::after { content:''; flex:1; height:1px; background:rgba(139,163,199,.15); }
-  .live-dot { width:7px; height:7px; border-radius:50%; background:var(--ok); box-shadow:0 0 8px var(--ok); animation:pulse 1.6s infinite; }
-  @keyframes pulse { 50% { opacity:.3; } }
-
-  /* ---------- prediction cards ---------- */
-  .cards { display:flex; flex-direction:column; gap:12px; padding: 0 16px; }
-  .card {
+  /* ---------- AI thinking ---------- */
+  .ai-loading {
+    margin: 14px 16px 6px; padding: 16px;
     background: var(--card); border-radius: var(--radius);
-    border: 1px solid rgba(0,229,255,.14);
-    overflow: hidden; position: relative;
-    box-shadow: 0 6px 20px rgba(0,0,0,.35);
+    border: 1px solid rgba(0,229,255,.15);
+    display:flex; align-items:center; gap:12px;
   }
-  .card-top {
+  .ai-loading .bot { font-size:26px; animation: bob 1s ease-in-out infinite; }
+  @keyframes bob { 50% { transform: translateY(-5px) rotate(-6deg); } }
+  .ai-loading .txt { font-size:13px; color:var(--muted); }
+  .ai-loading .txt b { color:var(--neon); }
+  .dots span {
+    display:inline-block; width:5px; height:5px; margin-left:3px;
+    border-radius:50%; background:var(--neon); animation: dot 1.2s infinite;
+  }
+  .dots span:nth-child(2) { animation-delay:.15s; }
+  .dots span:nth-child(3) { animation-delay:.3s; }
+  @keyframes dot { 0%,60%,100% { opacity:.25; transform:translateY(0);} 30% { opacity:1; transform:translateY(-4px);} }
+
+  /* ---------- mini stats ---------- */
+  .stats { display:flex; gap:10px; padding: 12px 16px 2px; }
+  .stat {
+    flex:1; background:var(--card); border-radius:14px; padding:9px 11px;
+    border:1px solid rgba(0,229,255,.12); text-align:center;
+  }
+  .stat .v { font-size:18px; font-weight:800; color:var(--neon); }
+  .stat .l { font-size:9.5px; color:var(--muted); margin-top:2px; letter-spacing:.03em; }
+
+  /* ---------- swipe deck (app-like) ---------- */
+  .deck-wrap { padding: 12px 16px 0; }
+  .deck { position:relative; }
+  .deck-track {
+    display:flex; touch-action: pan-y;
+    transition: transform .38s cubic-bezier(.22,1,.36,1);
+    will-change: transform;
+  }
+  .deck-track.dragging { transition: none; }
+  .slide { min-width:100%; padding: 0 1px; }
+  .p-card {
+    background: var(--card); border-radius: var(--radius);
+    border: 1px solid rgba(0,229,255,.16);
+    overflow:hidden; position:relative;
+    box-shadow: 0 8px 26px rgba(0,0,0,.4);
+    height: 100%;
+  }
+  .p-card.pro-card { border-color: rgba(255,201,60,.35); }
+  .p-top {
     display:flex; align-items:center; gap:8px;
-    padding:10px 14px; font-size:11px; color:var(--muted);
-    background: rgba(0,229,255,.04); border-bottom:1px solid rgba(0,229,255,.08);
+    padding:11px 14px; font-size:11px; color:var(--muted);
+    background: rgba(0,229,255,.05); border-bottom:1px solid rgba(0,229,255,.08);
   }
-  .card-top .sport { font-weight:700; color:var(--neon); }
-  .card-top .ai-tag {
+  .pro-card .p-top { background: rgba(255,201,60,.06); border-bottom-color: rgba(255,201,60,.14); }
+  .p-top .sport { font-weight:700; color:var(--neon); }
+  .pro-card .p-top .sport { color:var(--gold); }
+  .ai-tag {
     margin-left:auto; display:flex; align-items:center; gap:5px;
     font-size:10px; font-weight:800; letter-spacing:.1em;
-    color:#9d6bff; background:rgba(157,107,255,.12);
+    color:var(--violet); background:rgba(157,107,255,.12);
     padding:3px 8px; border-radius:12px; border:1px solid rgba(157,107,255,.3);
   }
-  .match { padding: 12px 14px 6px; font-size:15.5px; font-weight:700; line-height:1.35; }
-  .match .vs { color:var(--muted); font-weight:400; font-size:12px; margin:0 4px; }
-  .match .time { display:block; font-size:11px; color:var(--muted); font-weight:400; margin-top:3px; }
-
-  .pick-row {
-    display:flex; align-items:center; gap:10px; padding: 10px 14px;
-  }
+  .ai-tag.pro { color:var(--gold); background:rgba(255,201,60,.1); border-color:rgba(255,201,60,.4); animation:proPulse 2.4s infinite; }
+  .p-body { padding: 16px 16px 6px; text-align:center; }
+  .p-body .league { font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); }
+  .p-body .match { font-size:19px; font-weight:800; line-height:1.3; margin-top:6px; }
+  .p-body .vs { color:var(--muted); font-weight:400; font-size:13px; margin:0 5px; }
+  .p-body .time { font-size:11.5px; color:var(--muted); margin-top:5px; }
+  .p-picks { display:flex; gap:10px; padding: 14px 16px 4px; }
   .pick {
-    flex:1; background:var(--card2); border-radius:12px; padding:10px 12px;
-    border:1px solid rgba(0,229,255,.18);
+    flex:1; background:var(--card2); border-radius:13px; padding:12px;
+    border:1px solid rgba(0,229,255,.2); text-align:center;
   }
-  .pick .m { font-size:10.5px; color:var(--muted); letter-spacing:.05em; text-transform:uppercase; }
-  .pick .v { font-size:16px; font-weight:800; color:var(--neon); margin-top:2px;
-             text-shadow: 0 0 12px rgba(0,229,255,.45); }
-  .pick .k {
-    flex:none; text-align:center; background:rgba(255,201,60,.08);
-    border:1px solid rgba(255,201,60,.35); border-radius:12px; padding:8px 12px;
-  }
-  .pick .k .m { font-size:9.5px; color:var(--muted); }
-  .pick .k .v { font-size:17px; font-weight:800; color:var(--gold); }
-
-  .conf { padding: 0 14px 10px; }
-  .conf .lbl { display:flex; justify-content:space-between; font-size:10.5px; color:var(--muted); margin-bottom:5px; }
-  .conf .lbl b { color: var(--text); }
-  .bar { height:6px; border-radius:6px; background:rgba(139,163,199,.15); overflow:hidden; }
+  .pick .m { font-size:10px; color:var(--muted); letter-spacing:.06em; text-transform:uppercase; }
+  .pick .v { font-size:19px; font-weight:800; color:var(--neon); margin-top:3px;
+             text-shadow: 0 0 14px rgba(0,229,255,.5); }
+  .pick.gold { border-color:rgba(255,201,60,.4); background:rgba(255,201,60,.07); }
+  .pick.gold .v { color:var(--gold); text-shadow:0 0 14px rgba(255,201,60,.5); }
+  .conf { padding: 10px 18px 8px; }
+  .conf .lbl { display:flex; justify-content:space-between; font-size:10.5px; color:var(--muted); margin-bottom:6px; }
+  .conf .lbl b { color:var(--text); }
+  .bar { height:7px; border-radius:6px; background:rgba(139,163,199,.15); overflow:hidden; }
   .bar i {
-    display:block; height:100%; border-radius:6px;
+    display:block; height:100%; width:0; border-radius:6px;
     background: linear-gradient(90deg, var(--neon), #7bffb0);
     box-shadow: 0 0 10px rgba(0,229,255,.6);
+    transition: width 1.1s cubic-bezier(.22,1,.36,1);
   }
+  .pro-card .bar i { background:linear-gradient(90deg,var(--gold),#ffe08a); box-shadow:0 0 10px rgba(255,201,60,.6); }
   .ai-note {
-    margin: 2px 14px 12px; padding: 9px 11px;
-    background: rgba(157,107,255,.07); border-radius:10px;
-    border-left: 3px solid #9d6bff;
-    font-size:12px; line-height:1.5; color:#cfd8f5;
+    margin: 4px 14px 14px; padding: 10px 12px;
+    background: rgba(157,107,255,.07); border-radius:11px;
+    border-left: 3px solid var(--violet);
+    font-size:12px; line-height:1.5; color:#cfd8f5; text-align:left;
   }
+  .pro-card .ai-note { border-left-color:var(--gold); background:rgba(255,201,60,.06); }
   .ai-note b { color:#b79aff; }
+  .pro-card .ai-note b { color:var(--gold); }
+  .res-chip {
+    position:absolute; top:44px; right:12px; font-size:10px; font-weight:800;
+    padding:4px 9px; border-radius:12px; letter-spacing:.05em; z-index:3;
+  }
+  .res-chip.hit  { color:var(--ok); background:rgba(0,230,118,.12); border:1px solid rgba(0,230,118,.4); }
+  .res-chip.miss { color:var(--warn); background:rgba(255,82,82,.1); border:1px solid rgba(255,82,82,.4); }
+  .res-chip.push { color:var(--gold); background:rgba(255,201,60,.1); border:1px solid rgba(255,201,60,.4); }
 
-  /* locked */
-  .card.locked .blur { filter: blur(7px) saturate(.6); pointer-events:none; user-select:none; }
+  /* swipe dots */
+  .deck-nav { display:flex; align-items:center; justify-content:center; gap:7px; padding: 13px 0 4px; }
+  .dn {
+    width:7px; height:7px; border-radius:6px; background:rgba(139,163,199,.3);
+    transition: all .3s; cursor:pointer; border:none; padding:0;
+  }
+  .dn.on { width:22px; background:var(--neon); box-shadow:0 0 10px rgba(0,229,255,.6); }
+  .deck-nav.pro .dn.on { background:var(--gold); box-shadow:0 0 10px rgba(255,201,60,.6); }
+  .swipe-hint {
+    text-align:center; font-size:10.5px; color:var(--muted); letter-spacing:.08em;
+    padding: 2px 0 0;
+  }
+  .swipe-hint .ar { display:inline-block; animation: arw 1.6s ease-in-out infinite; }
+  @keyframes arw { 50% { transform: translateX(5px); opacity:.4; } }
+
+  /* locked slide */
+  .slide.locked .blur { filter: blur(7px) saturate(.6); pointer-events:none; }
   .lock-overlay {
     position:absolute; inset:0; z-index:2;
     display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;
-    background: rgba(10,13,22,.55); backdrop-filter: blur(1px);
+    background: rgba(10,13,22,.55); backdrop-filter: blur(1px); overflow:hidden; border-radius:var(--radius);
   }
+  .lock-overlay::after {
+    content:''; position:absolute; top:0; bottom:0; width:60px;
+    background: linear-gradient(105deg, transparent, rgba(255,201,60,.09), transparent);
+    animation: sweep 2.6s linear infinite;
+  }
+  @keyframes sweep { from { left:-80px; } to { left:110%; } }
   .lock-overlay .ico { font-size:26px; }
   .lock-overlay span { font-size:12px; color:var(--muted); letter-spacing:.05em; }
   .lock-overlay button {
-    margin-top:4px; border:none; cursor:pointer;
+    margin-top:4px; border:none; cursor:pointer; position:relative; z-index:2;
     background: linear-gradient(135deg, var(--gold), #ffb01f);
     color:#0a0d16; font-weight:800; font-size:12.5px; letter-spacing:.06em;
     padding: 10px 20px; border-radius: 24px;
     box-shadow: 0 0 18px rgba(255,201,60,.45);
   }
 
+  /* ---------- partner (аккуратно) ---------- */
+  .bet-btn {
+    display:inline-block; margin: 2px 16px 12px; padding: 9px 14px;
+    border: 1px solid rgba(139,163,199,.3); border-radius: 12px;
+    color: var(--muted); font-size: 12px; font-weight: 700;
+    text-decoration: none; letter-spacing: .03em;
+    transition: all .2s; cursor: pointer;
+  }
+  .bet-btn:active { transform: scale(.97); border-color: var(--neon); color: var(--neon); }
+  .bet-wrap { text-align: center; }
+  .promo-box {
+    margin: 0 16px; padding: 14px; border-radius: 14px;
+    background: linear-gradient(135deg, rgba(0,229,255,.07), rgba(255,201,60,.07));
+    border: 1px solid rgba(0,229,255,.25);
+  }
+  .promo-box .lbl { font-size: 10.5px; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
+  .promo-box .code {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    margin-top: 8px; padding: 10px 12px;
+    background: rgba(10,13,22,.6); border: 1px dashed rgba(0,229,255,.4); border-radius: 10px;
+  }
+  .promo-box .code b { font-size: 16px; letter-spacing: .12em; color: var(--neon); }
+  .promo-box .copy {
+    border: none; cursor: pointer; padding: 7px 12px; border-radius: 9px;
+    background: rgba(0,229,255,.12); color: var(--neon); font-weight: 700; font-size: 11px;
+  }
+  .promo-box .desc { font-size: 11.5px; color: var(--muted); margin-top: 8px; line-height: 1.45; }
+  .promo-box .adv { font-size: 9px; color: #5f7396; margin-top: 8px; letter-spacing: .08em; text-transform: uppercase; }
+
+  /* ---------- PRO view ---------- */
+  .pro-hero {
+    margin: 12px 16px 0; padding: 15px 16px;
+    border-radius: var(--radius); position:relative; overflow:hidden;
+    background: linear-gradient(135deg, rgba(255,201,60,.14), rgba(255,43,214,.1), rgba(157,107,255,.12));
+    background-size: 200% 200%;
+    animation: proShift 6s ease-in-out infinite;
+    border: 1px solid rgba(255,201,60,.4);
+  }
+  @keyframes proShift { 0%,100% { background-position:0% 0%; } 50% { background-position:100% 100%; } }
+  .pro-hero h3 { font-size:16px; color:var(--gold); display:flex; align-items:center; gap:8px; }
+  .pro-hero h3 .crown { animation: bob 2s ease-in-out infinite; display:inline-block; }
+  .pro-hero p { font-size:12px; color:#d8c9a8; line-height:1.5; margin-top:6px; }
+  .orb { position:absolute; border-radius:50%; filter:blur(26px); opacity:.5; pointer-events:none; }
+  .orb.a { width:90px; height:90px; background:#ffc93c; top:-30px; right:-20px; animation: floatOrb 5s ease-in-out infinite; }
+  .orb.b { width:70px; height:70px; background:#ff2bd6; bottom:-24px; left:-14px; animation: floatOrb 6.5s ease-in-out infinite reverse; }
+  @keyframes floatOrb { 50% { transform: translateY(14px) scale(1.15); } }
+
   /* ---------- paywall ---------- */
   .paywall-cta {
-    margin: 20px 16px 8px; padding: 18px 16px;
+    margin: 16px 16px 8px; padding: 16px;
     background: linear-gradient(135deg, rgba(255,201,60,.10), rgba(255,43,214,.08));
     border: 1px solid rgba(255,201,60,.4); border-radius: var(--radius);
     text-align:center;
   }
-  .paywall-cta h3 { font-size:16px; margin-bottom:6px; color:var(--gold); }
-  .paywall-cta p { font-size:12.5px; color:var(--muted); line-height:1.5; margin-bottom:12px; }
+  .paywall-cta h3 { font-size:15px; margin-bottom:5px; color:var(--gold); }
+  .paywall-cta p { font-size:12px; color:var(--muted); line-height:1.5; margin-bottom:11px; }
   .btn-sub {
     width:100%; border:none; cursor:pointer;
     background: linear-gradient(135deg, var(--gold), #ffb01f);
     color:#0a0d16; font-weight:800; font-size:15px; letter-spacing:.04em;
-    padding: 14px; border-radius: 14px;
+    padding: 13px; border-radius: 14px;
     box-shadow: 0 4px 22px rgba(255,201,60,.4);
+    transition: transform .12s ease;
   }
-  .btn-sub:active { transform: scale(.98); }
-  .plans { display:flex; gap:10px; margin: 14px 16px 0; }
-  .plan {
-    flex:1; background:var(--card); border-radius:14px; padding:14px 10px;
-    border:1.5px solid rgba(139,163,199,.2); text-align:center; cursor:pointer;
-    transition: border-color .2s;
+  .btn-sub:active { transform: scale(.97); }
+
+  /* ---------- history ---------- */
+  .h-list { display:flex; flex-direction:column; gap:9px; padding: 0 16px; }
+  .h-item {
+    display:flex; align-items:center; gap:12px;
+    background:var(--card); border-radius:14px; padding:12px 14px;
+    border:1px solid rgba(139,163,199,.12);
+    animation: cardIn .4s cubic-bezier(.22,1,.36,1) both;
+    animation-delay: var(--d, 0s);
   }
-  .plan.active { border-color: var(--gold); box-shadow: 0 0 16px rgba(255,201,60,.2); }
-  .plan .t { font-size:12px; color:var(--muted); }
-  .plan .p { font-size:18px; font-weight:800; color:var(--gold); margin:4px 0; }
-  .plan .d { font-size:10px; color:var(--ok); font-weight:700; }
-  .plan .d.hot { color: var(--neon2); }
+  .h-item .r { font-size:18px; }
+  .h-item .m { flex:1; min-width:0; }
+  .h-item .m .t { font-size:13px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .h-item .m .s { font-size:10.5px; color:var(--muted); margin-top:2px; }
+  .h-item .m .s .ai { color:var(--violet); font-weight:700; }
+  .h-item .m .s .pro { color:var(--gold); font-weight:700; }
+  .h-item .o { font-size:12px; font-weight:800; color:var(--gold); }
+  .h-item.hit  { border-left:3px solid var(--ok); }
+  .h-item.miss { border-left:3px solid var(--warn); }
+  .h-item.push { border-left:3px solid var(--gold); }
+
+  /* ---------- profile ---------- */
+  .prof-head { display:flex; align-items:center; gap:13px; padding: 14px 16px; }
+  .avatar {
+    width:58px; height:58px; border-radius:50%; flex:none;
+    background: linear-gradient(135deg, #14324a, #0a0d16);
+    border: 2px solid rgba(0,229,255,.5);
+    display:flex; align-items:center; justify-content:center;
+    font-size:21px; font-weight:800; color:var(--neon);
+    box-shadow: 0 0 18px rgba(0,229,255,.3);
+    overflow:hidden;
+  }
+  .avatar img { width:100%; height:100%; object-fit:cover; }
+  .prof-head h2 { font-size:17px; }
+  .prof-head .since { font-size:11px; color:var(--muted); margin-top:3px; }
+  .streak {
+    margin-left:auto; text-align:center; padding:8px 12px;
+    background:rgba(255,201,60,.08); border:1px solid rgba(255,201,60,.35); border-radius:14px;
+  }
+  .streak .v { font-size:19px; font-weight:800; color:var(--gold); }
+  .streak .l { font-size:9px; color:var(--muted); letter-spacing:.05em; }
+  .stat-grid { display:grid; grid-template-columns:1fr 1fr; gap:9px; padding: 2px 16px 0; }
+  .sg {
+    background:var(--card); border-radius:13px; padding:12px;
+    border:1px solid rgba(139,163,199,.14); text-align:center;
+  }
+  .sg .v { font-size:20px; font-weight:800; }
+  .sg .v.c-neon { color:var(--neon); } .sg .v.c-ok { color:var(--ok); }
+  .sg .v.c-warn { color:var(--warn); } .sg .v.c-gold { color:var(--gold); }
+  .sg .l { font-size:10px; color:var(--muted); margin-top:3px; letter-spacing:.04em; }
+  .prof-actions { padding: 13px 16px 0; display:flex; flex-direction:column; gap:9px; }
+  .btn-ghost {
+    width:100%; border:1px dashed rgba(0,229,255,.4); background:none;
+    color:var(--neon); font-weight:700; padding:11px; border-radius:12px;
+    font-size:12.5px; cursor:pointer;
+  }
 
   /* ---------- footer ---------- */
   .footer {
-    margin: 22px 16px 10px; padding: 12px 14px;
+    margin: 18px 16px 10px; padding: 11px 14px;
     background: rgba(139,163,199,.06); border-radius: 12px;
-    font-size: 11px; line-height: 1.55; color: #7d92b5; text-align:center;
+    font-size: 10.5px; line-height: 1.55; color: #7d92b5; text-align:center;
   }
   .footer b { color:#9fb3d4; }
   .age { display:inline-block; margin-top:6px; padding:2px 8px; border:1px solid #7d92b5; border-radius:8px; font-weight:800; font-size:10px; letter-spacing:.1em; }
@@ -196,13 +342,29 @@
   .tab {
     flex:1; border:none; background:none; cursor:pointer;
     display:flex; flex-direction:column; align-items:center; gap:3px;
-    color:#5f7396; font-size:10px; font-weight:700; letter-spacing:.05em;
-    padding:6px 0; border-radius:12px;
+    color:#5f7396; font-size:9.5px; font-weight:700; letter-spacing:.05em;
+    padding:6px 0; border-radius:12px; transition: color .2s;
   }
-  .tab .i { font-size:20px; }
+  .tab .i { font-size:19px; transition: transform .25s cubic-bezier(.34,1.56,.64,1); }
   .tab.active { color: var(--neon); text-shadow: 0 0 10px rgba(0,229,255,.6); }
+  .tab.active .i { transform: translateY(-3px) scale(1.15); }
+  .tab.pro-tab.active { color: var(--gold); text-shadow: 0 0 10px rgba(255,201,60,.6); }
 
-  /* ---------- toast ---------- */
+  /* ---------- view transitions ---------- */
+  .view { display:none; }
+  .view.active { display:block; animation: viewIn .35s ease; }
+  @keyframes viewIn { from { opacity:0; transform: translateY(10px); } }
+  @keyframes cardIn { from { opacity:0; transform: translateY(18px) scale(.98); } }
+
+  .section-title {
+    padding: 14px 16px 8px; font-size:12px; font-weight:800;
+    letter-spacing:.12em; text-transform:uppercase; color:var(--muted);
+    display:flex; align-items:center; gap:8px;
+  }
+  .section-title::after { content:''; flex:1; height:1px; background:rgba(139,163,199,.15); }
+  .live-dot { width:7px; height:7px; border-radius:50%; background:var(--ok); box-shadow:0 0 8px var(--ok); animation:pulse 1.6s infinite; }
+  @keyframes pulse { 50% { opacity:.3; } }
+
   .toast {
     position:fixed; left:50%; bottom:96px; transform:translateX(-50%) translateY(20px);
     background:#1a2140; color:var(--text); font-size:12.5px;
@@ -211,12 +373,6 @@
     box-shadow: 0 4px 20px rgba(0,0,0,.5);
   }
   .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
-
-  /* views */
-  .view { display:none; }
-  .view.active { display:block; }
-  .empty { text-align:center; color:var(--muted); padding: 40px 30px; font-size:13px; line-height:1.7; }
-  .empty .i { font-size:38px; display:block; margin-bottom:10px; }
 </style>
 </head>
 <body>
@@ -232,7 +388,6 @@
   </div>
 </header>
 
-<!-- AI DISCLAIMER — всегда на экране -->
 <div class="ai-disclaimer">
   <div class="ico">🤖</div>
   <div><b>Прогнозы генерирует ИИ.</b> Это аналитика, а не гарантия: <b>вероятность не 100%</b>. Ставьте только то, что готовы потерять.</div>
@@ -240,58 +395,130 @@
 
 <!-- ================= HOME ================= -->
 <main id="view-home" class="view active">
-  <div class="stats">
-    <div class="stat"><div class="v" id="statToday">0</div><div class="l">прогнозов сегодня</div></div>
-    <div class="stat"><div class="v" id="statMonth">—</div><div class="l">проходимость 30д</div></div>
-    <div class="stat"><div class="v" id="statLeft">0</div><div class="l">осталось сегодня</div></div>
+  <div class="ai-loading" id="aiLoading">
+    <div class="bot">🤖</div>
+    <div class="txt"><b>Базовый ИИ</b> анализирует матчи<span class="dots"><span></span><span></span><span></span></span></div>
   </div>
 
-  <div class="section-title"><span class="live-dot"></span> Прогнозы ИИ на сегодня</div>
-  <div class="cards" id="cards"></div>
+  <div class="stats">
+    <div class="stat"><div class="v" id="statRate">—</div><div class="l">заходов 14д</div></div>
+    <div class="stat"><div class="v" id="statFree">5</div><div class="l">бесплатно сегодня</div></div>
+    <div class="stat"><div class="v" style="color:var(--gold)" id="statProCnt">5</div><div class="l">в PRO</div></div>
+  </div>
+
+  <div class="deck-wrap">
+    <div class="deck" id="freeDeck">
+      <div class="deck-track" id="freeTrack"></div>
+    </div>
+    <div class="deck-nav" id="freeNav"></div>
+    <div class="swipe-hint">свайп, чтобы листать <span class="ar">↔</span></div>
+  </div>
 
   <div class="paywall-cta" id="paywallCta">
-    <h3>⚡ PRO-подписка</h3>
-    <p>2–4 прогноза от ИИ каждый день, расширенная аналитика и приоритетная выдача до начала матчей</p>
-    <button class="btn-sub" id="btnSubscribe">Оформить подписку</button>
+    <h3>💎 Ещё 5 прогнозов — у Pro-ИИ</h3>
+    <p>Отдельная нейросеть: value-ставки, скан линий 20+ букмекеров, повышенная точность</p>
+    <button class="btn-sub" onclick="goSubscribe()">Открыть PRO</button>
   </div>
 
   <div class="footer">
     <b>18+</b> · Играйте ответственно. Ставки — это риск.<br>
-    Прогнозы носят информационный характер и не являются финансовой рекомендацией.
+    Реклама букмекера-партнёра · есть риск проигрыша
     <br><span class="age">18+</span>
+  </div>
+</main>
+
+<!-- ================= PRO ================= -->
+<main id="view-pro" class="view">
+  <div class="pro-hero">
+    <div class="orb a"></div><div class="orb b"></div>
+    <h3><span class="crown">💎</span> Pro-ИИ · углублённая модель</h3>
+    <p>Больший объём данных, анализ коэффициентов 20+ букмекеров, расчёт value-ставок. <b>5 прогнозов в день.</b></p>
+  </div>
+
+  <div class="deck-wrap">
+    <div class="deck" id="proDeck">
+      <div class="deck-track" id="proTrack"></div>
+    </div>
+    <div class="deck-nav pro" id="proNav"></div>
+    <div class="swipe-hint">свайп, чтобы листать <span class="ar">↔</span></div>
+  </div>
+
+  <div class="paywall-cta" id="proPaywall">
+    <h3>💎 Станьте PRO</h3>
+    <p>Полный доступ к 5 прогнозам Pro-ИИ каждый день + история без замков</p>
+    <button class="btn-sub" onclick="goSubscribe()">Оформить подписку</button>
+  </div>
+
+  <div class="footer">
+    Pro-ИИ тоже ошибается: <b>вероятность не 100%</b>. Играйте ответственно, <b>18+</b>.
   </div>
 </main>
 
 <!-- ================= HISTORY ================= -->
 <main id="view-history" class="view">
-  <div class="section-title">История прогнозов</div>
-  <div class="cards" id="historyCards"></div>
+  <div class="stats">
+    <div class="stat"><div class="v" style="color:var(--ok)" id="hHits">0</div><div class="l">зашло ✅</div></div>
+    <div class="stat"><div class="v" style="color:var(--warn)" id="hMiss">0</div><div class="l">не зашло ❌</div></div>
+    <div class="stat"><div class="v" style="color:var(--gold)" id="hRate">—</div><div class="l">проходимость</div></div>
+  </div>
+  <div class="section-title">История · последние 7 дней</div>
+  <div class="h-list" id="historyList"></div>
 </main>
 
 <!-- ================= PROFILE ================= -->
 <main id="view-profile" class="view">
-  <div class="section-title">Профиль</div>
-  <div class="cards">
-    <div class="card" style="padding:16px">
-      <div style="font-size:15px;font-weight:700" id="profName">Гость</div>
-      <div style="font-size:12px;color:var(--muted);margin-top:4px" id="profId">ID: —</div>
-      <div style="margin-top:12px;font-size:13px">
-        Подписка: <b id="profSub" style="color:var(--gold)">нет</b>
+  <div class="prof-head" style="background:var(--card);margin:14px 16px 0;border-radius:var(--radius);border:1px solid rgba(0,229,255,.14)">
+    <div class="avatar" id="profAvatar">?</div>
+    <div>
+      <h2 id="profName">Гость</h2>
+      <div class="since" id="profSince">в приложении с сегодня</div>
+    </div>
+    <div class="streak"><div class="v" id="streakV">1</div><div class="l">дней 🔥</div></div>
+  </div>
+
+  <div class="section-title">Статистика</div>
+  <div class="stat-grid">
+    <div class="sg"><div class="v c-neon" id="pTotal">0</div><div class="l">прогнозов за 14д</div></div>
+    <div class="sg"><div class="v c-ok" id="pHits">0</div><div class="l">зашло ✅</div></div>
+    <div class="sg"><div class="v c-warn" id="pMiss">0</div><div class="l">не зашло ❌</div></div>
+    <div class="sg"><div class="v c-gold" id="pRate">—</div><div class="l">проходимость</div></div>
+  </div>
+
+  <div class="section-title">Бонус партнёра</div>
+  <div class="promo-box">
+    <div class="lbl">Промокод для 1win</div>
+    <div class="code">
+      <b id="promoCode">PXAXBET2026</b>
+      <button class="copy" onclick="copyPromo()">копировать</button>
+    </div>
+    <div class="desc">Активируй при регистрации и получи бонус на первый депозит.</div>
+    <a class="btn-sub" style="display:block;margin-top:10px;text-decoration:none;text-align:center;font-size:13.5px;padding:11px" data-plink="https://r1wjvzfr.life/?p=gfuv&sub1=profile&sub2=promo" href="https://r1wjvzfr.life/?p=gfuv&sub1=profile&sub2=promo" rel="noopener">Перейти к партнёру ↗</a>
+    <div class="adv">реклама · 18+</div>
+  </div>
+
+  <div class="section-title">Аккаунт</div>
+  <div class="h-list">
+    <div class="h-item" style="border-left:3px solid var(--neon)">
+      <div class="m">
+        <div class="t">Подписка: <span id="profSub" style="color:var(--gold)">нет</span></div>
+        <div class="s">ID: <span id="profId">—</span> · визитов: <b id="profVisits" style="color:var(--neon)">1</b></div>
       </div>
-      <button class="btn-sub" id="btnSubscribe2" style="margin-top:14px">Управлять подпиской</button>
-      <button id="btnDemoUnlock" style="margin-top:10px;width:100%;border:1px dashed rgba(0,229,255,.4);background:none;color:var(--neon);font-weight:700;padding:11px;border-radius:12px;font-size:12.5px;cursor:pointer">
-        🔧 Демо: включить PRO (тест)
-      </button>
     </div>
   </div>
+  <div class="prof-actions">
+    <button class="btn-sub" id="btnSubscribe2">Управлять подпиской</button>
+    <button id="btnDemoUnlock" class="btn-ghost">🔧 Демо: включить PRO (тест)</button>
+  </div>
+
   <div class="footer">
-    PXAX AI Predict · v0.1 (MVP)<br>
+    PXAX AI Predict · v0.3<br>
     Все прогнозы создаются алгоритмом. Прошлые результаты не гарантируют будущих.
   </div>
 </main>
 
 <nav class="tabbar">
   <button class="tab active" data-view="home"><span class="i">🎯</span>Прогнозы</button>
+  <button class="tab pro-tab" data-view="pro"><span class="i">💎</span>PRO</button>
   <button class="tab" data-view="history"><span class="i">📊</span>История</button>
   <button class="tab" data-view="profile"><span class="i">👤</span>Профиль</button>
 </nav>
@@ -301,28 +528,33 @@
 <script>
 /* ================= Telegram SDK ================= */
 const tg = window.Telegram?.WebApp;
-let isTg = false;
-if (tg) {
-  try { tg.expand(); tg.disableVerticalSwipes?.(); isTg = true; } catch(e) {}
-}
+if (tg) { try { tg.expand(); tg.disableVerticalSwipes?.(); } catch(e) {} }
 const user = tg?.initDataUnsafe?.user;
 
 /* ================= settings ================= */
 const CONFIG = {
-  // Ссылка на оплату (потом заменится на инвойс бота / Telegram Stars)
-  SUBSCRIBE_URL: 'https://t.me/pxaxbetai_bot', // ← заменить на бота
-  FREE_DAILY: 1,
-  PRO_DAILY: [2, 4], // ИИ выдаёт 2–4 прогноза в день
+  SUBSCRIBE_URL: 'https://t.me/pxaxbetai_bot',
+  FREE_DAILY: 5,   // бесплатных прогнозов в день
+  PRO_DAILY: 5,    // прогнозов Pro-ИИ в день
+  STAT_DAYS: 14,
+  // --- партнёрская программа ---
+  PARTNER_URL: 'https://r1wjvzfr.life/?p=gfuv',
+  PROMO: 'PXAXBET2026',
 };
 
-/* ================= мок-движок ИИ (v0.1) ================= */
-// Детерминированный генератор: на каждый день свой набор прогнозов.
+// партнёрская ссылка с суб-метками: sub1 = id прогноза, sub2 = экран
+function betLink(p) {
+  return CONFIG.PARTNER_URL + '&sub1=' + encodeURIComponent(p.id) +
+         '&sub2=' + (p.kind === 'pro' ? 'pro' : 'free');
+}
+function betBtn(p) {
+  return `<a class="bet-btn" data-plink="${betLink(p)}" href="${betLink(p)}" rel="noopener">🎲 Сделать ставку</a>`;
+}
+
+/* ================= мок-движок ИИ ================= */
 function seedRand(seed) {
   let s = seed >>> 0;
-  return () => {
-    s = (s * 1664525 + 1013904223) >>> 0;
-    return s / 4294967296;
-  };
+  return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
 }
 function hashStr(str) {
   let h = 2166136261;
@@ -331,151 +563,272 @@ function hashStr(str) {
 }
 
 const LEAGUES = [
-  { sport:'⚽ Футбол',  name:'EPL',        teams:[['Арсенал','Ливерпуль'],['Ман Сити','Челси'],['Тоттенхэм','МЮ'],['Ньюкасл','Астон Вилла'],['Брайтон','Вест Хэм']] },
-  { sport:'⚽ Футбол',  name:'La Liga',    teams:[['Реал Мадрид','Барселона'],['Атлетико','Севилья'],['Вильярреал','Бетис'],['Атлетик','Социдад']] },
-  { sport:'⚽ Футбол',  name:'Серия А',    teams:[['Интер','Милан'],['Ювентус','Наполи'],['Рома','Лацио'],['Аталанта','Фиорентина']] },
-  { sport:'🏀 Баскетбол', name:'NBA',      teams:[['Лейкерс','Селтикс'],['Голден Стэйт','Денвер'],['Майами','Никс'],['Бакс','Санс']] },
-  { sport:'🎮 Киберспорт', name:'CS2 / Dota', teams:[['NAVI','FaZe'],['Spirit','Vitality'],['G2','MOUZ'],['T1','Gen.G']] },
-  { sport:'🏒 Хоккей',  name:'NHL',        teams:[['Колорадо','Эдмонтон'],['Торонто','Бостон'],['Вегас','Ванкувер']] },
+  { sport:'⚽', name:'Футбол · EPL',     teams:[['Арсенал','Ливерпуль'],['Ман Сити','Челси'],['Тоттенхэм','МЮ'],['Ньюкасл','Астон Вилла'],['Брайтон','Вест Хэм']] },
+  { sport:'⚽', name:'Футбол · La Liga', teams:[['Реал Мадрид','Барселона'],['Атлетико','Севилья'],['Вильярреал','Бетис'],['Атлетик','Социдад']] },
+  { sport:'⚽', name:'Футбол · Серия А', teams:[['Интер','Милан'],['Ювентус','Наполи'],['Рома','Лацио'],['Аталанта','Фиорентина']] },
+  { sport:'🏀', name:'Баскетбол · NBA',  teams:[['Лейкерс','Селтикс'],['Голден Стэйт','Денвер'],['Майами','Никс'],['Бакс','Санс']] },
+  { sport:'🎮', name:'Киберспорт',       teams:[['NAVI','FaZe'],['Spirit','Vitality'],['G2','MOUZ'],['T1','Gen.G']] },
+  { sport:'🏒', name:'Хоккей · NHL',     teams:[['Колорадо','Эдмонтон'],['Торонто','Бостон'],['Вегас','Ванкувер']] },
 ];
-const MARKETS = [
-  { code:'П1',      label:'исход',     note:'победа первой команды' },
-  { code:'П2',      label:'исход',     note:'победа второй команды' },
-  { code:'ТБ 2.5',  label:'тотал',     note:'тотал больше 2.5' },
-  { code:'ТМ 2.5',  label:'тотал',     note:'тотал меньше 2.5' },
-  { code:'Ф1 -1.5', label:'фора',      note:'фора первой -1.5' },
-  { code:'Х2',      label:'двойной шанс', note:'ничья или П2' },
-];
+const MARKETS = ['П1','П2','ТБ 2.5','ТМ 2.5','Ф1 -1.5','Х2'];
 const AI_NOTES = [
   'Модель учитывает форму команд за 5 матчей, травмы и статистику xG. Взвешенный риск.',
-  'Высокая корреляция между атакующей статистикой гостей и текущим тоталом линии. Уверенность средняя.',
-  'История личных встреч и домашний фактор складываются в пользу прогноза, но коэффициент уже включает риск.',
+  'Высокая корреляция между атакующей статистикой гостей и текущим тоталом линии.',
+  'История личных встреч и домашний фактор складываются в пользу прогноза.',
   'Алгоритм отмечает перекос в линии: букмекер, вероятно, недооценил мотивацию андердога.',
   'Сетка признаков видит снижение темпа обеих команд — вероятен низовой матч.',
   'Прогноз собран ансамблем из 3 моделей; расхождение между ними умеренное.',
 ];
+const PRO_NOTES = [
+  'Pro-модель: скан коэффициентов 20+ букмекеров нашёл value 4.2% на этом рынке.',
+  'Pro-модель: веса пересчитаны с учётом мотивационного фильтра (турнирное положение).',
+  'Pro-модель: ансамбль из 7 моделей, консенсус 6/7. Расхождение минимально.',
+  'Pro-модель: паттерн «поздний гол» в 68% последних матчей этих команд.',
+  'Pro-модель: adjusted xG с поправкой на ротацию состава указывает на перевес.',
+  'Pro-модель: рынок движется в сторону прогноза — вход до движения линии.',
+];
 
-function dayKey(d = new Date()) {
-  return d.toISOString().slice(0, 10);
-}
+function dayKey(d = new Date()) { return d.toISOString().slice(0, 10); }
 
-function generateDay(dateStr) {
-  const rand = seedRand(hashStr('pxax-v01-' + dateStr));
-  const isProDay = Math.random && false; // число зависит только от seed
-  const n = CONFIG.PRO_DAILY[0] + Math.floor(rand() * (CONFIG.PRO_DAILY[1] - CONFIG.PRO_DAILY[0] + 1));
+function generateDay(dateStr, kind) {
+  const rand = seedRand(hashStr('pxax-v03-' + kind + '-' + dateStr));
+  const n = kind === 'pro' ? CONFIG.PRO_DAILY : CONFIG.FREE_DAILY;
   const preds = [];
   const used = new Set();
   for (let i = 0; i < n; i++) {
-    // выбираем уникальный матч
     let lg, pair, key, guard = 0;
     do {
       lg = LEAGUES[Math.floor(rand() * LEAGUES.length)];
       pair = lg.teams[Math.floor(rand() * lg.teams.length)];
       key = pair[0] + pair[1];
-    } while (used.has(key) && ++guard < 20);
+    } while (used.has(key) && ++guard < 30);
     used.add(key);
-    const mk = MARKETS[Math.floor(rand() * MARKETS.length)];
     const hour = 14 + Math.floor(rand() * 9);
-    const min = rand() < .5 ? '00' : '30';
     preds.push({
-      id: dateStr + '-' + i,
-      sport: lg.sport, league: lg.name,
+      id: kind + '-' + dateStr + '-' + i,
+      kind, sport: lg.sport, league: lg.name,
       home: pair[0], away: pair[1],
-      time: `${hour}:${min} МСК`,
-      market: mk.code, marketType: mk.label, marketNote: mk.note,
-      odds: (1.55 + rand() * 1.15).toFixed(2),
-      confidence: Math.round(58 + rand() * 27), // 58–85%
-      note: AI_NOTES[Math.floor(rand() * AI_NOTES.length)],
+      time: `${hour}:${rand() < .5 ? '00' : '30'} МСК`,
+      market: MARKETS[Math.floor(rand() * MARKETS.length)],
+      odds: kind === 'pro' ? (1.8 + rand() * 1.7).toFixed(2) : (1.55 + rand() * 1.15).toFixed(2),
+      confidence: Math.round(kind === 'pro' ? 62 + rand() * 26 : 58 + rand() * 22),
+      note: (kind === 'pro' ? PRO_NOTES : AI_NOTES)[Math.floor(rand() * 6)],
     });
   }
   return preds.sort((a, b) => a.time.localeCompare(b.time));
 }
 
-// статистика «проходимости» — фиктивная витрина v0.1, позже подтянем из БД
-function mockMonthRate() {
-  const rand = seedRand(hashStr('rate-' + dayKey()));
-  return (58 + rand() * 12).toFixed(0) + '%';
+function resultOf(p) {
+  const r = seedRand(hashStr('res-' + p.id))();
+  if (r < .55) return { label:'✅', cls:'hit', full:'Зашёл' };
+  if (r < .90) return { label:'❌', cls:'miss', full:'Не зашёл' };
+  return { label:'⏳', cls:'push', full:'Возврат' };
 }
 
-/* ================= state ================= */
+function collectStats(days) {
+  let hits = 0, miss = 0, total = 0;
+  for (let d = 1; d <= days; d++) {
+    const ds = dayKey(new Date(Date.now() - d * 86400000));
+    for (const kind of ['free', 'pro']) {
+      for (const p of generateDay(ds, kind)) {
+        const r = resultOf(p); total++;
+        if (r.cls === 'hit') hits++;
+        else if (r.cls === 'miss') miss++;
+      }
+    }
+  }
+  return { hits, miss, total, rate: (hits + miss) ? Math.round(hits / (hits + miss) * 100) : 0 };
+}
+
+/* ================= user state ================= */
 const store = {
   get pro() { return localStorage.getItem('pxax_pro') === '1'; },
   set pro(v) { localStorage.setItem('pxax_pro', v ? '1' : '0'); },
 };
 const today = dayKey();
-const predictions = generateDay(today);
+let visits = +(localStorage.getItem('pxax_visits') || 0);
+let streak = +(localStorage.getItem('pxax_streak') || 0);
+const last = localStorage.getItem('pxax_last');
+if (last !== today) {
+  visits++;
+  streak = (last === dayKey(new Date(Date.now() - 86400000))) ? streak + 1 : 1;
+  localStorage.setItem('pxax_visits', visits);
+  localStorage.setItem('pxax_streak', streak);
+  localStorage.setItem('pxax_last', today);
+}
+
+const freeToday = generateDay(today, 'free');
+const proToday = generateDay(today, 'pro');
+
+/* ================= swipe deck component ================= */
+function makeDeck(trackEl, navEl, count) {
+  let index = 0, startX = 0, dragging = false, width = trackEl.parentElement.clientWidth || 320;
+  const dots = [];
+  navEl.innerHTML = '';
+  for (let i = 0; i < count; i++) {
+    const d = document.createElement('button');
+    d.className = 'dn'; d.onclick = () => goTo(i);
+    navEl.appendChild(d); dots.push(d);
+  }
+  function goTo(i, instant) {
+    index = Math.max(0, Math.min(count - 1, i));
+    if (instant) trackEl.classList.add('dragging');
+    trackEl.style.transform = `translateX(${-index * 100}%)`;
+    if (instant) requestAnimationFrame(() => trackEl.classList.remove('dragging'));
+    dots.forEach((d, j) => d.classList.toggle('on', j === index));
+  }
+  trackEl.addEventListener('pointerdown', e => {
+    dragging = true; startX = e.clientX; width = trackEl.parentElement.clientWidth;
+    trackEl.classList.add('dragging');
+    trackEl.setPointerCapture?.(e.pointerId);
+  });
+  trackEl.addEventListener('pointermove', e => {
+    if (!dragging) return;
+    const dx = e.clientX - startX;
+    const base = -index * 100;
+    trackEl.style.transform = `translateX(calc(${base}% + ${dx}px))`;
+  });
+  const end = e => {
+    if (!dragging) return;
+    dragging = false;
+    trackEl.classList.remove('dragging');
+    const dx = e.clientX - startX;
+    if (Math.abs(dx) > width * .18) goTo(index + (dx < 0 ? 1 : -1));
+    else goTo(index);
+  };
+  trackEl.addEventListener('pointerup', end);
+  trackEl.addEventListener('pointercancel', end);
+  trackEl.addEventListener('pointerleave', e => { if (dragging) end(e); });
+  goTo(0);
+  return { goTo };
+}
+
+/* ================= cards ================= */
+function slideHTML(p, unlocked, isPro, isHistory) {
+  const res = isHistory && p.result ? `<div class="res-chip ${p.result.cls}">${p.result.label}</div>` : '';
+  return `
+    <div class="slide ${unlocked ? '' : 'locked'}">
+      <div class="p-card ${isPro ? 'pro-card' : ''}">
+        ${res}
+        <div class="blur">
+          <div class="p-top">
+            <span class="sport">${p.sport}</span><span>${p.league}</span>
+            <span class="ai-tag ${isPro ? 'pro' : ''}">${isPro ? '💎 Pro AI' : '🤖 AI'}</span>
+          </div>
+          <div class="p-body">
+            <div class="league">${p.league.split('·')[1] || p.league}</div>
+            <div class="match">${p.home} <span class="vs">VS</span> ${p.away}</div>
+            <div class="time">${isHistory ? 'вчера · ' : ''}${p.time}</div>
+          </div>
+          <div class="p-picks">
+            <div class="pick">
+              <div class="m">прогноз</div>
+              <div class="v">${p.market}</div>
+            </div>
+            <div class="pick gold">
+              <div class="m">коэф</div>
+              <div class="v">${p.odds}</div>
+            </div>
+          </div>
+          <div class="bet-wrap">${unlocked ? betBtn(p) : ''}</div>
+          <div class="conf">
+            <div class="lbl"><span>уверенность ИИ</span><b>${p.confidence}%</b></div>
+            <div class="bar"><i data-w="${p.confidence}"></i></div>
+          </div>
+          <div class="ai-note"><b>${isPro ? 'Pro-разбор:' : 'Разбор ИИ:'}</b> ${p.note}</div>
+        </div>
+        ${unlocked ? '' : `
+        <div class="lock-overlay">
+          <div class="ico">🔒</div>
+          <span>Только для PRO</span>
+          <button onclick="goSubscribe()">Открыть доступ</button>
+        </div>`}
+      </div>
+    </div>`;
+}
+
+/* ================= render ================= */
+function animateNum(el, target, suffix = '') {
+  const t0 = performance.now(), dur = 800;
+  (function step(t) {
+    const k = Math.min(1, (t - t0) / dur);
+    el.textContent = Math.round(target * (1 - Math.pow(1 - k, 3))) + suffix;
+    if (k < 1) requestAnimationFrame(step);
+  })(t0);
+}
+
+let freeDeckObj, proDeckObj;
 
 function render() {
   const pro = store.pro;
   document.getElementById('subBadge').className = 'sub-badge ' + (pro ? 'pro' : 'free');
   document.getElementById('subBadge').textContent = pro ? 'pro' : 'free';
   document.getElementById('profSub').textContent = pro ? 'PRO активна ✨' : 'нет';
-  document.getElementById('statToday').textContent = predictions.length;
-  document.getElementById('statMonth').textContent = mockMonthRate();
-  document.getElementById('statLeft').textContent =
-    Math.max(0, (pro ? predictions.length : CONFIG.FREE_DAILY) - visibleCount(pro));
+  document.getElementById('profVisits').textContent = visits;
+  document.getElementById('streakV').textContent = streak;
 
-  const cardsEl = document.getElementById('cards');
-  cardsEl.innerHTML = '';
-  predictions.forEach((p, i) => {
-    const unlocked = pro || i < CONFIG.FREE_DAILY;
-    cardsEl.appendChild(cardHTML(p, unlocked));
-  });
+  const stats = collectStats(CONFIG.STAT_DAYS);
+  animateNum(document.getElementById('statRate'), stats.rate, '%');
+  document.getElementById('statFree').textContent = CONFIG.FREE_DAILY;
+  document.getElementById('statProCnt').textContent = CONFIG.PRO_DAILY;
+  document.getElementById('hHits').textContent = stats.hits;
+  document.getElementById('hMiss').textContent = stats.miss;
+  document.getElementById('hRate').textContent = stats.rate + '%';
+  animateNum(document.getElementById('pTotal'), stats.total);
+  document.getElementById('pHits').textContent = stats.hits;
+  document.getElementById('pMiss').textContent = stats.miss;
+  document.getElementById('pRate').textContent = stats.rate + '%';
+
+  // колоды
+  document.getElementById('freeTrack').innerHTML =
+    freeToday.map(p => slideHTML(p, true, false, false)).join('');
+  document.getElementById('proTrack').innerHTML =
+    proToday.map(p => slideHTML(p, pro, true, false)).join('');
+  freeDeckObj = makeDeck(document.getElementById('freeTrack'), document.getElementById('freeNav'), CONFIG.FREE_DAILY);
+  proDeckObj = makeDeck(document.getElementById('proTrack'), document.getElementById('proNav'), CONFIG.PRO_DAILY);
   document.getElementById('paywallCta').style.display = pro ? 'none' : 'block';
+  document.getElementById('proPaywall').style.display = pro ? 'none' : 'block';
 
-  // история: за последние 5 дней (для pro — полный список, иначе только 1 в день)
-  const hEl = document.getElementById('historyCards');
+  // история
+  const hEl = document.getElementById('historyList');
   hEl.innerHTML = '';
-  for (let d = 1; d <= 5; d++) {
-    const dt = new Date(Date.now() - d * 86400000);
-    const ds = dayKey(dt);
-    const day = generateDay(ds);
-    day.forEach((p, i) => {
-      const unlocked = pro || i < 1;
-      p.result = ['✅ Зашёл', '❌ Не зашёл', '⏳ Возврат'][Math.floor(seedRand(hashStr(p.id))()*3)];
-      hEl.appendChild(cardHTML(p, unlocked, true));
-    });
+  let dIdx = 0;
+  for (let d = 1; d <= 7; d++) {
+    const ds = dayKey(new Date(Date.now() - d * 86400000));
+    const day = [...generateDay(ds, 'pro'), ...generateDay(ds, 'free')];
+    for (const p of day) {
+      const r = resultOf(p);
+      const unlocked = pro || p.kind === 'free';
+      const el = document.createElement('div');
+      el.className = 'h-item ' + r.cls;
+      el.style.setProperty('--d', (dIdx++ * .04) + 's');
+      el.innerHTML = `
+        <div class="r">${r.label}</div>
+        <div class="m">
+          <div class="t">${p.home} — ${p.away}</div>
+          <div class="s">${p.sport} ${p.league} · <span class="${p.kind === 'pro' ? 'pro' : 'ai'}">${p.kind === 'pro' ? 'Pro AI' : 'AI'}</span> · ${p.market}</div>
+        </div>
+        <div class="o">${unlocked ? p.odds : '🔒'}</div>`;
+      hEl.appendChild(el);
+    }
   }
 
-  document.getElementById('profName').textContent = user ? [user.first_name, user.last_name].filter(Boolean).join(' ') : 'Гость (демо-режим)';
-  document.getElementById('profId').textContent = 'ID: ' + (user ? user.id : '—');
-}
-function visibleCount(pro) { return pro ? predictions.length : Math.min(CONFIG.FREE_DAILY, predictions.length); }
+  // профиль
+  document.getElementById('profName').textContent =
+    user ? [user.first_name, user.last_name].filter(Boolean).join(' ') : 'Гость (демо)';
+  document.getElementById('profId').textContent = user ? user.id : '—';
+  const av = document.getElementById('profAvatar');
+  if (user?.photo_url) av.innerHTML = `<img src="${user.photo_url}" alt="">`;
+  else av.textContent = user ? (user.first_name?.[0] || '?').toUpperCase() : '?';
+  let since = localStorage.getItem('pxax_since');
+  if (!since) { localStorage.setItem('pxax_since', today); since = today; }
+  document.getElementById('profSince').textContent =
+    'в приложении с ' + new Date(since + 'T00:00:00').toLocaleDateString('ru-RU', { day:'numeric', month:'short' });
 
-function cardHTML(p, unlocked, isHistory) {
-  const el = document.createElement('div');
-  el.className = 'card' + (unlocked ? '' : ' locked');
-  const inner = `
-    <div class="blur">
-      <div class="card-top">
-        <span class="sport">${p.sport}</span><span>${p.league}</span>
-        <span class="ai-tag">🤖 AI</span>
-      </div>
-      <div class="match">
-        ${p.home} <span class="vs">—</span> ${p.away}
-        <span class="time">${isHistory ? 'вчера · ' : ''}${p.time}</span>
-      </div>
-      <div class="pick-row">
-        <div class="pick">
-          <div class="m">${p.marketType}</div>
-          <div class="v">${p.market}</div>
-        </div>
-        ${isHistory ? `<div class="pick"><div class="m">результат</div><div class="v" style="color:${p.result.includes('✅')?'var(--ok)':p.result.includes('❌')?'var(--warn)':'var(--gold)'}">${p.result}</div></div>` : ''}
-        <div class="k"><div class="m">коэф</div><div class="v">${p.odds}</div></div>
-      </div>
-      <div class="conf">
-        <div class="lbl"><span>уверенность ИИ</span><b>${p.confidence}%</b></div>
-        <div class="bar"><i style="width:${p.confidence}%"></i></div>
-      </div>
-      <div class="ai-note"><b>Разбор ИИ:</b> ${p.note}</div>
-    </div>`;
-  el.innerHTML = inner + (unlocked ? '' : `
-    <div class="lock-overlay">
-      <div class="ico">🔒</div>
-      <span>Доступно с PRO-подпиской</span>
-      <button onclick="goSubscribe()">Открыть доступ</button>
-    </div>`);
-  return el;
+  // полосы уверенности
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    document.querySelectorAll('.bar i').forEach(i => i.style.width = i.dataset.w + '%');
+  }));
 }
 
 /* ================= UI wiring ================= */
@@ -485,15 +838,32 @@ function toast(msg) {
   setTimeout(() => t.classList.remove('show'), 2400);
 }
 function goSubscribe() {
-  document.querySelector('[data-view="home"]').click();
-  if (tg?.showAlert) tg.showAlert('Подключение оплаты — на следующей версии. Пока используйте кнопку бота: ' + CONFIG.SUBSCRIBE_URL);
-  else toast('Оплата подключается в v0.2 — ссылка на бота: ' + CONFIG.SUBSCRIBE_URL);
+  document.querySelector('[data-view="pro"]').click();
+  if (tg?.openTelegramLink) tg.openTelegramLink(CONFIG.SUBSCRIBE_URL + '?start=subscribe');
+  else toast('Оплата через бота: ' + CONFIG.SUBSCRIBE_URL);
 }
-document.getElementById('btnSubscribe').onclick = goSubscribe;
+// копирование промокода
+function copyPromo() {
+  const done = () => toast('Промокод скопирован ✅');
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(CONFIG.PROMO).then(done).catch(() => fallbackCopy(done));
+  } else fallbackCopy(done);
+}
+function fallbackCopy(done) {
+  const ta = document.createElement('textarea');
+  ta.value = CONFIG.PROMO; document.body.appendChild(ta);
+  ta.select(); try { document.execCommand('copy'); done(); } catch(e) {}
+  ta.remove();
+}
+// партнёрские ссылки открываем через Telegram in-app браузер
+document.addEventListener('click', e => {
+  const a = e.target.closest('[data-plink]');
+  if (a && tg?.openLink) { e.preventDefault(); tg.openLink(a.dataset.plink); }
+});
 document.getElementById('btnSubscribe2').onclick = goSubscribe;
 document.getElementById('btnDemoUnlock').onclick = () => {
   store.pro = !store.pro;
-  toast(store.pro ? 'PRO включён (демо)' : 'PRO выключен');
+  toast(store.pro ? '💎 PRO включён (демо)' : 'PRO выключен');
   render();
 };
 
@@ -506,6 +876,18 @@ document.querySelectorAll('.tab').forEach(btn => {
     window.scrollTo(0, 0);
   };
 });
+
+// «ИИ думает» — раз в день
+if (sessionStorage.getItem('intro_' + today)) {
+  document.getElementById('aiLoading').style.display = 'none';
+} else {
+  setTimeout(() => {
+    const el = document.getElementById('aiLoading');
+    el.style.transition = 'opacity .4s'; el.style.opacity = '0';
+    setTimeout(() => el.remove(), 420);
+    sessionStorage.setItem('intro_' + today, '1');
+  }, 1600);
+}
 
 render();
 </script>
