@@ -288,6 +288,16 @@
   .h-item.miss { border-left:3px solid var(--warn); }
   .h-item.push { border-left:3px solid var(--gold); }
 
+  /* ---------- stats filter ---------- */
+  .filter-row { display:flex; gap:8px; padding: 2px 16px 10px; }
+  .f-btn {
+    flex:1; border:1px solid rgba(139,163,199,.25); background:none;
+    color:var(--muted); font-weight:700; font-size:11.5px; letter-spacing:.03em;
+    padding:9px 4px; border-radius:11px; cursor:pointer; transition: all .2s;
+  }
+  .f-btn.on { border-color: var(--neon); color: var(--neon); background: rgba(0,229,255,.08); box-shadow: 0 0 12px rgba(0,229,255,.15); }
+  .f-btn.vip.on { border-color: var(--gold); color: var(--gold); background: rgba(255,201,60,.08); box-shadow: 0 0 12px rgba(255,201,60,.2); }
+
   /* ---------- profile ---------- */
   .prof-head { display:flex; align-items:center; gap:13px; padding: 14px 16px; }
   .avatar {
@@ -461,8 +471,18 @@
     <div class="stat"><div class="v" style="color:var(--warn)" id="hMiss">0</div><div class="l">не зашло ❌</div></div>
     <div class="stat"><div class="v" style="color:var(--gold)" id="hRate">—</div><div class="l">проходимость</div></div>
   </div>
-  <div class="section-title">История · последние 7 дней</div>
+
+  <div class="section-title">Прошедшие прогнозы ИИ · 7 дней</div>
+  <div class="filter-row">
+    <button class="f-btn on" data-f="all">Все</button>
+    <button class="f-btn" data-f="free">🤖 Базовый ИИ</button>
+    <button class="f-btn vip" data-f="pro">💎 VIP (Pro)</button>
+  </div>
   <div class="h-list" id="historyList"></div>
+
+  <div class="footer">
+    Статистика ведётся по завершённым матчам. Прошлые результаты не гарантируют будущих.
+  </div>
 </main>
 
 <!-- ================= PROFILE ================= -->
@@ -519,7 +539,7 @@
 <nav class="tabbar">
   <button class="tab active" data-view="home"><span class="i">🎯</span>Прогнозы</button>
   <button class="tab pro-tab" data-view="pro"><span class="i">💎</span>PRO</button>
-  <button class="tab" data-view="history"><span class="i">📊</span>История</button>
+  <button class="tab" data-view="history"><span class="i">📈</span>Статистика</button>
   <button class="tab" data-view="profile"><span class="i">👤</span>Профиль</button>
 </nav>
 
@@ -625,11 +645,11 @@ function resultOf(p) {
   return { label:'⏳', cls:'push', full:'Возврат' };
 }
 
-function collectStats(days) {
+function collectStats(days, onlyKind) {
   let hits = 0, miss = 0, total = 0;
   for (let d = 1; d <= days; d++) {
     const ds = dayKey(new Date(Date.now() - d * 86400000));
-    for (const kind of ['free', 'pro']) {
+    for (const kind of onlyKind ? [onlyKind] : ['free', 'pro']) {
       for (const p of generateDay(ds, kind)) {
         const r = resultOf(p); total++;
         if (r.cls === 'hit') hits++;
@@ -641,6 +661,7 @@ function collectStats(days) {
 }
 
 /* ================= user state ================= */
+let statFilter = 'all'; // all | free | pro
 const store = {
   get pro() { return localStorage.getItem('pxax_pro') === '1'; },
   set pro(v) { localStorage.setItem('pxax_pro', v ? '1' : '0'); },
@@ -767,17 +788,18 @@ function render() {
   document.getElementById('profVisits').textContent = visits;
   document.getElementById('streakV').textContent = streak;
 
-  const stats = collectStats(CONFIG.STAT_DAYS);
-  animateNum(document.getElementById('statRate'), stats.rate, '%');
+  const statsAll = collectStats(CONFIG.STAT_DAYS);
+  const statsView = collectStats(CONFIG.STAT_DAYS, statFilter);
+  animateNum(document.getElementById('statRate'), statsAll.rate, '%');
   document.getElementById('statFree').textContent = CONFIG.FREE_DAILY;
   document.getElementById('statProCnt').textContent = CONFIG.PRO_DAILY;
-  document.getElementById('hHits').textContent = stats.hits;
-  document.getElementById('hMiss').textContent = stats.miss;
-  document.getElementById('hRate').textContent = stats.rate + '%';
-  animateNum(document.getElementById('pTotal'), stats.total);
-  document.getElementById('pHits').textContent = stats.hits;
-  document.getElementById('pMiss').textContent = stats.miss;
-  document.getElementById('pRate').textContent = stats.rate + '%';
+  document.getElementById('hHits').textContent = statsView.hits;
+  document.getElementById('hMiss').textContent = statsView.miss;
+  document.getElementById('hRate').textContent = statsView.rate + '%';
+  animateNum(document.getElementById('pTotal'), statsAll.total);
+  document.getElementById('pHits').textContent = statsAll.hits;
+  document.getElementById('pMiss').textContent = statsAll.miss;
+  document.getElementById('pRate').textContent = statsAll.rate + '%';
 
   // колоды
   document.getElementById('freeTrack').innerHTML =
@@ -789,13 +811,14 @@ function render() {
   document.getElementById('paywallCta').style.display = pro ? 'none' : 'block';
   document.getElementById('proPaywall').style.display = pro ? 'none' : 'block';
 
-  // история
+  // статистика прошедших прогнозов
   const hEl = document.getElementById('historyList');
   hEl.innerHTML = '';
   let dIdx = 0;
+  const kinds = statFilter === 'all' ? ['pro', 'free'] : [statFilter];
   for (let d = 1; d <= 7; d++) {
     const ds = dayKey(new Date(Date.now() - d * 86400000));
-    const day = [...generateDay(ds, 'pro'), ...generateDay(ds, 'free')];
+    const day = kinds.flatMap(k => generateDay(ds, k));
     for (const p of day) {
       const r = resultOf(p);
       const unlocked = pro || p.kind === 'free';
@@ -866,6 +889,15 @@ document.getElementById('btnDemoUnlock').onclick = () => {
   toast(store.pro ? '💎 PRO включён (демо)' : 'PRO выключен');
   render();
 };
+
+// фильтр статистики: Все / Базовый ИИ / VIP
+document.querySelectorAll('.f-btn').forEach(b => {
+  b.onclick = () => {
+    statFilter = b.dataset.f;
+    document.querySelectorAll('.f-btn').forEach(x => x.classList.toggle('on', x === b));
+    render();
+  };
+});
 
 document.querySelectorAll('.tab').forEach(btn => {
   btn.onclick = () => {
