@@ -1,6 +1,6 @@
 // Генератор прогнозов на реальных данных ESPN (бесплатный API, без ключа).
 // Запускается GitHub Actions раз в день. Модель: rules-v1.
-import { writeFileSync, mkdirSync, readFileSync } from 'node:fs';
+import { writeFileSync, mkdirSync, readFileSync, existsSync } from 'node:fs';
 
 const LEAGUES = [
   { key: 'soccer/eng.1', sport: '⚽', name: 'EPL', type: 'soccer' },
@@ -100,6 +100,18 @@ for (const lg of LEAGUES) {
   } catch (err) {
     console.warn('league skip:', lg.key, String(err));
   }
+}
+
+// архивируем предыдущий день, чтобы не терять неразрешённые прогнозы
+if (existsSync('data/predictions.json')) {
+  try {
+    const old = JSON.parse(readFileSync('data/predictions.json', 'utf8'));
+    if (old.date && old.date !== dateStr) {
+      mkdirSync('data/archive', { recursive: true });
+      writeFileSync(`data/archive/${old.date}.json`, JSON.stringify(old, null, 2));
+      console.log(`archived predictions for ${old.date}`);
+    }
+  } catch (e) { console.warn('archive skip:', String(e)); }
 }
 
 // сортируем по уверенности: самые уверенные -> VIP, остальные -> free

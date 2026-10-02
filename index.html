@@ -453,6 +453,12 @@
     box-shadow: 0 4px 20px rgba(0,0,0,.5);
   }
   .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+  .empty {
+    text-align:center; color:var(--muted); padding: 28px 30px; font-size:13px; line-height:1.7;
+    background:var(--card); border-radius:var(--radius); border:1px dashed rgba(139,163,199,.25);
+    margin: 0 16px;
+  }
+  .empty .i { font-size:34px; display:block; margin-bottom:8px; }
 
   /* ---------- manage subscription bottom-sheet ---------- */
   .modal-ov {
@@ -551,7 +557,7 @@
   </a>
 
   <div class="paywall-cta" id="paywallCta">
-    <h3>💎 Ещё 5 прогнозов — у Pro-ИИ</h3>
+    <h3 id="payProTitle">💎 Ещё 5 прогнозов — у Pro-ИИ</h3>
     <p>Отдельная нейросеть: value-ставки, скан линий 20+ букмекеров, повышенная точность</p>
     <button class="btn-trial" id="btnTrialHome" style="display:none" onclick="startTrial()">🎁 Попробовать бесплатно · 3 дня</button>
     <button class="btn-sub" onclick="goSubscribe()">Открыть PRO · 777 ⭐/мес</button>
@@ -569,7 +575,7 @@
   <div class="pro-hero">
     <div class="orb a"></div><div class="orb b"></div>
     <h3><span class="crown">💎</span> Pro-ИИ · углублённая модель</h3>
-    <p>Больший объём данных, анализ коэффициентов 20+ букмекеров, расчёт value-ставок. <b>5 прогнозов в день.</b></p>
+    <p>Больший объём данных, анализ коэффициентов 20+ букмекеров, расчёт value-ставок. <b id="proCnt">…</b></p>
   </div>
 
   <div class="deck-wrap">
@@ -787,6 +793,13 @@ const PRO_NOTES = [
 ];
 
 function dayKey(d = new Date()) { return d.toISOString().slice(0, 10); }
+// русская плюрализация: plural(5, 'прогноз', 'прогноза', 'прогнозов')
+function plural(n, one, few, many) {
+  const m10 = n % 10, m100 = n % 100;
+  if (m10 === 1 && m100 !== 11) return one;
+  if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return few;
+  return many;
+}
 
 function generateDay(dateStr, kind) {
   const rand = seedRand(hashStr('pxax-v03-' + kind + '-' + dateStr));
@@ -1005,18 +1018,23 @@ function render() {
   document.getElementById('profVisits').textContent = visits;
   document.getElementById('streakV').textContent = streak;
 
-  const statsAll = collectStats(CONFIG.STAT_DAYS);
-  const statsView = collectStats(CONFIG.STAT_DAYS, statFilter);
-  animateNum(document.getElementById('statRate'), statsAll.rate, '%');
+  // честная статистика: показываем цифры только по реальным завершённым матчам
+  const hasReal = !!(REAL.results && REAL.results.length);
+  const statsAll = hasReal ? collectStats(CONFIG.STAT_DAYS) : null;
+  const statsView = hasReal ? collectStats(CONFIG.STAT_DAYS, statFilter) : null;
+  document.getElementById('statRate').textContent = hasReal ? statsAll.rate + '%' : '—';
   document.getElementById('statFree').textContent = freeToday.length;
   document.getElementById('statProCnt').textContent = proToday.length;
-  document.getElementById('hHits').textContent = statsView.hits;
-  document.getElementById('hMiss').textContent = statsView.miss;
-  document.getElementById('hRate').textContent = statsView.rate + '%';
-  animateNum(document.getElementById('pTotal'), statsAll.total);
-  document.getElementById('pHits').textContent = statsAll.hits;
-  document.getElementById('pMiss').textContent = statsAll.miss;
-  document.getElementById('pRate').textContent = statsAll.rate + '%';
+  document.getElementById('hHits').textContent = hasReal ? statsView.hits : '—';
+  document.getElementById('hMiss').textContent = hasReal ? statsView.miss : '—';
+  document.getElementById('hRate').textContent = hasReal ? statsView.rate + '%' : '—';
+  document.getElementById('pTotal').textContent = hasReal ? statsAll.total : '—';
+  document.getElementById('pHits').textContent = hasReal ? statsAll.hits : '—';
+  document.getElementById('pMiss').textContent = hasReal ? statsAll.miss : '—';
+  document.getElementById('pRate').textContent = hasReal ? statsAll.rate + '%' : '—';
+  // динамические счётчики вместо захардкоженных
+  document.getElementById('payProTitle').textContent = `💎 Ещё ${proToday.length} ${plural(proToday.length)} — у Pro-ИИ`;
+  document.getElementById('proCnt').textContent = `${proToday.length} ${plural(proToday.length)} в VIP на сегодня`;
 
   // колоды
   document.getElementById('freeTrack').innerHTML =
@@ -1058,17 +1076,9 @@ function render() {
         `${r.sport} ${r.league} · <span class="${r.kind === 'pro' ? 'pro' : 'ai'}">${r.kind === 'pro' ? 'Pro AI' : 'AI'}</span> · ${r.market} · счёт ${r.score}`,
         cls, label, r.odds, pro || r.kind === 'free');
     }
-  } else {
-    for (let d = 1; d <= 7; d++) {
-      const ds = dayKey(new Date(Date.now() - d * 86400000));
-      const day = kinds.flatMap(k => generateDay(ds, k));
-      for (const p of day) {
-        const r = resultOf(p);
-        addH(p.home, p.away,
-          `${p.sport} ${p.league} · <span class="${p.kind === 'pro' ? 'pro' : 'ai'}">${p.kind === 'pro' ? 'Pro AI' : 'AI'}</span> · ${p.market}`,
-          r.cls, r.label, p.odds, pro || p.kind === 'free');
-      }
-    }
+  }
+  if (!dIdx) {
+    hEl.innerHTML = `<div class="empty"><span class="i">📈</span>Здесь появится статистика прошедших прогнозов.<br>Первые результаты — как только сыграют первые матчи.</div>`;
   }
 
   // профиль
@@ -1149,14 +1159,24 @@ function renderProfileExtras(statsAll) {
     document.getElementById('xpFill').style.width = pct + '%';
   });
 
-  // сравнение Базовый vs VIP — честный вердикт
+  // сравнение Базовый vs VIP — честный вердикт (только по реальным данным)
+  const v = document.getElementById('verdict');
+  const hasRealCmp = !!(REAL.results && REAL.results.length);
+  if (!hasRealCmp) {
+    document.getElementById('cmpFree').textContent = '—';
+    document.getElementById('cmpFreeD').textContent = 'мало данных';
+    document.getElementById('cmpPro').textContent = '—';
+    document.getElementById('cmpProD').textContent = 'мало данных';
+    v.className = 'verdict neutral';
+    v.innerHTML = '👀 Статистика появится после первых сыгранных матчей — пока сравнивать нечего.';
+    return;
+  }
   const sf = collectStats(CONFIG.STAT_DAYS, 'free');
   const sp = collectStats(CONFIG.STAT_DAYS, 'pro');
   document.getElementById('cmpFree').textContent = sf.rate + '%';
   document.getElementById('cmpFreeD').textContent = `${sf.hits} из ${sf.hits + sf.miss}`;
   document.getElementById('cmpPro').textContent = sp.rate + '%';
   document.getElementById('cmpProD').textContent = `${sp.hits} из ${sp.hits + sp.miss}`;
-  const v = document.getElementById('verdict');
   const diff = sp.rate - sf.rate;
   if (diff >= 5) {
     v.className = 'verdict good';
