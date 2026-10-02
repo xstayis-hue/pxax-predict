@@ -298,6 +298,39 @@
   .f-btn.on { border-color: var(--neon); color: var(--neon); background: rgba(0,229,255,.08); box-shadow: 0 0 12px rgba(0,229,255,.15); }
   .f-btn.vip.on { border-color: var(--gold); color: var(--gold); background: rgba(255,201,60,.08); box-shadow: 0 0 12px rgba(255,201,60,.2); }
 
+  /* ---------- level & achievements ---------- */
+  .lvl-card { margin:12px 16px 0; padding:14px; background:var(--card); border-radius:var(--radius); border:1px solid rgba(0,229,255,.16); }
+  .lvl-top { display:flex; align-items:center; gap:12px; }
+  .lvl-badge { width:52px; height:52px; border-radius:16px; background:linear-gradient(135deg,#1a2f4d,#0a0d16); border:1.5px solid rgba(0,229,255,.5); display:flex; align-items:center; justify-content:center; font-size:22px; box-shadow:0 0 16px rgba(0,229,255,.25); animation:logoGlow 3s ease-in-out infinite; }
+  .lvl-name { font-size:15px; font-weight:800; }
+  .lvl-sub { font-size:11px; color:var(--muted); margin-top:2px; }
+  .xp-bar { height:8px; border-radius:8px; background:rgba(139,163,199,.15); overflow:hidden; margin-top:12px; }
+  .xp-bar i { display:block; height:100%; width:0; border-radius:8px; background:linear-gradient(90deg,var(--neon),var(--violet)); box-shadow:0 0 10px rgba(0,229,255,.5); transition: width 1.2s cubic-bezier(.22,1,.36,1); }
+  .xp-lbl { display:flex; justify-content:space-between; font-size:10px; color:var(--muted); margin-top:5px; }
+  .ach-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:9px; padding: 2px 16px 0; }
+  .ach { background:var(--card); border-radius:13px; padding:11px 6px; text-align:center; border:1px solid rgba(139,163,199,.14); opacity:.4; filter:grayscale(.8); }
+  .ach.on { opacity:1; filter:none; border-color:rgba(255,201,60,.4); background:linear-gradient(160deg, rgba(255,201,60,.09), var(--card)); animation:achPop .5s cubic-bezier(.34,1.56,.64,1) both; }
+  @keyframes achPop { from { transform:scale(.6); opacity:0; } }
+  .ach .i { font-size:22px; }
+  .ach .t { font-size:9.5px; color:var(--muted); margin-top:4px; line-height:1.25; }
+  .ach.on .t { color:#d9c68f; }
+  .fun-row { display:flex; gap:9px; padding:2px 16px 0; }
+  .fun { flex:1; background:var(--card); border-radius:13px; padding:11px 6px; border:1px solid rgba(139,163,199,.14); text-align:center; }
+  .fun .i { font-size:18px; }
+  .fun .v { font-size:12px; font-weight:700; margin-top:3px; }
+  .fun .l { font-size:9px; color:var(--muted); margin-top:2px; }
+
+  /* ---------- compare VIP vs free ---------- */
+  .cmp-wrap { display:flex; gap:10px; padding: 2px 16px 0; }
+  .cmp { flex:1; border-radius:14px; padding:12px; text-align:center; border:1px solid rgba(139,163,199,.18); background:var(--card); }
+  .cmp.vip { border-color:rgba(255,201,60,.35); }
+  .cmp .t { font-size:11px; font-weight:800; }
+  .cmp .r { font-size:24px; font-weight:800; margin-top:4px; }
+  .cmp .d { font-size:9.5px; color:var(--muted); margin-top:2px; }
+  .verdict { margin:10px 16px 0; padding:10px 12px; border-radius:12px; font-size:12px; line-height:1.5; }
+  .verdict.good { background:rgba(0,230,118,.08); border:1px solid rgba(0,230,118,.35); color:#9fe8c4; }
+  .verdict.neutral { background:rgba(139,163,199,.07); border:1px solid rgba(139,163,199,.25); color:#9fb3d4; }
+
   /* ---------- profile ---------- */
   .prof-head { display:flex; align-items:center; gap:13px; padding: 14px 16px; }
   .avatar {
@@ -478,6 +511,13 @@
     <button class="f-btn" data-f="free">🤖 Базовый ИИ</button>
     <button class="f-btn vip" data-f="pro">💎 VIP (Pro)</button>
   </div>
+  <div class="section-title" style="padding-top:10px">🤖 против 💎 — что заходит лучше?</div>
+  <div class="cmp-wrap">
+    <div class="cmp"><div class="t">🤖 Базовый ИИ</div><div class="r" style="color:var(--neon)" id="cmpFree">—</div><div class="d" id="cmpFreeD">—</div></div>
+    <div class="cmp vip"><div class="t">💎 VIP</div><div class="r" style="color:var(--gold)" id="cmpPro">—</div><div class="d" id="cmpProD">—</div></div>
+  </div>
+  <div class="verdict neutral" id="verdict"></div>
+
   <div class="h-list" id="historyList"></div>
 
   <div class="footer">
@@ -494,6 +534,28 @@
       <div class="since" id="profSince">в приложении с сегодня</div>
     </div>
     <div class="streak"><div class="v" id="streakV">1</div><div class="l">дней 🔥</div></div>
+  </div>
+
+  <div class="lvl-card">
+    <div class="lvl-top">
+      <div class="lvl-badge" id="lvlIcon">🌱</div>
+      <div>
+        <div class="lvl-name" id="lvlName">Новичок</div>
+        <div class="lvl-sub" id="lvlSub">начни свой путь 🚀</div>
+      </div>
+    </div>
+    <div class="xp-bar"><i id="xpFill"></i></div>
+    <div class="xp-lbl"><span id="xpNow">0 XP</span><span id="xpNext">— XP</span></div>
+  </div>
+
+  <div class="section-title">Достижения</div>
+  <div class="ach-grid" id="achGrid"></div>
+
+  <div class="section-title">Твои привычки</div>
+  <div class="fun-row">
+    <div class="fun"><div class="i" id="favSportI">⚽</div><div class="v" id="favSportV">—</div><div class="l">любимый спорт</div></div>
+    <div class="fun"><div class="i">📅</div><div class="v" id="daysWith">1</div><div class="l">дней с нами</div></div>
+    <div class="fun"><div class="i">🤝</div><div class="v" id="betClicks">0</div><div class="l">переходов к партнёру</div></div>
   </div>
 
   <div class="section-title">Статистика</div>
@@ -848,10 +910,90 @@ function render() {
   document.getElementById('profSince').textContent =
     'в приложении с ' + new Date(since + 'T00:00:00').toLocaleDateString('ru-RU', { day:'numeric', month:'short' });
 
+  renderProfileExtras(statsAll);
+
   // полосы уверенности
   requestAnimationFrame(() => requestAnimationFrame(() => {
     document.querySelectorAll('.bar i').forEach(i => i.style.width = i.dataset.w + '%');
   }));
+}
+
+/* ================= профиль: уровень, ачивки, привычки, сравнение ================= */
+const LEVELS = [
+  { xp: 0,   icon: '🌱', name: 'Новичок' },
+  { xp: 60,  icon: '🎯', name: 'Игрок' },
+  { xp: 160, icon: '📊', name: 'Аналитик' },
+  { xp: 320, icon: '💎', name: 'Профи' },
+  { xp: 600, icon: '👑', name: 'Легенда' },
+];
+
+function renderProfileExtras(statsAll) {
+  // XP: визиты + стрик + подписка
+  const xp = visits * 10 + streak * 15 + (store.pro ? 60 : 0);
+  let li = 0;
+  for (let i = 0; i < LEVELS.length; i++) if (xp >= LEVELS[i].xp) li = i;
+  const cur = LEVELS[li];
+  const next = LEVELS[li + 1];
+  document.getElementById('lvlIcon').textContent = cur.icon;
+  document.getElementById('lvlName').textContent = cur.name;
+  document.getElementById('lvlSub').textContent = next ? `до «${next.name}» осталось ${next.xp - xp} XP` : 'максимальный уровень 🎉';
+  document.getElementById('xpNow').textContent = xp + ' XP';
+  document.getElementById('xpNext').textContent = next ? next.xp + ' XP' : 'MAX';
+
+  // достижения
+  const since = localStorage.getItem('pxax_since') || today;
+  const daysWith = Math.max(1, Math.round((Date.now() - new Date(since + 'T00:00:00')) / 86400000) + 1);
+  document.getElementById('daysWith').textContent = daysWith;
+  const bets = +(localStorage.getItem('pxax_bets') || 0);
+  document.getElementById('betClicks').textContent = bets;
+  const achs = [
+    { i: '🚀', t: 'Первый запуск', ok: visits >= 1 },
+    { i: '🔥', t: '3 дня подряд', ok: streak >= 3 },
+    { i: '⚡', t: '7 дней подряд', ok: streak >= 7 },
+    { i: '💎', t: 'PRO-игрок', ok: store.pro },
+    { i: '📅', t: 'Неделя с нами', ok: daysWith >= 7 },
+    { i: '🧠', t: '100 прогнозов', ok: statsAll.total >= 100 },
+  ];
+  document.getElementById('achGrid').innerHTML =
+    achs.map(a => `<div class="ach ${a.ok ? 'on' : ''}"><div class="i">${a.i}</div><div class="t">${a.t}</div></div>`).join('');
+
+  // любимый спорт (по прогнозам за 14 дней)
+  const sportCnt = {};
+  for (let d = 1; d <= 14; d++) {
+    const ds = dayKey(new Date(Date.now() - d * 86400000));
+    for (const p of generateDay(ds, 'free')) sportCnt[p.sport] = (sportCnt[p.sport] || 0) + 1;
+  }
+  const fav = Object.entries(sportCnt).sort((a, b) => b[1] - a[1])[0];
+  if (fav) {
+    document.getElementById('favSportI').textContent = fav[0];
+    document.getElementById('favSportV').textContent = fav[0].split(' ')[1] || 'Спорт';
+  }
+
+  // XP-бар — анимируем после вставки
+  requestAnimationFrame(() => {
+    const pct = next ? Math.min(100, Math.round((xp - cur.xp) / (next.xp - cur.xp) * 100)) : 100;
+    document.getElementById('xpFill').style.width = pct + '%';
+  });
+
+  // сравнение Базовый vs VIP — честный вердикт
+  const sf = collectStats(CONFIG.STAT_DAYS, 'free');
+  const sp = collectStats(CONFIG.STAT_DAYS, 'pro');
+  document.getElementById('cmpFree').textContent = sf.rate + '%';
+  document.getElementById('cmpFreeD').textContent = `${sf.hits} из ${sf.hits + sf.miss}`;
+  document.getElementById('cmpPro').textContent = sp.rate + '%';
+  document.getElementById('cmpProD').textContent = `${sp.hits} из ${sp.hits + sp.miss}`;
+  const v = document.getElementById('verdict');
+  const diff = sp.rate - sf.rate;
+  if (diff >= 5) {
+    v.className = 'verdict good';
+    v.innerHTML = `💎 VIP-прогнозы заходят чаще на <b>${diff} п.п.</b> — подписка может окупиться. Но помни: <b>вероятность не 100%</b>.`;
+  } else if (diff <= -5) {
+    v.className = 'verdict neutral';
+    v.innerHTML = `👀 Сейчас VIP заходит <b>реже</b> базового (${Math.abs(diff)} п.п.) — платить не обязательно. Следи за статистикой.`;
+  } else {
+    v.className = 'verdict neutral';
+    v.innerHTML = `👀 Разница пока небольшая (${Math.abs(diff)} п.п.) — ясности нет, стоит ли платить. Решение за тобой · 18+.`;
+  }
 }
 
 /* ================= UI wiring ================= */
@@ -881,7 +1023,10 @@ function fallbackCopy(done) {
 // партнёрские ссылки открываем через Telegram in-app браузер
 document.addEventListener('click', e => {
   const a = e.target.closest('[data-plink]');
-  if (a && tg?.openLink) { e.preventDefault(); tg.openLink(a.dataset.plink); }
+  if (!a) return;
+  // счётчик переходов к партнёру — для профиля
+  localStorage.setItem('pxax_bets', +(localStorage.getItem('pxax_bets') || 0) + 1);
+  if (tg?.openLink) { e.preventDefault(); tg.openLink(a.dataset.plink); }
 });
 document.getElementById('btnSubscribe2').onclick = goSubscribe;
 document.getElementById('btnDemoUnlock').onclick = () => {
