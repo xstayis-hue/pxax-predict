@@ -108,6 +108,23 @@
     height: 100%;
   }
   .p-card.pro-card { border-color: rgba(255,201,60,.35); }
+  /* неоновая верхняя кромка */
+  .p-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:2px; z-index:2;
+    background: linear-gradient(90deg, var(--neon), rgba(0,229,255,0) 70%);
+    opacity:.9;
+  }
+  .pro-card::before {
+    background: linear-gradient(90deg, var(--gold), var(--neon2), rgba(255,43,214,0) 80%);
+    background-size: 200% 100%;
+    animation: topLine 3.2s linear infinite;
+  }
+  @keyframes topLine { from { background-position: 0 0; } to { background-position: 200% 0; } }
+  /* водяной знак вида спорта */
+  .wm {
+    position:absolute; right:-14px; bottom:-24px; font-size:110px;
+    opacity:.05; pointer-events:none; user-select:none; z-index:0;
+  }
   .p-top {
     display:flex; align-items:center; gap:8px;
     padding:11px 14px; font-size:11px; color:var(--muted);
@@ -123,11 +140,37 @@
     padding:3px 8px; border-radius:12px; border:1px solid rgba(157,107,255,.3);
   }
   .ai-tag.pro { color:var(--gold); background:rgba(255,201,60,.1); border-color:rgba(255,201,60,.4); animation:proPulse 2.4s infinite; }
-  .p-body { padding: 16px 16px 6px; text-align:center; }
-  .p-body .league { font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); }
-  .p-body .match { font-size:19px; font-weight:800; line-height:1.3; margin-top:6px; }
-  .p-body .vs { color:var(--muted); font-weight:400; font-size:13px; margin:0 5px; }
-  .p-body .time { font-size:11.5px; color:var(--muted); margin-top:5px; }
+  .p-body { padding: 16px 14px 4px; text-align:center; position:relative; z-index:1; }
+  .league-line { display:flex; align-items:center; justify-content:center; gap:7px; font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); }
+  .lg-dot { width:6px; height:6px; border-radius:50%; background:var(--neon); box-shadow:0 0 8px var(--neon); flex:none; }
+  .pro-card .lg-dot { background:var(--gold); box-shadow:0 0 8px var(--gold); }
+  .teams { display:flex; align-items:center; justify-content:center; gap:12px; margin-top:13px; }
+  .team { flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; gap:7px; }
+  .badge {
+    width:52px; height:52px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:900; font-size:17px; color:#eaf6ff;
+    background: radial-gradient(circle at 30% 25%, #24405f, #101a2c);
+    border:1.5px solid rgba(0,229,255,.35);
+    box-shadow: 0 0 14px rgba(0,229,255,.18), inset 0 0 10px rgba(0,229,255,.12);
+  }
+  .team:last-child .badge {
+    border-color: rgba(255,43,214,.35);
+    box-shadow: 0 0 14px rgba(255,43,214,.15), inset 0 0 10px rgba(255,43,214,.1);
+  }
+  .tname { font-size:12.5px; font-weight:700; color:var(--text); line-height:1.2; max-width:112px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .vs-badge {
+    flex:none; width:38px; height:38px; border-radius:50%;
+    background:rgba(139,163,199,.1); border:1px solid rgba(139,163,199,.28);
+    display:flex; align-items:center; justify-content:center;
+    font-size:11px; font-weight:800; color:var(--muted); letter-spacing:.05em;
+  }
+  .time-chip {
+    display:inline-flex; align-items:center; gap:6px; margin-top:13px;
+    padding:5px 13px; border-radius:20px; font-size:11px; color:var(--muted);
+    background:rgba(0,229,255,.06); border:1px solid rgba(0,229,255,.18);
+  }
+  .pro-card .time-chip { background:rgba(255,201,60,.07); border-color:rgba(255,201,60,.22); }
   .p-picks { display:flex; gap:10px; padding: 14px 16px 4px; }
   .pick {
     flex:1; background:var(--card2); border-radius:13px; padding:12px;
@@ -141,7 +184,13 @@
   .conf { padding: 10px 18px 8px; }
   .conf .lbl { display:flex; justify-content:space-between; font-size:10.5px; color:var(--muted); margin-bottom:6px; }
   .conf .lbl b { color:var(--text); }
-  .bar { height:7px; border-radius:6px; background:rgba(139,163,199,.15); overflow:hidden; }
+  .bar { position:relative; height:7px; border-radius:6px; background:rgba(139,163,199,.15); overflow:hidden; }
+  .bar i::after {
+    content:''; position:absolute; top:0; bottom:0; width:40%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.5), transparent);
+    animation: barShine 2.4s linear infinite;
+  }
+  @keyframes barShine { from { left:-40%; } to { left:110%; } }
   .bar i {
     display:block; height:100%; width:0; border-radius:6px;
     background: linear-gradient(90deg, var(--neon), #7bffb0);
@@ -955,21 +1004,37 @@ function makeDeck(trackEl, navEl, count, deckId) {
 }
 
 /* ================= cards ================= */
+function teamInitials(name) {
+  const w = String(name).split(' ').filter(Boolean);
+  return (w.length > 1 ? w[0][0] + w[1][0] : String(name).slice(0, 2)).toUpperCase();
+}
+
 function slideHTML(p, unlocked, isPro, isHistory) {
   const res = isHistory && p.result ? `<div class="res-chip ${p.result.cls}">${p.result.label}</div>` : '';
   return `
     <div class="slide ${unlocked ? '' : 'locked'}">
       <div class="p-card ${isPro ? 'pro-card' : ''}">
         ${res}
+        <div class="wm">${p.sport}</div>
         <div class="blur">
           <div class="p-top">
             <span class="sport">${p.sport}</span><span>${p.league}</span>
             <span class="ai-tag ${isPro ? 'pro' : ''}">${isPro ? '💎 Pro AI' : '🤖 AI'}</span>
           </div>
           <div class="p-body">
-            <div class="league">${p.league.split('·')[1] || p.league}</div>
-            <div class="match">${p.home} <span class="vs">VS</span> ${p.away}</div>
-            <div class="time">${isHistory ? 'вчера · ' : ''}${p.time}</div>
+            <div class="league-line"><span class="lg-dot"></span>${p.league}</div>
+            <div class="teams">
+              <div class="team">
+                <div class="badge">${teamInitials(p.home)}</div>
+                <div class="tname">${p.home}</div>
+              </div>
+              <div class="vs-badge">VS</div>
+              <div class="team">
+                <div class="badge">${teamInitials(p.away)}</div>
+                <div class="tname">${p.away}</div>
+              </div>
+            </div>
+            <div class="time-chip">🕐 ${isHistory ? 'вчера · ' : ''}${p.time}</div>
           </div>
           <div class="p-picks">
             <div class="pick">
