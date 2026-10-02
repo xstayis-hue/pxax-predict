@@ -613,6 +613,26 @@ const tg = window.Telegram?.WebApp;
 if (tg) { try { tg.expand(); tg.disableVerticalSwipes?.(); } catch(e) {} }
 const user = tg?.initDataUnsafe?.user;
 
+/* ================= реальные данные (GitHub Actions -> data/*.json) ================= */
+const REAL = { date: null, free: [], pro: [], results: null };
+async function loadReal() {
+  try {
+    const r = await fetch('data/predictions.json', { cache: 'no-store' });
+    if (r.ok) {
+      const d = await r.json();
+      if (d.date === today && Array.isArray(d.predictions) && d.predictions.length) {
+        REAL.date = d.date;
+        REAL.free = d.predictions.filter(p => p.tier === 'free');
+        REAL.pro = d.predictions.filter(p => p.tier === 'pro');
+      }
+    }
+  } catch (e) {}
+  try {
+    const r = await fetch('data/results.json', { cache: 'no-store' });
+    if (r.ok) { const j = await r.json(); if (Array.isArray(j) && j.length) REAL.results = j; }
+  } catch (e) {}
+}
+
 /* ================= settings ================= */
 const CONFIG = {
   SUBSCRIBE_URL: 'https://t.me/pxaxbetai_bot',
@@ -708,6 +728,19 @@ function resultOf(p) {
 }
 
 function collectStats(days, onlyKind) {
+  // реальные результаты (если есть) — приоритет над моком
+  if (REAL.results) {
+    let hits = 0, miss = 0, total = 0;
+    const cutoff = dayKey(new Date(Date.now() - days * 86400000));
+    for (const r of REAL.results) {
+      if (r.date < cutoff) continue;
+      if (onlyKind && r.kind !== onlyKind) continue;
+      total++;
+      if (r.result === 'hit') hits++;
+      else if (r.result === 'miss') miss++;
+    }
+    return { hits, miss, total, rate: (hits + miss) ? Math.round(hits / (hits + miss) * 100) : 0 };
+  }
   let hits = 0, miss = 0, total = 0;
   for (let d = 1; d <= days; d++) {
     const ds = dayKey(new Date(Date.now() - d * 86400000));
@@ -740,8 +773,8 @@ if (last !== today) {
   localStorage.setItem('pxax_last', today);
 }
 
-const freeToday = generateDay(today, 'free');
-const proToday = generateDay(today, 'pro');
+let freeToday = generateDay(today, 'free');
+let proToday = generateDay(today, 'pro');
 
 /* ================= swipe deck component ================= */
 function makeDeck(trackEl, navEl, count) {
@@ -890,8 +923,8 @@ function render() {
   const statsAll = collectStats(CONFIG.STAT_DAYS);
   const statsView = collectStats(CONFIG.STAT_DAYS, statFilter);
   animateNum(document.getElementById('statRate'), statsAll.rate, '%');
-  document.getElementById('statFree').textContent = CONFIG.FREE_DAILY;
-  document.getElementById('statProCnt').textContent = CONFIG.PRO_DAILY;
+  document.getElementById('statFree').textContent = freeToday.length;
+  document.getElementById('statProCnt').textContent = proToday.length;
   document.getElementById('hHits').textContent = statsView.hits;
   document.getElementById('hMiss').textContent = statsView.miss;
   document.getElementById('hRate').textContent = statsView.rate + '%';
@@ -905,8 +938,8 @@ function render() {
     freeToday.map(p => slideHTML(p, true, false, false)).join('');
   document.getElementById('proTrack').innerHTML =
     proToday.map(p => slideHTML(p, pro, true, false)).join('');
-  freeDeckObj = makeDeck(document.getElementById('freeTrack'), document.getElementById('freeNav'), CONFIG.FREE_DAILY);
-  proDeckObj = makeDeck(document.getElementById('proTrack'), document.getElementById('proNav'), CONFIG.PRO_DAILY);
+  freeDeckObj = makeDeck(document.getElementById('freeTrack'), document.getElementById('freeNav'), freeToday.length);
+  proDeckObj = makeDeck(document.getElementById('proTrack'), document.getElementById('proNav'), proToday.length);
   document.getElementById('paywallCta').style.display = pro ? 'none' : 'block';
   document.getElementById('proPaywall').style.display = pro ? 'none' : 'block';
 
@@ -915,23 +948,41 @@ function render() {
   hEl.innerHTML = '';
   let dIdx = 0;
   const kinds = statFilter === 'all' ? ['pro', 'free'] : [statFilter];
-  for (let d = 1; d <= 7; d++) {
-    const ds = dayKey(new Date(Date.now() - d * 86400000));
-    const day = kinds.flatMap(k => generateDay(ds, k));
-    for (const p of day) {
-      const r = resultOf(p);
-      const unlocked = pro || p.kind === 'free';
-      const el = document.createElement('div');
-      el.className = 'h-item ' + r.cls;
-      el.style.setProperty('--d', (dIdx++ * .04) + 's');
-      el.innerHTML = `
-        <div class="r">${r.label}</div>
-        <div class="m">
-          <div class="t">${p.home} — ${p.away}</div>
-          <div class="s">${p.sport} ${p.league} · <span class="${p.kind === 'pro' ? 'pro' : 'ai'}">${p.kind === 'pro' ? 'Pro AI' : 'AI'}</span> · ${p.market}</div>
-        </div>
-        <div class="o">${unlocked ? p.odds : '🔒'}</div>`;
-      hEl.appendChild(el);
+  const addH = (home, away, sub, cls, label, odds, unlocked) => {
+    const el = document.createElement('div');
+    el.className = 'h-item ' + cls;
+    el.style.setProperty('--d', (dIdx++ * .04) + 's');
+    el.innerHTML = `
+      <div class="r">${label}</div>
+      <div class="m">
+        <div class="t">${home} — ${away}</div>
+        <div class="s">${sub}</div>
+      </div>
+      <div class="o">${unlocked ? odds : '🔒'}</div>`;
+    hEl.appendChild(el);
+  };
+  if (REAL.results) {
+    const cutoff = dayKey(new Date(Date.now() - 7 * 86400000));
+    const rows = REAL.results
+      .filter(r => r.date >= cutoff && kinds.includes(r.kind))
+      .sort((a, b) => b.date.localeCompare(a.date));
+    for (const r of rows) {
+      const cls = r.result === 'hit' ? 'hit' : r.result === 'miss' ? 'miss' : 'push';
+      const label = r.result === 'hit' ? '✅' : r.result === 'miss' ? '❌' : '⏳';
+      addH(r.home, r.away,
+        `${r.sport} ${r.league} · <span class="${r.kind === 'pro' ? 'pro' : 'ai'}">${r.kind === 'pro' ? 'Pro AI' : 'AI'}</span> · ${r.market} · счёт ${r.score}`,
+        cls, label, r.odds, pro || r.kind === 'free');
+    }
+  } else {
+    for (let d = 1; d <= 7; d++) {
+      const ds = dayKey(new Date(Date.now() - d * 86400000));
+      const day = kinds.flatMap(k => generateDay(ds, k));
+      for (const p of day) {
+        const r = resultOf(p);
+        addH(p.home, p.away,
+          `${p.sport} ${p.league} · <span class="${p.kind === 'pro' ? 'pro' : 'ai'}">${p.kind === 'pro' ? 'Pro AI' : 'AI'}</span> · ${p.market}`,
+          r.cls, r.label, p.odds, pro || p.kind === 'free');
+      }
     }
   }
 
@@ -1103,7 +1154,12 @@ if (sessionStorage.getItem('intro_' + today)) {
   }, 1600);
 }
 
-render();
+(async () => {
+  await loadReal();
+  if (REAL.free.length) freeToday = REAL.free.slice(0, 5).map(p => ({ ...p, kind: 'free', league: p.lgName }));
+  if (REAL.pro.length) proToday = REAL.pro.slice(0, 5).map(p => ({ ...p, kind: 'pro', league: p.lgName }));
+  render();
+})();
 </script>
 </body>
 </html>

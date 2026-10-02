@@ -1,0 +1,26 @@
+name: daily-predictions
+on:
+  schedule:
+    - cron: '5 6 * * *'   # 09:05 МСК
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  daily:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Generate predictions
+        run: node scripts/generate-predictions.mjs
+      - name: Resolve yesterday results
+        run: node scripts/resolve-results.mjs
+      - name: Commit data
+        run: |
+          git config user.name "pxax-bot"
+          git config user.email "bot@pxax.local"
+          git add data
+          git diff --cached --quiet || git commit -m "data: daily update $(date -u +%F)"
+          git push
