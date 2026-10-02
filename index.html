@@ -90,7 +90,7 @@
 
   /* ---------- swipe deck (app-like) ---------- */
   .deck-wrap { padding: 12px 16px 0; }
-  .deck { position:relative; }
+  .deck { position:relative; overflow:hidden; border-radius:var(--radius); }
   .deck-track {
     display:flex; touch-action: pan-y;
     transition: transform .38s cubic-bezier(.22,1,.36,1);
@@ -760,28 +760,65 @@ function makeDeck(trackEl, navEl, count) {
     if (instant) requestAnimationFrame(() => trackEl.classList.remove('dragging'));
     dots.forEach((d, j) => d.classList.toggle('on', j === index));
   }
-  trackEl.addEventListener('pointerdown', e => {
-    dragging = true; startX = e.clientX; width = trackEl.parentElement.clientWidth;
+  // --- общая логика жеста ---
+  let startY = 0, t0 = 0, locked = null, moved = false; // locked: 'x' | 'y'
+  function begin(x, y) {
+    dragging = true; moved = false; startX = x; startY = y; locked = null;
+    width = trackEl.parentElement.clientWidth || 320;
+    t0 = performance.now();
     trackEl.classList.add('dragging');
-    trackEl.setPointerCapture?.(e.pointerId);
-  });
-  trackEl.addEventListener('pointermove', e => {
+  }
+  function move(x, y) {
     if (!dragging) return;
-    const dx = e.clientX - startX;
-    const base = -index * 100;
-    trackEl.style.transform = `translateX(calc(${base}% + ${dx}px))`;
-  });
-  const end = e => {
+    const dx = x - startX, dy = y - startY;
+    if (!locked) {
+      if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return;
+      locked = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+    }
+    if (locked !== 'x') return;
+    moved = true;
+    let d = dx;
+    if ((index === 0 && d > 0) || (index === count - 1 && d < 0)) d *= .35; // сопротивление на краях
+    trackEl.style.transform = `translateX(calc(${-index * 100}% + ${d}px))`;
+  }
+  function finish(x) {
     if (!dragging) return;
     dragging = false;
     trackEl.classList.remove('dragging');
-    const dx = e.clientX - startX;
-    if (Math.abs(dx) > width * .18) goTo(index + (dx < 0 ? 1 : -1));
+    const dx = x - startX;
+    const flick = performance.now() - t0 < 260 && Math.abs(dx) > 28;
+    if (locked === 'x' && (flick || Math.abs(dx) > width * .18)) goTo(index + (dx < 0 ? 1 : -1));
     else goTo(index);
-  };
-  trackEl.addEventListener('pointerup', end);
-  trackEl.addEventListener('pointercancel', end);
-  trackEl.addEventListener('pointerleave', e => { if (dragging) end(e); });
+    locked = null;
+  }
+  // --- мышь/стилус (Pointer Events) ---
+  trackEl.addEventListener('pointerdown', e => {
+    if (e.pointerType === 'touch') return; // тач — ниже
+    begin(e.clientX, e.clientY);
+    trackEl.setPointerCapture?.(e.pointerId);
+  });
+  trackEl.addEventListener('pointermove', e => { if (e.pointerType !== 'touch') move(e.clientX, e.clientY); });
+  trackEl.addEventListener('pointerup', e => { if (e.pointerType !== 'touch') finish(e.clientX); });
+  trackEl.addEventListener('pointercancel', () => {
+    dragging = false; trackEl.classList.remove('dragging'); goTo(index);
+  });
+  // --- тач (Android WebView / iOS WKWebView) ---
+  trackEl.addEventListener('touchstart', e => {
+    const t = e.touches[0]; begin(t.clientX, t.clientY);
+  }, { passive: true });
+  trackEl.addEventListener('touchmove', e => {
+    const t = e.touches[0];
+    move(t.clientX, t.clientY);
+    if (locked === 'x') e.preventDefault(); // горизонтальный свайп — не даём скроллить страницу
+  }, { passive: false });
+  trackEl.addEventListener('touchend', e => finish(e.changedTouches[0].clientX));
+  trackEl.addEventListener('touchcancel', () => {
+    dragging = false; trackEl.classList.remove('dragging'); goTo(index);
+  });
+  // после свайпа не срабатывают клики по кнопкам внутри карточки
+  trackEl.addEventListener('click', e => {
+    if (moved) { e.preventDefault(); e.stopPropagation(); moved = false; }
+  }, true);
   goTo(0);
   return { goTo };
 }
