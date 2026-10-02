@@ -86,8 +86,15 @@ const server = http.createServer(async (req, res) => {
   try {
     if (url.pathname === '/status') {
       const uid = url.searchParams.get('uid');
+      const u = loadUsers()[String(uid)];
       res.writeHead(200, { 'Content-Type': 'application/json', ...cors });
-      return res.end(JSON.stringify({ pro: isPro(uid), until: loadUsers()[String(uid)]?.until || null }));
+      return res.end(JSON.stringify({
+        pro: isPro(uid),
+        until: u?.until || null,
+        price: STARS_PRICE,
+        days: PRO_DAYS,
+        payments: u?.payments || [],
+      }));
     }
     if (url.pathname === '/pay' && req.method === 'POST') {
       let body = '';
@@ -129,6 +136,15 @@ async function poll() {
       const chatId = msg.chat.id;
       if (msg.successful_payment) {
         const until = grant(chatId, msg.from.first_name);
+        // сохраняем историю платежей
+        const users = loadUsers();
+        const u = users[String(chatId)];
+        if (u) {
+          u.payments = u.payments || [];
+          u.payments.push({ d: new Date().toISOString(), stars: msg.successful_payment.total_amount });
+          if (u.payments.length > 30) u.payments = u.payments.slice(-30);
+          saveUsers(users);
+        }
         console.log(`PAYMENT: ${msg.from.username || chatId} -> PRO until ${until}`);
         await api('sendMessage', { chat_id: chatId, text: `💎 PRO активирована до ${new Date(until).toLocaleDateString('ru-RU')}!\nОткрой мини-апп заново — статус обновится.\n\n_Напоминаем: прогнозы не гарантируют результат, 18+_`, parse_mode: 'Markdown' });
         continue;

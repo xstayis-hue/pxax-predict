@@ -453,6 +453,43 @@
     box-shadow: 0 4px 20px rgba(0,0,0,.5);
   }
   .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+  /* ---------- manage subscription bottom-sheet ---------- */
+  .modal-ov {
+    position:fixed; inset:0; z-index:100; background:rgba(4,6,14,.78);
+    backdrop-filter:blur(6px); display:flex; align-items:flex-end;
+  }
+  .modal {
+    width:100%; background:#10141f; border-radius:22px 22px 0 0;
+    border-top:1px solid rgba(0,229,255,.25);
+    padding:20px 18px calc(18px + env(safe-area-inset-bottom));
+    animation: sheetUp .32s cubic-bezier(.22,1,.36,1);
+  }
+  @keyframes sheetUp { from { transform:translateY(80px); opacity:0; } }
+  .modal h3 { font-size:17px; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+  .m-status {
+    padding:13px 14px; border-radius:14px; margin-bottom:12px;
+    background:rgba(0,230,118,.07); border:1px solid rgba(0,230,118,.35);
+  }
+  .m-status.off { background:rgba(139,163,199,.06); border-color:rgba(139,163,199,.25); }
+  .m-status .s { font-size:14px; font-weight:800; }
+  .m-status.on .s { color:var(--ok); }
+  .m-status.off .s { color:var(--muted); }
+  .m-status .d { font-size:12px; color:var(--muted); margin-top:4px; }
+  .m-status .d b { color:var(--text); }
+  .m-hist { margin-bottom:14px; }
+  .m-hist .t { font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-bottom:7px; }
+  .m-hist .row {
+    display:flex; justify-content:space-between; font-size:12.5px;
+    padding:8px 11px; border-radius:10px; background:rgba(139,163,199,.06); margin-bottom:5px;
+  }
+  .m-hist .row b { color:var(--gold); }
+  .m-note { font-size:10.5px; color:#7d92b5; line-height:1.5; margin:10px 0 14px; }
+  .m-close {
+    width:100%; border:1px dashed rgba(139,163,199,.35); background:none;
+    color:var(--muted); font-weight:700; padding:11px; border-radius:12px;
+    font-size:12.5px; cursor:pointer; margin-top:9px;
+  }
 </style>
 </head>
 <body>
@@ -507,7 +544,7 @@
   <div class="paywall-cta" id="paywallCta">
     <h3>💎 Ещё 5 прогнозов — у Pro-ИИ</h3>
     <p>Отдельная нейросеть: value-ставки, скан линий 20+ букмекеров, повышенная точность</p>
-    <button class="btn-sub" onclick="goSubscribe()">Открыть PRO</button>
+    <button class="btn-sub" onclick="goSubscribe()">Открыть PRO · 777 ⭐/мес</button>
   </div>
 
   <div class="footer">
@@ -536,7 +573,7 @@
   <div class="paywall-cta" id="proPaywall">
     <h3>💎 Станьте PRO</h3>
     <p>Полный доступ к 5 прогнозам Pro-ИИ каждый день + история без замков</p>
-    <button class="btn-sub" onclick="goSubscribe()">Оформить подписку</button>
+    <button class="btn-sub" onclick="goSubscribe()">Оформить PRO · 777 ⭐/мес</button>
   </div>
 
   <div class="footer">
@@ -1186,7 +1223,42 @@ document.addEventListener('click', e => {
   localStorage.setItem('pxax_bets', +(localStorage.getItem('pxax_bets') || 0) + 1);
   if (tg?.openLink) { e.preventDefault(); tg.openLink(a.dataset.plink); }
 });
-document.getElementById('btnSubscribe2').onclick = goSubscribe;
+// ---- управление подпиской (bottom-sheet) ----
+async function openManage() {
+  let st = { pro: store.pro, until: null, payments: [], price: 777, days: 30, demo: !isTg };
+  if (isTg && user && CONFIG.API_BASE && !CONFIG.API_BASE.startsWith('__')) {
+    try {
+      const r = await fetch(CONFIG.API_BASE + '/status?uid=' + user.id, { cache: 'no-store' });
+      st = { ...(await r.json()), demo: false };
+    } catch (e) {}
+  }
+  if (st.pro && !store.pro) store.pro = true;
+
+  const ov = document.createElement('div');
+  ov.className = 'modal-ov';
+  ov.onclick = e => { if (e.target === ov) ov.remove(); };
+  const daysLeft = st.until ? Math.max(0, Math.ceil((new Date(st.until) - Date.now()) / 864e5)) : 0;
+  const fmt = d => d ? new Date(d).toLocaleDateString('ru-RU', { day:'numeric', month:'long', year:'numeric' }) : '—';
+  const hist = (st.payments || []).slice(-5).reverse()
+    .map(p => `<div class="row"><span>${new Date(p.d).toLocaleDateString('ru-RU')}</span><b>✦ ${p.stars} ⭐</b></div>`).join('');
+  ov.innerHTML = `
+    <div class="modal">
+      <h3>${st.pro ? '💎' : '👤'} Управление подпиской</h3>
+      <div class="m-status ${st.pro ? 'on' : 'off'}">
+        <div class="s">${st.pro ? 'PRO активна ✨' : 'Подписки нет'}</div>
+        ${st.pro ? `<div class="d">действует до <b>${fmt(st.until)}</b> · осталось <b>${daysLeft} дн.</b></div>` : ''}
+        ${st.demo ? '<div class="d">демо-режим (браузер без Telegram)</div>' : ''}
+      </div>
+      ${hist ? `<div class="m-hist"><div class="t">История платежей</div>${hist}</div>` : ''}
+      <button class="btn-sub" id="mAction">${st.pro ? `Продлить на +${st.days || 30} дней · ${st.price || 777} ⭐` : `Оформить PRO · ${st.price || 777} ⭐`}</button>
+      <div class="m-note">Оплата разовая в Telegram Stars. Продление суммируется с текущим сроком. Stars не возвращаются. Прогнозы не гарантируют результат, 18+.</div>
+      <button class="m-close" id="mClose">Закрыть</button>
+    </div>`;
+  document.body.appendChild(ov);
+  ov.querySelector('#mClose').onclick = () => { ov.remove(); render(); };
+  ov.querySelector('#mAction').onclick = () => { ov.remove(); goSubscribe(); };
+}
+document.getElementById('btnSubscribe2').onclick = openManage;
 document.getElementById('btnDemoUnlock').onclick = () => {
   store.pro = !store.pro;
   toast(store.pro ? '💎 PRO включён (демо)' : 'PRO выключен');
