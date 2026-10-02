@@ -842,6 +842,16 @@ const PRO_NOTES = [
 ];
 
 function dayKey(d = new Date()) { return d.toISOString().slice(0, 10); }
+// умная дата матча: сегодня / завтра / 10 окт
+function matchDateLabel(iso) {
+  if (!iso) return '';
+  const d = new Date(new Date(iso).getTime() + 3 * 3600e3); // -> МСК
+  const todayMsk = new Date(Date.now() + 3 * 3600e3);
+  const dd = d.toISOString().slice(0, 10);
+  if (dd === todayMsk.toISOString().slice(0, 10)) return 'сегодня · ';
+  if (dd === new Date(todayMsk.getTime() + 86400e3).toISOString().slice(0, 10)) return 'завтра · ';
+  return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', timeZone: 'UTC' }) + ' · ';
+}
 // русская плюрализация: plural(5, 'прогноз', 'прогноза', 'прогнозов')
 function plural(n, one, few, many) {
   const m10 = n % 10, m100 = n % 100;
@@ -1034,7 +1044,7 @@ function slideHTML(p, unlocked, isPro, isHistory) {
                 <div class="tname">${p.away}</div>
               </div>
             </div>
-            <div class="time-chip">🕐 ${isHistory ? 'вчера · ' : ''}${p.time}</div>
+            <div class="time-chip">🕐 ${isHistory ? 'вчера · ' : ''}${matchDateLabel(p.matchDate)}${p.time}</div>
           </div>
           <div class="p-picks">
             <div class="pick">

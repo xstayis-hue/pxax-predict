@@ -91,6 +91,7 @@ for (const lg of LEAGUES) {
         lgKey: lg.key, lgName: lg.name, sport: lg.sport, type: lg.type,
         home: home.team.displayName, away: away.team.displayName,
         time: fmtTime(e.date),
+        matchDate: e.date,
         market, odds: (0.93 / prob).toFixed(2),
         confidence: Math.round(prob * 100),
         note,
