@@ -846,17 +846,17 @@ function dayKey(d = new Date()) {
   // всё приложение живёт по МСК (как генератор и аудитория) — иначе после полуночи даты разъезжаются с data/*.json
   return new Date((d instanceof Date ? d.getTime() : d) + 3 * 3600e3).toISOString().slice(0, 10);
 }
-// полная дата матча: сегодня / завтра / пт · 10 октября
+// точная дата всегда: сегодня, 03.10 · 02:00 МСК / сб, 10.10 · 16:00 МСК
 function matchDateLabel(iso) {
   if (!iso) return '';
   const d = new Date(new Date(iso).getTime() + 3 * 3600e3); // -> МСК
   const todayMsk = new Date(Date.now() + 3 * 3600e3);
   const dd = d.toISOString().slice(0, 10);
-  if (dd === todayMsk.toISOString().slice(0, 10)) return 'сегодня · ';
-  if (dd === new Date(todayMsk.getTime() + 86400e3).toISOString().slice(0, 10)) return 'завтра · ';
+  const dm = d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', timeZone: 'UTC' });
+  if (dd === todayMsk.toISOString().slice(0, 10)) return `сегодня, ${dm} · `;
+  if (dd === new Date(todayMsk.getTime() + 86400e3).toISOString().slice(0, 10)) return `завтра, ${dm} · `;
   const wd = d.toLocaleDateString('ru-RU', { weekday: 'short', timeZone: 'UTC' });
-  const dm = d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', timeZone: 'UTC' });
-  return `${wd} · ${dm} · `;
+  return `${wd}, ${dm} · `;
 }
 // русская плюрализация: plural(5, 'прогноз', 'прогноза', 'прогнозов')
 function plural(n, one, few, many) {
