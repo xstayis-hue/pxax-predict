@@ -842,7 +842,10 @@ const PRO_NOTES = [
   'Pro-модель: рынок движется в сторону прогноза — вход до движения линии.',
 ];
 
-function dayKey(d = new Date()) { return d.toISOString().slice(0, 10); }
+function dayKey(d = new Date()) {
+  // всё приложение живёт по МСК (как генератор и аудитория) — иначе после полуночи даты разъезжаются с data/*.json
+  return new Date((d instanceof Date ? d.getTime() : d) + 3 * 3600e3).toISOString().slice(0, 10);
+}
 // полная дата матча: сегодня / завтра / пт · 10 октября
 function matchDateLabel(iso) {
   if (!iso) return '';
