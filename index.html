@@ -767,7 +767,7 @@ const user = tg?.initDataUnsafe?.user;
 const REAL = { loaded: false, date: null, free: [], pro: [], results: null };
 async function loadReal() {
   try {
-    const r = await fetch('data/predictions.json', { cache: 'no-store' });
+    const r = await fetch('data/predictions.json?v=' + Date.now(), { cache: 'no-store' });
     if (r.ok) {
       const d = await r.json();
       REAL.loaded = true;
@@ -779,7 +779,7 @@ async function loadReal() {
     }
   } catch (e) {}
   try {
-    const r = await fetch('data/results.json', { cache: 'no-store' });
+    const r = await fetch('data/results.json?v=' + Date.now(), { cache: 'no-store' });
     if (r.ok) { const j = await r.json(); if (Array.isArray(j) && j.length) REAL.results = j; }
   } catch (e) {}
 }
@@ -843,7 +843,7 @@ const PRO_NOTES = [
 ];
 
 function dayKey(d = new Date()) { return d.toISOString().slice(0, 10); }
-// умная дата матча: сегодня / завтра / 10 окт
+// полная дата матча: сегодня / завтра / пт · 10 октября
 function matchDateLabel(iso) {
   if (!iso) return '';
   const d = new Date(new Date(iso).getTime() + 3 * 3600e3); // -> МСК
@@ -851,7 +851,9 @@ function matchDateLabel(iso) {
   const dd = d.toISOString().slice(0, 10);
   if (dd === todayMsk.toISOString().slice(0, 10)) return 'сегодня · ';
   if (dd === new Date(todayMsk.getTime() + 86400e3).toISOString().slice(0, 10)) return 'завтра · ';
-  return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', timeZone: 'UTC' }) + ' · ';
+  const wd = d.toLocaleDateString('ru-RU', { weekday: 'short', timeZone: 'UTC' });
+  const dm = d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', timeZone: 'UTC' });
+  return `${wd} · ${dm} · `;
 }
 // русская плюрализация: plural(5, 'прогноз', 'прогноза', 'прогнозов')
 function plural(n, one, few, many) {
@@ -1366,7 +1368,7 @@ async function openManage() {
   let st = { pro: store.pro, until: null, payments: [], price: 777, days: 30, demo: !isTg };
   if (isTg && user && CONFIG.API_BASE && !CONFIG.API_BASE.startsWith('__')) {
     try {
-      const r = await fetch(CONFIG.API_BASE + '/status?uid=' + user.id, { cache: 'no-store' });
+      const r = await fetch(CONFIG.API_BASE + '/status?uid=' + user.id + '&v=' + Date.now(), { cache: 'no-store' });
       st = { ...(await r.json()), demo: false };
     } catch (e) {}
   }
