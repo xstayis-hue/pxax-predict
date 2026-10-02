@@ -58,6 +58,8 @@ for (const lg of LEAGUES) {
     let taken = 0;
     for (const e of events) {
       if (taken >= 2) break;
+      // событие должно начинаться минимум через 6 часов — чтобы юзер успел поставить
+      if (new Date(e.date).getTime() < Date.now() + 6 * 3600e3) continue;
       const comp = e.competitions?.[0];
       const home = comp?.competitors?.find(c => c.homeAway === 'home');
       const away = comp?.competitors?.find(c => c.homeAway === 'away');
