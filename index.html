@@ -657,6 +657,7 @@
 <script>
 /* ================= Telegram SDK ================= */
 const tg = window.Telegram?.WebApp;
+const isTg = !!tg;
 if (tg) { try { tg.expand(); tg.disableVerticalSwipes?.(); } catch(e) {} }
 const user = tg?.initDataUnsafe?.user;
 
@@ -683,6 +684,7 @@ async function loadReal() {
 /* ================= settings ================= */
 const CONFIG = {
   SUBSCRIBE_URL: 'https://t.me/pxaxbetai_bot',
+  API_BASE: 'https://senate-insurance-sprint-designs.trycloudflare.com', // адрес бэкенда (cloudflared tunnel), обновляется при перезапуске туннеля
   FREE_DAILY: 5,   // бесплатных прогнозов в день
   PRO_DAILY: 5,    // прогнозов Pro-ИИ в день
   STAT_DAYS: 14,
@@ -1110,10 +1112,41 @@ function toast(msg) {
   t.textContent = msg; t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2400);
 }
-function goSubscribe() {
+async function goSubscribe() {
   document.querySelector('[data-view="pro"]').click();
+  // реальная оплата через Telegram Stars
+  if (isTg && tg?.initData && CONFIG.API_BASE && !CONFIG.API_BASE.startsWith('__')) {
+    try {
+      toast('Выставляю счёт… ⏳');
+      const r = await fetch(CONFIG.API_BASE + '/pay', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ initData: tg.initData }),
+      });
+      const j = await r.json();
+      if (j.ok && j.sent) {
+        toast('💸 Счёт отправлен в чат бота — оплати там!');
+        tg.openTelegramLink(CONFIG.SUBSCRIBE_URL);
+      } else if (j.needs_start) {
+        toast('Сначала нажми START в чате бота 🤖');
+        tg.openTelegramLink(CONFIG.SUBSCRIBE_URL);
+      } else {
+        toast('Не удалось выставить счёт, попробуй позже');
+      }
+    } catch (e) { toast('Сервер оплаты недоступен 😔'); }
+    return;
+  }
   if (tg?.openTelegramLink) tg.openTelegramLink(CONFIG.SUBSCRIBE_URL + '?start=subscribe');
   else toast('Оплата через бота: ' + CONFIG.SUBSCRIBE_URL);
+}
+// реальный PRO-статус с бэкенда
+async function loadServerPro() {
+  if (!isTg || !user || !CONFIG.API_BASE || CONFIG.API_BASE.startsWith('__')) return false;
+  try {
+    const r = await fetch(CONFIG.API_BASE + '/status?uid=' + user.id, { cache: 'no-store' });
+    const j = await r.json();
+    if (j.pro && !store.pro) { store.pro = true; return true; }
+  } catch (e) {}
+  return false;
 }
 // копирование промокода
 function copyPromo() {
@@ -1175,10 +1208,12 @@ if (sessionStorage.getItem('intro_' + today)) {
 }
 
 (async () => {
+  const serverPro = await loadServerPro();
   await loadReal();
   if (REAL.free.length) freeToday = REAL.free.slice(0, 5).map(p => ({ ...p, kind: 'free', league: p.lgName }));
   if (REAL.pro.length) proToday = REAL.pro.slice(0, 5).map(p => ({ ...p, kind: 'pro', league: p.lgName }));
   render();
+  if (serverPro) toast('💎 PRO активна — спасибо за поддержку!');
 })();
 </script>
 </body>
