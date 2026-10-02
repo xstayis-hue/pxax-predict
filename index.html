@@ -92,12 +92,14 @@
   .deck-wrap { padding: 12px 16px 0; }
   .deck { position:relative; overflow:hidden; border-radius:var(--radius); }
   .deck-track {
-    display:flex; touch-action: pan-y;
-    transition: transform .38s cubic-bezier(.22,1,.36,1);
-    will-change: transform;
+    display:flex; overflow-x:auto; overflow-y:hidden;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none; -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
   }
-  .deck-track.dragging { transition: none; }
-  .slide { min-width:100%; padding: 0 1px; }
+  .deck-track::-webkit-scrollbar { display:none; }
+  .slide { min-width:100%; padding: 0 1px; scroll-snap-align: start; scroll-snap-stop: always; }
   .p-card {
     background: var(--card); border-radius: var(--radius);
     border: 1px solid rgba(0,229,255,.16);
@@ -778,7 +780,8 @@ let proToday = generateDay(today, 'pro');
 
 /* ================= swipe deck component ================= */
 function makeDeck(trackEl, navEl, count) {
-  let index = 0, startX = 0, dragging = false, width = trackEl.parentElement.clientWidth || 320;
+  // нативный scroll-snap: свайп делает сам браузер — работает в любом webview
+  let index = 0, moved = false, lastLeft = 0, drag = null;
   const dots = [];
   navEl.innerHTML = '';
   for (let i = 0; i < count; i++) {
@@ -786,73 +789,45 @@ function makeDeck(trackEl, navEl, count) {
     d.className = 'dn'; d.onclick = () => goTo(i);
     navEl.appendChild(d); dots.push(d);
   }
+  function setDots() { dots.forEach((d, j) => d.classList.toggle('on', j === index)); }
   function goTo(i, instant) {
     index = Math.max(0, Math.min(count - 1, i));
-    if (instant) trackEl.classList.add('dragging');
-    trackEl.style.transform = `translateX(${-index * 100}%)`;
-    if (instant) requestAnimationFrame(() => trackEl.classList.remove('dragging'));
-    dots.forEach((d, j) => d.classList.toggle('on', j === index));
+    trackEl.scrollTo({ left: index * trackEl.clientWidth, behavior: instant ? 'auto' : 'smooth' });
+    setDots();
   }
-  // --- общая логика жеста ---
-  let startY = 0, t0 = 0, locked = null, moved = false; // locked: 'x' | 'y'
-  function begin(x, y) {
-    dragging = true; moved = false; startX = x; startY = y; locked = null;
-    width = trackEl.parentElement.clientWidth || 320;
-    t0 = performance.now();
-    trackEl.classList.add('dragging');
-  }
-  function move(x, y) {
-    if (!dragging) return;
-    const dx = x - startX, dy = y - startY;
-    if (!locked) {
-      if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return;
-      locked = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
-    }
-    if (locked !== 'x') return;
-    moved = true;
-    let d = dx;
-    if ((index === 0 && d > 0) || (index === count - 1 && d < 0)) d *= .35; // сопротивление на краях
-    trackEl.style.transform = `translateX(calc(${-index * 100}% + ${d}px))`;
-  }
-  function finish(x) {
-    if (!dragging) return;
-    dragging = false;
-    trackEl.classList.remove('dragging');
-    const dx = x - startX;
-    const flick = performance.now() - t0 < 260 && Math.abs(dx) > 28;
-    if (locked === 'x' && (flick || Math.abs(dx) > width * .18)) goTo(index + (dx < 0 ? 1 : -1));
-    else goTo(index);
-    locked = null;
-  }
-  // --- мышь/стилус (Pointer Events) ---
+  // синхронизация со свайпом/инерцией
+  trackEl.addEventListener('scroll', () => {
+    const left = trackEl.scrollLeft;
+    if (Math.abs(left - lastLeft) > 8) moved = true;
+    lastLeft = left;
+    const i = Math.round(left / (trackEl.clientWidth || 1));
+    if (i !== index) { index = i; setDots(); }
+    clearTimeout(trackEl._movedT);
+    trackEl._movedT = setTimeout(() => moved = false, 250);
+  }, { passive: true });
+  // перетаскивание мышью (десктоп/превью)
   trackEl.addEventListener('pointerdown', e => {
-    if (e.pointerType === 'touch') return; // тач — ниже
-    begin(e.clientX, e.clientY);
+    if (e.pointerType === 'touch') return; // тач — нативный скролл
+    drag = { x: e.clientX, left: trackEl.scrollLeft };
     trackEl.setPointerCapture?.(e.pointerId);
   });
-  trackEl.addEventListener('pointermove', e => { if (e.pointerType !== 'touch') move(e.clientX, e.clientY); });
-  trackEl.addEventListener('pointerup', e => { if (e.pointerType !== 'touch') finish(e.clientX); });
-  trackEl.addEventListener('pointercancel', () => {
-    dragging = false; trackEl.classList.remove('dragging'); goTo(index);
+  trackEl.addEventListener('pointermove', e => {
+    if (!drag) return;
+    trackEl.scrollLeft = drag.left - (e.clientX - drag.x);
   });
-  // --- тач (Android WebView / iOS WKWebView) ---
-  trackEl.addEventListener('touchstart', e => {
-    const t = e.touches[0]; begin(t.clientX, t.clientY);
-  }, { passive: true });
-  trackEl.addEventListener('touchmove', e => {
-    const t = e.touches[0];
-    move(t.clientX, t.clientY);
-    if (locked === 'x') e.preventDefault(); // горизонтальный свайп — не даём скроллить страницу
-  }, { passive: false });
-  trackEl.addEventListener('touchend', e => finish(e.changedTouches[0].clientX));
-  trackEl.addEventListener('touchcancel', () => {
-    dragging = false; trackEl.classList.remove('dragging'); goTo(index);
-  });
+  const mouseUp = e => {
+    if (!drag) return;
+    const dx = e.clientX - drag.x;
+    drag = null;
+    goTo(dx < -40 ? index + 1 : dx > 40 ? index - 1 : index);
+  };
+  trackEl.addEventListener('pointerup', mouseUp);
+  trackEl.addEventListener('pointercancel', () => { drag = null; goTo(index); });
   // после свайпа не срабатывают клики по кнопкам внутри карточки
   trackEl.addEventListener('click', e => {
     if (moved) { e.preventDefault(); e.stopPropagation(); moved = false; }
   }, true);
-  goTo(0);
+  goTo(0, true);
   return { goTo };
 }
 
