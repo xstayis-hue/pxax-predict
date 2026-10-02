@@ -19,6 +19,7 @@ const USERS_FILE = path.join(__dirname, 'users.json'); // gitignore!
 const loadUsers = () => { try { return JSON.parse(fs.readFileSync(USERS_FILE, 'utf8')); } catch { return {}; } };
 const saveUsers = (u) => fs.writeFileSync(USERS_FILE, JSON.stringify(u, null, 2));
 const PRO_DAYS = 30;
+const TRIAL_DAYS = 3;
 
 // ---------- Telegram API ----------
 const api = async (method, body) => {
@@ -64,12 +65,13 @@ function isPro(uid) {
   const u = loadUsers()[String(uid)];
   return !!(u && new Date(u.until) > new Date());
 }
-function grant(uid, name) {
+function grant(uid, name, days = PRO_DAYS) {
   const users = loadUsers();
-  const prev = users[String(uid)];
-  const base = prev && new Date(prev.until) > new Date() ? new Date(prev.until) : new Date();
-  base.setDate(base.getDate() + PRO_DAYS);
-  users[String(uid)] = { until: base.toISOString(), name: name || prev?.name || '' };
+  const prev = users[String(uid)] || {};
+  const base = prev.until && new Date(prev.until) > new Date() ? new Date(prev.until) : new Date();
+  base.setDate(base.getDate() + days);
+  // сохраняем все прежние поля (payments, trial и т.д.)
+  users[String(uid)] = { ...prev, until: base.toISOString(), name: name || prev.name || '' };
   saveUsers(users);
   return users[String(uid)].until;
 }
@@ -93,8 +95,36 @@ const server = http.createServer(async (req, res) => {
         until: u?.until || null,
         price: STARS_PRICE,
         days: PRO_DAYS,
+        trialUsed: !!u?.trial,
         payments: u?.payments || [],
       }));
+    }
+    if (url.pathname === '/trial' && req.method === 'POST') {
+      let body = '';
+      for await (const chunk of req) body += chunk;
+      const { initData } = JSON.parse(body || '{}');
+      const user = validateInitData(initData || '');
+      if (!user) {
+        res.writeHead(401, { 'Content-Type': 'application/json', ...cors });
+        return res.end(JSON.stringify({ ok: false, error: 'bad_auth' }));
+      }
+      if (isPro(user.id)) {
+        res.writeHead(200, { 'Content-Type': 'application/json', ...cors });
+        return res.end(JSON.stringify({ ok: false, reason: 'active' }));
+      }
+      const users = loadUsers();
+      const u = users[String(user.id)] || {};
+      if (u.trial) {
+        res.writeHead(200, { 'Content-Type': 'application/json', ...cors });
+        return res.end(JSON.stringify({ ok: false, reason: 'used' }));
+      }
+      const until = grant(user.id, user.first_name, TRIAL_DAYS);
+      const users2 = loadUsers();
+      users2[String(user.id)].trial = true;
+      saveUsers(users2);
+      console.log(`TRIAL: ${user.username || user.id} -> until ${until}`);
+      res.writeHead(200, { 'Content-Type': 'application/json', ...cors });
+      return res.end(JSON.stringify({ ok: true, until }));
     }
     if (url.pathname === '/pay' && req.method === 'POST') {
       let body = '';

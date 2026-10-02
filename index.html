@@ -490,6 +490,15 @@
     color:var(--muted); font-weight:700; padding:11px; border-radius:12px;
     font-size:12.5px; cursor:pointer; margin-top:9px;
   }
+  .btn-trial {
+    width:100%; border:none; cursor:pointer;
+    background: linear-gradient(135deg, var(--neon), #00b3d4);
+    color:#04121c; font-weight:800; font-size:14.5px; letter-spacing:.03em;
+    padding: 13px; border-radius: 14px;
+    box-shadow: 0 4px 22px rgba(0,229,255,.4);
+    transition: transform .12s ease; margin-bottom: 10px;
+  }
+  .btn-trial:active { transform: scale(.97); }
 </style>
 </head>
 <body>
@@ -544,6 +553,7 @@
   <div class="paywall-cta" id="paywallCta">
     <h3>💎 Ещё 5 прогнозов — у Pro-ИИ</h3>
     <p>Отдельная нейросеть: value-ставки, скан линий 20+ букмекеров, повышенная точность</p>
+    <button class="btn-trial" id="btnTrialHome" style="display:none" onclick="startTrial()">🎁 Попробовать бесплатно · 3 дня</button>
     <button class="btn-sub" onclick="goSubscribe()">Открыть PRO · 777 ⭐/мес</button>
   </div>
 
@@ -573,6 +583,7 @@
   <div class="paywall-cta" id="proPaywall">
     <h3>💎 Станьте PRO</h3>
     <p>Полный доступ к 5 прогнозам Pro-ИИ каждый день + история без замков</p>
+    <button class="btn-trial" id="btnTrialPro" style="display:none" onclick="startTrial()">🎁 Попробовать бесплатно · 3 дня</button>
     <button class="btn-sub" onclick="goSubscribe()">Оформить PRO · 777 ⭐/мес</button>
   </div>
 
@@ -673,7 +684,6 @@
   </div>
   <div class="prof-actions">
     <button class="btn-sub" id="btnSubscribe2">Управлять подпиской</button>
-    <button id="btnDemoUnlock" class="btn-ghost">🔧 Демо: включить PRO (тест)</button>
   </div>
 
   <div class="footer">
@@ -1192,15 +1202,36 @@ async function goSubscribe() {
   if (tg?.openTelegramLink) tg.openTelegramLink(CONFIG.SUBSCRIBE_URL + '?start=subscribe');
   else toast('Оплата через бота: ' + CONFIG.SUBSCRIBE_URL);
 }
-// реальный PRO-статус с бэкенда
+// реальный PRO-статус с бэкенда (сервер — источник правды)
+let TRIAL = { available: null };
 async function loadServerPro() {
   if (!isTg || !user || !CONFIG.API_BASE || CONFIG.API_BASE.startsWith('__')) return false;
   try {
     const r = await fetch(CONFIG.API_BASE + '/status?uid=' + user.id, { cache: 'no-store' });
     const j = await r.json();
-    if (j.pro && !store.pro) { store.pro = true; return true; }
-  } catch (e) {}
-  return false;
+    store.pro = !!j.pro;
+    TRIAL.available = !j.pro && !j.trialUsed;
+    return j.pro;
+  } catch (e) { return false; }
+}
+// активация бесплатного пробного периода (3 дня)
+async function startTrial() {
+  if (!isTg || !user || !CONFIG.API_BASE || CONFIG.API_BASE.startsWith('__')) { toast('Доступно в Telegram 📱'); return; }
+  try {
+    const r = await fetch(CONFIG.API_BASE + '/trial', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ initData: tg.initData }),
+    });
+    const j = await r.json();
+    if (j.ok) {
+      TRIAL.available = false;
+      toast('🎁 Пробный период активирован — 3 дня PRO!');
+      await loadServerPro();
+      render();
+    } else if (j.reason === 'used') { toast('Пробный период уже был использован'); }
+    else if (j.reason === 'active') { toast('У тебя уже активна PRO 💎'); }
+    else { toast('Не удалось активировать, попробуй позже'); }
+  } catch (e) { toast('Сервер недоступен 😔'); }
 }
 // копирование промокода
 function copyPromo() {
@@ -1250,20 +1281,24 @@ async function openManage() {
         ${st.demo ? '<div class="d">демо-режим (браузер без Telegram)</div>' : ''}
       </div>
       ${hist ? `<div class="m-hist"><div class="t">История платежей</div>${hist}</div>` : ''}
+      ${!st.pro && st.trialUsed === false ? `<button class="btn-trial" id="mTrial">🎁 Попробовать бесплатно · 3 дня</button>` : ''}
       <button class="btn-sub" id="mAction">${st.pro ? `Продлить на +${st.days || 30} дней · ${st.price || 777} ⭐` : `Оформить PRO · ${st.price || 777} ⭐`}</button>
       <div class="m-note">Оплата разовая в Telegram Stars. Продление суммируется с текущим сроком. Stars не возвращаются. Прогнозы не гарантируют результат, 18+.</div>
       <button class="m-close" id="mClose">Закрыть</button>
     </div>`;
   document.body.appendChild(ov);
   ov.querySelector('#mClose').onclick = () => { ov.remove(); render(); };
+  const mT = ov.querySelector('#mTrial');
+  if (mT) mT.onclick = () => { ov.remove(); startTrial(); };
   ov.querySelector('#mAction').onclick = () => { ov.remove(); goSubscribe(); };
 }
 document.getElementById('btnSubscribe2').onclick = openManage;
-document.getElementById('btnDemoUnlock').onclick = () => {
-  store.pro = !store.pro;
-  toast(store.pro ? '💎 PRO включён (демо)' : 'PRO выключен');
-  render();
-};
+// показываем/прячем кнопки пробного периода
+const showTrial = TRIAL.available === true && !store.pro;
+['btnTrialHome', 'btnTrialPro'].forEach(id => {
+  const b = document.getElementById(id);
+  if (b) b.style.display = showTrial ? 'block' : 'none';
+});
 
 // фильтр статистики: Все / Базовый ИИ / VIP
 document.querySelectorAll('.f-btn').forEach(b => {
