@@ -14,10 +14,11 @@
       "time": "19:30 МСК",
       "matchDate": "2026-10-03T16:30Z",
       "market": "Х2",
-      "odds": "1.33",
       "confidence": 70,
       "note": "Форма: Cádiz 0-4-3 (очков/матч 0.57) против Leganés 3-2-2 (1.57). Модель с домашним фактором даёт 70% на Х2.",
-      "tier": "pro"
+      "tier": "pro",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/3842.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/17534.png"
     },
     {
       "id": "401891826",
@@ -30,10 +31,11 @@
       "time": "02:00 МСК",
       "matchDate": "2026-10-03T23:00Z",
       "market": "П2",
-      "odds": "1.44",
       "confidence": 65,
       "note": "Баланс сил: Tampa Bay Lightning 0-1-0 против Washington Capitals 1-0-0. Процент побед выше у фаворита, модель учитывает домашнюю площадку: 65%.",
-      "tier": "pro"
+      "tier": "pro",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/tb.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/wsh.png"
     },
     {
       "id": "401841586",
@@ -46,10 +48,11 @@
       "time": "23:00 МСК",
       "matchDate": "2026-10-03T20:00Z",
       "market": "Х2",
-      "odds": "1.54",
       "confidence": 60,
       "note": "Форма: Newell's Old Boys 4-4-2 (очков/матч 1.60) против Lanús 5-1-4 (1.60). Модель с домашним фактором даёт 60% на Х2.",
-      "tier": "pro"
+      "tier": "pro",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/14.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/12.png"
     },
     {
       "id": "401883195",
@@ -62,10 +65,11 @@
       "time": "17:15 МСК",
       "matchDate": "2026-10-03T14:15Z",
       "market": "Х2",
-      "odds": "1.58",
       "confidence": 59,
       "note": "Форма: Almería 5-0-2 (очков/матч 2.14) против Burgos 4-2-1 (2.00). Модель с домашним фактором даёт 59% на Х2.",
-      "tier": "pro"
+      "tier": "pro",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/6832.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/12597.png"
     },
     {
       "id": "401841596",
@@ -78,10 +82,11 @@
       "time": "23:00 МСК",
       "matchDate": "2026-10-03T20:00Z",
       "market": "Х2",
-      "odds": "1.59",
       "confidence": 59,
       "note": "Форма: Atlético Tucumán 3-4-3 (очков/матч 1.30) против Barracas Central 3-3-4 (1.20). Модель с домашним фактором даёт 59% на Х2.",
-      "tier": "pro"
+      "tier": "pro",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/9785.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/10060.png"
     },
     {
       "id": "401891776",
@@ -94,10 +99,11 @@
       "time": "02:00 МСК",
       "matchDate": "2026-10-03T23:00Z",
       "market": "П1",
-      "odds": "1.56",
       "confidence": 59,
       "note": "Баланс сил: Buffalo Sabres 0-1-0 против Chicago Blackhawks 0-2-0. Процент побед выше у фаворита, модель учитывает домашнюю площадку: 59%.",
-      "tier": "free"
+      "tier": "free",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/buf.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/chi.png"
     },
     {
       "id": "401841168",
@@ -110,10 +116,11 @@
       "time": "00:30 МСК",
       "matchDate": "2026-10-03T21:30Z",
       "market": "Х2",
-      "odds": "1.61",
       "confidence": 58,
       "note": "Форма: Atlético-MG 11-7-9 (очков/матч 1.48) против Red Bull Bragantino 10-6-11 (1.33). Модель с домашним фактором даёт 58% на Х2.",
-      "tier": "free"
+      "tier": "free",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/7632.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/6079.png"
     },
     {
       "id": "401883190",
@@ -126,10 +133,11 @@
       "time": "19:30 МСК",
       "matchDate": "2026-10-03T16:30Z",
       "market": "П1",
-      "odds": "1.71",
       "confidence": 55,
       "note": "Форма: CD Sabadell 3-3-1 (очков/матч 1.71) против FC Andorra 2-0-5 (0.86). Модель с домашним фактором даёт 55% на П1.",
-      "tier": "free"
+      "tier": "free",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/11487.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/20179.png"
     },
     {
       "id": "401891822",
@@ -142,10 +150,11 @@
       "time": "02:00 МСК",
       "matchDate": "2026-10-03T23:00Z",
       "market": "П1",
-      "odds": "1.78",
       "confidence": 52,
       "note": "Баланс сил: Pittsburgh Penguins 1-0-0 против Montreal Canadiens 1-0-0. Процент побед выше у фаворита, модель учитывает домашнюю площадку: 52%.",
-      "tier": "free"
+      "tier": "free",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/pit.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/mtl.png"
     },
     {
       "id": "401892435",
@@ -158,10 +167,11 @@
       "time": "02:00 МСК",
       "matchDate": "2026-10-03T23:00Z",
       "market": "П1",
-      "odds": "1.78",
       "confidence": 52,
       "note": "Баланс сил: Philadelphia Flyers 0-1-1 против Carolina Hurricanes 0-1-1. Процент побед выше у фаворита, модель учитывает домашнюю площадку: 52%.",
-      "tier": "free"
+      "tier": "free",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/phi.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/car.png"
     },
     {
       "id": "401892436",
@@ -174,10 +184,11 @@
       "time": "02:00 МСК",
       "matchDate": "2026-10-03T23:00Z",
       "market": "П1",
-      "odds": "1.78",
       "confidence": 52,
       "note": "Баланс сил: Columbus Blue Jackets 1-0-0 против Utah Mammoth 1-0-0. Процент побед выше у фаворита, модель учитывает домашнюю площадку: 52%.",
-      "tier": "free"
+      "tier": "free",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/cbj.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/uta.png"
     },
     {
       "id": "401841593",
@@ -190,10 +201,11 @@
       "time": "20:45 МСК",
       "matchDate": "2026-10-03T17:45Z",
       "market": "П1",
-      "odds": "1.81",
       "confidence": 51,
       "note": "Форма: Defensa y Justicia 5-3-2 (очков/матч 1.80) против San Lorenzo 3-2-5 (1.10). Модель с домашним фактором даёт 51% на П1.",
-      "tier": "free"
+      "tier": "free",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/8950.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/18.png"
     }
   ]
 }

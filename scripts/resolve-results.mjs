@@ -52,7 +52,7 @@ for (const src of sources) {
       results.push({
         date: yest, id: p.id, kind: p.tier === 'pro' ? 'pro' : 'free',
         sport: p.sport, league: p.lgName, home: p.home, away: p.away,
-        market: p.market, odds: p.odds, confidence: p.confidence,
+        market: p.market, confidence: p.confidence,
         score: `${hs}:${as}`, result: r,
       });
     } catch (err) {

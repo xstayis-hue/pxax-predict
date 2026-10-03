@@ -166,6 +166,8 @@
     border:1.5px solid rgba(0,229,255,.35);
     box-shadow: 0 0 14px rgba(0,229,255,.18), inset 0 0 10px rgba(0,229,255,.12);
   }
+  .badge img { width:100%; height:100%; padding:5px; object-fit:contain; }
+  .badge span { font-size:23px; line-height:1; }
   .team:last-child .badge {
     border-color: rgba(255,43,214,.35);
     box-shadow: 0 0 14px rgba(255,43,214,.15), inset 0 0 10px rgba(255,43,214,.1);
@@ -193,6 +195,7 @@
              text-shadow: 0 0 14px rgba(0,229,255,.5); }
   .pick.gold { border-color:rgba(255,201,60,.4); background:rgba(255,201,60,.07); }
   .pick.gold .v { color:var(--gold); text-shadow:0 0 14px rgba(255,201,60,.5); }
+  .pick.gold .v.unavailable { color:var(--muted); font-size:12px; text-shadow:none; }
   .conf { padding: 10px 18px 8px; }
   .conf .lbl { display:flex; justify-content:space-between; font-size:10.5px; color:var(--muted); margin-bottom:6px; }
   .conf .lbl b { color:var(--text); }
@@ -901,7 +904,6 @@ function generateDay(dateStr, kind) {
       home: pair[0], away: pair[1],
       time: `${hour}:${rand() < .5 ? '00' : '30'} МСК`,
       market: MARKETS[Math.floor(rand() * MARKETS.length)],
-      odds: kind === 'pro' ? (1.8 + rand() * 1.7).toFixed(2) : (1.55 + rand() * 1.15).toFixed(2),
       confidence: Math.round(kind === 'pro' ? 62 + rand() * 26 : 58 + rand() * 22),
       note: (kind === 'pro' ? PRO_NOTES : AI_NOTES)[Math.floor(rand() * 6)],
     });
@@ -1035,9 +1037,13 @@ function makeDeck(trackEl, navEl, count, deckId) {
 }
 
 /* ================= cards ================= */
-function teamInitials(name) {
-  const w = String(name).split(' ').filter(Boolean);
-  return (w.length > 1 ? w[0][0] + w[1][0] : String(name).slice(0, 2)).toUpperCase();
+function teamBadge(logo, sport) {
+  const safeLogo = typeof logo === 'string' && /^https:\/\/a\.espncdn\.com\//.test(logo) ? logo : '';
+  const fallback = `<span${safeLogo ? ' hidden' : ''}>${sport || '🏟️'}</span>`;
+  const image = safeLogo
+    ? `<img src="${safeLogo}" alt="" loading="lazy" decoding="async" onerror="this.hidden=true;this.nextElementSibling.hidden=false">`
+    : '';
+  return `<div class="badge">${image}${fallback}</div>`;
 }
 
 function slideHTML(p, unlocked, isPro, isHistory) {
@@ -1065,12 +1071,12 @@ function slideHTML(p, unlocked, isPro, isHistory) {
             <div class="league-line"><span class="lg-dot"></span>${p.league}</div>
             <div class="teams">
               <div class="team">
-                <div class="badge">${teamInitials(p.home)}</div>
+                ${teamBadge(p.homeLogo, p.sport)}
                 <div class="tname">${p.home}</div>
               </div>
               <div class="vs-badge">VS</div>
               <div class="team">
-                <div class="badge">${teamInitials(p.away)}</div>
+                ${teamBadge(p.awayLogo, p.sport)}
                 <div class="tname">${p.away}</div>
               </div>
             </div>
@@ -1082,8 +1088,8 @@ function slideHTML(p, unlocked, isPro, isHistory) {
               <div class="v">${p.market}</div>
             </div>
             <div class="pick gold">
-              <div class="m">коэф</div>
-              <div class="v">${p.odds}</div>
+              <div class="m">коэффициент БК</div>
+              <div class="v unavailable">не загружен</div>
             </div>
           </div>
           <div class="bet-wrap">${unlocked ? betBtn(p) : ''}</div>
@@ -1167,7 +1173,7 @@ function render() {
   hEl.innerHTML = '';
   let dIdx = 0;
   const kinds = statFilter === 'all' ? ['pro', 'free'] : [statFilter];
-  const addH = (home, away, sub, cls, label, odds, unlocked) => {
+  const addH = (home, away, sub, cls, label, unlocked) => {
     const el = document.createElement('div');
     el.className = 'h-item ' + cls;
     el.style.setProperty('--d', (dIdx++ * .04) + 's');
@@ -1177,7 +1183,7 @@ function render() {
         <div class="t">${home} — ${away}</div>
         <div class="s">${sub}</div>
       </div>
-      <div class="o">${unlocked ? odds : '🔒'}</div>`;
+      <div class="o">${unlocked ? '' : '🔒'}</div>`;
     hEl.appendChild(el);
   };
   if (REAL.results) {
@@ -1190,7 +1196,7 @@ function render() {
       const label = r.result === 'hit' ? '✅' : r.result === 'miss' ? '❌' : '⏳';
       addH(r.home, r.away,
         `${r.sport} ${r.league} · <span class="${r.kind === 'pro' ? 'pro' : 'ai'}">${r.kind === 'pro' ? 'Pro AI' : 'AI'}</span> · ${r.market} · счёт ${r.score}`,
-        cls, label, r.odds, pro || r.kind === 'free');
+        cls, label, pro || r.kind === 'free');
     }
   }
   if (!dIdx) {

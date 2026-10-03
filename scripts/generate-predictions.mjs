@@ -117,9 +117,11 @@ for (const lg of LEAGUES) {
         id: `${e.id}`,
         lgKey: lg.key, lgName: lg.name, sport: lg.sport, type: lg.type,
         home: home.team.displayName, away: away.team.displayName,
+        homeLogo: home.team.logo || home.team.logos?.[0]?.href || null,
+        awayLogo: away.team.logo || away.team.logos?.[0]?.href || null,
         time: fmtTime(e.date),
         matchDate: e.date,
-        market, odds: (0.93 / prob).toFixed(2),
+        market,
         confidence: Math.round(prob * 100),
         note,
       });
