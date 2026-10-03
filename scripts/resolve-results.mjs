@@ -6,6 +6,20 @@ const UA = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKi
 const mskNow = Date.now() + 3 * 3600e3;
 const yest = new Date(mskNow - 86400e3).toISOString().slice(0, 10);
 
+// fetch с таймаутом и ретраями — сетевые сбои не должны терять результаты
+async function fetchJson(url, tries = 3) {
+  for (let i = 1; i <= tries; i++) {
+    try {
+      const res = await fetch(url, { headers: UA, signal: AbortSignal.timeout(15000) });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return await res.json();
+    } catch (e) {
+      if (i === tries) throw e;
+      await new Promise(r => setTimeout(r, 1500 * i));
+    }
+  }
+}
+
 // собираем файлы с прогнозами за вчера
 const sources = [];
 if (existsSync('data/predictions.json')) {
@@ -28,17 +42,28 @@ if (!sources.length) { console.log(`no predictions for ${yest}`); process.exit(0
 const results = [];
 for (const src of sources) {
   if (src.data.resolved) continue;
+  let pending = false; // есть матчи, по которым вердикта ещё нет — файл оставляем неразрешённым
   for (const p of src.data.predictions) {
     try {
-      const res = await fetch(`https://site.api.espn.com/apis/site/v2/sports/${p.lgKey}/summary?event=${p.id}`, { headers: UA });
-      if (!res.ok) continue;
-      const j = await res.json();
+      const j = await fetchJson(`https://site.api.espn.com/apis/site/v2/sports/${p.lgKey}/summary?event=${p.id}`);
       const comp = j.header?.competitions?.[0];
-      if (!comp || comp.status?.type?.state !== 'post') continue; // ещё не сыгран
+      if (!comp) { pending = true; continue; }
+      const desc = (comp.status?.type?.description || '').toLowerCase();
+      // отмена/перенос — это не «мисс», а возврат (push), иначе портим статистику
+      if (/cancel|postpon|abandon|suspend|forfeit/.test(desc)) {
+        results.push({
+          date: yest, id: p.id, kind: p.tier === 'pro' ? 'pro' : 'free',
+          sport: p.sport, league: p.lgName, home: p.home, away: p.away,
+          market: p.market, confidence: p.confidence,
+          score: '—', result: 'push',
+        });
+        continue;
+      }
+      if (comp.status?.type?.state !== 'post') { pending = true; continue; } // ещё не сыгран
       const H = comp.competitors.find(c => c.homeAway === 'home');
       const A = comp.competitors.find(c => c.homeAway === 'away');
       const hs = Number(H?.score), as = Number(A?.score);
-      if (isNaN(hs) || isNaN(as)) continue;
+      if (isNaN(hs) || isNaN(as)) { pending = true; continue; }
       let r;
       switch (p.market) {
         case 'П1': r = hs > as ? 'hit' : 'miss'; break;
@@ -47,7 +72,7 @@ for (const src of sources) {
         case 'Ф1 -1.5': r = hs - as >= 2 ? 'hit' : 'miss'; break;
         case 'ТБ 2.5': r = hs + as > 2.5 ? 'hit' : 'miss'; break;
         case 'ТМ 2.5': r = hs + as < 2.5 ? 'hit' : 'miss'; break;
-        default: r = 'miss';
+        default: r = 'push'; // незнакомый рынок — возврат, а не автоматический «мисс»
       }
       results.push({
         date: yest, id: p.id, kind: p.tier === 'pro' ? 'pro' : 'free',
@@ -56,12 +81,17 @@ for (const src of sources) {
         score: `${hs}:${as}`, result: r,
       });
     } catch (err) {
+      pending = true; // сеть/5xx — попробуем в следующем прогоне
       console.warn('skip', p.id, String(err));
     }
   }
-  // помечаем источник разрешённым
-  src.data.resolved = true;
-  writeFileSync(src.file, JSON.stringify(src.data, null, 2));
+  // помечаем источник разрешённым только когда вердикт есть по всем матчам
+  if (!pending) {
+    src.data.resolved = true;
+    writeFileSync(src.file, JSON.stringify(src.data, null, 2));
+  } else {
+    console.log(`pending: не все матчи в ${src.file} сыграли — вернёмся в следующем прогоне`);
+  }
 }
 
 // накапливаем историю

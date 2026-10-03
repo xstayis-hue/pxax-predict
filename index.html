@@ -1087,10 +1087,6 @@ function slideHTML(p, unlocked, isPro, isHistory) {
               <div class="m">прогноз</div>
               <div class="v">${p.market}</div>
             </div>
-            <div class="pick gold">
-              <div class="m">коэффициент БК</div>
-              <div class="v unavailable">не загружен</div>
-            </div>
           </div>
           <div class="bet-wrap">${unlocked ? betBtn(p) : ''}</div>
           <div class="conf">
@@ -1263,11 +1259,19 @@ function renderProfileExtras(statsAll) {
   document.getElementById('achGrid').innerHTML =
     achs.map(a => `<div class="ach ${a.ok ? 'on' : ''}"><div class="i">${a.i}</div><div class="t">${a.t}</div></div>`).join('');
 
-  // любимый спорт (по прогнозам за 14 дней)
+  // любимый спорт (по реальным результатам за 14 дней; мок — только пока нет данных)
   const sportCnt = {};
-  for (let d = 1; d <= 14; d++) {
-    const ds = dayKey(new Date(Date.now() - d * 86400000));
-    for (const p of generateDay(ds, 'free')) sportCnt[p.sport] = (sportCnt[p.sport] || 0) + 1;
+  if (REAL.results && REAL.results.length) {
+    const cutoff = dayKey(new Date(Date.now() - 14 * 86400000));
+    for (const r of REAL.results) {
+      if (r.date < cutoff) continue;
+      sportCnt[r.sport] = (sportCnt[r.sport] || 0) + 1;
+    }
+  } else {
+    for (let d = 1; d <= 14; d++) {
+      const ds = dayKey(new Date(Date.now() - d * 86400000));
+      for (const p of generateDay(ds, 'free')) sportCnt[p.sport] = (sportCnt[p.sport] || 0) + 1;
+    }
   }
   const fav = Object.entries(sportCnt).sort((a, b) => b[1] - a[1])[0];
   if (fav) {
@@ -1346,13 +1350,22 @@ async function goSubscribe() {
 }
 // реальный PRO-статус с бэкенда (сервер — источник правды)
 let TRIAL = { available: null };
+// цена из /status (источник правды — config.json сервера); 777 — только заглушка до ответа
+let PRICE = 777;
+function syncPriceLabels() {
+  document.querySelectorAll('button.btn-sub[onclick="goSubscribe()"]').forEach(b => {
+    b.textContent = b.textContent.replace(/\d+(?=\s*⭐)/, PRICE);
+  });
+}
 async function loadServerPro() {
   if (!isTg || !user || !CONFIG.API_BASE || CONFIG.API_BASE.startsWith('__')) return false;
   try {
-    const r = await fetch(CONFIG.API_BASE + '/status?uid=' + user.id, { cache: 'no-store' });
+    const r = await fetch(CONFIG.API_BASE + '/status?uid=' + user.id +
+      '&initData=' + encodeURIComponent(tg.initData || ''), { cache: 'no-store' });
     const j = await r.json();
     store.pro = !!j.pro;
     TRIAL.available = !j.pro && !j.trialUsed;
+    if (j.price) { PRICE = j.price; syncPriceLabels(); }
     return j.pro;
   } catch (e) { return false; }
 }
@@ -1401,7 +1414,8 @@ async function openManage() {
   let st = { pro: store.pro, until: null, payments: [], price: 777, days: 30, demo: !isTg };
   if (isTg && user && CONFIG.API_BASE && !CONFIG.API_BASE.startsWith('__')) {
     try {
-      const r = await fetch(CONFIG.API_BASE + '/status?uid=' + user.id + '&v=' + Date.now(), { cache: 'no-store' });
+      const r = await fetch(CONFIG.API_BASE + '/status?uid=' + user.id +
+        '&initData=' + encodeURIComponent(tg.initData || '') + '&v=' + Date.now(), { cache: 'no-store' });
       st = { ...(await r.json()), demo: false };
     } catch (e) {}
   }

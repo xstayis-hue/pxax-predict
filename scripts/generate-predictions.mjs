@@ -30,10 +30,22 @@ const ymd = (d) => new Date(d).toISOString().slice(0, 10).replaceAll('-', '');
 async function scoreboard(key, ds) {
   // без dates-параметра ESPN отдаёт ближайший тур (с рекордами); для лиг США можно запросить конкретный день
   const url = `https://site.api.espn.com/apis/site/v2/sports/${key}/scoreboard${ds ? `?dates=${ds}` : ''}`;
-  const res = await fetch(url, { headers: UA });
-  if (!res.ok) throw new Error('HTTP ' + res.status);
-  const j = await res.json();
+  const j = await fetchJson(url);
   return j.events ?? [];
+}
+
+// fetch с таймаутом и ретраями: ESPN иногда отдаёт 5xx/зависает, а один лиг не должен ронять прогон
+async function fetchJson(url, tries = 3) {
+  for (let i = 1; i <= tries; i++) {
+    try {
+      const res = await fetch(url, { headers: UA, signal: AbortSignal.timeout(15000) });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return await res.json();
+    } catch (e) {
+      if (i === tries) throw e;
+      await new Promise(r => setTimeout(r, 1500 * i));
+    }
+  }
 }
 
 // разбор рекорда "W-D-L" (футбол) / "W-L" или "W-L-OT" (США)
@@ -130,6 +142,13 @@ for (const lg of LEAGUES) {
   } catch (err) {
     console.warn('league skip:', lg.key, String(err));
   }
+}
+
+// если ни один прогноз не собран (например, ESPN лежал) — не затираем вчерашние данные,
+// а падаем с ошибкой, чтобы Actions это видно и данные остались
+if (!preds.length) {
+  console.error('FAIL: 0 predictions — вероятно, ESPN недоступен. Прежние data/predictions.json не тронуты.');
+  process.exit(1);
 }
 
 // архивируем предыдущий день, чтобы не терять неразрешённые прогнозы

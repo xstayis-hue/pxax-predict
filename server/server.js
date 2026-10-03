@@ -7,17 +7,24 @@ const path = require('path');
 
 // ---------- конфиг ----------
 const CONFIG_FILE = path.join(__dirname, 'config.json');
-let TOKEN, STARS_PRICE = 100, PORT = 8787;
+let TOKEN, STARS_PRICE = 100, PORT = 8787, MINIAPP_URL = '';
 if (fs.existsSync(CONFIG_FILE)) {
   const c = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
   TOKEN = c.TOKEN; STARS_PRICE = c.STARS_PRICE || STARS_PRICE; PORT = c.PORT || PORT;
+  MINIAPP_URL = c.MINIAPP_URL || '';
 }
 if (!TOKEN && process.env.BOT_TOKEN) TOKEN = process.env.BOT_TOKEN;
+if (!MINIAPP_URL && process.env.MINIAPP_URL) MINIAPP_URL = process.env.MINIAPP_URL;
 if (!TOKEN) { console.error('Нет токена: создай server/config.json {"TOKEN":"..."}'); process.exit(1); }
 
 const USERS_FILE = path.join(__dirname, 'users.json'); // gitignore!
 const loadUsers = () => { try { return JSON.parse(fs.readFileSync(USERS_FILE, 'utf8')); } catch { return {}; } };
-const saveUsers = (u) => fs.writeFileSync(USERS_FILE, JSON.stringify(u, null, 2));
+// атомарная запись: сперва во временный файл, потом rename — users.json не побьётся при сбое
+const saveUsers = (u) => {
+  const tmp = USERS_FILE + '.tmp';
+  fs.writeFileSync(tmp, JSON.stringify(u, null, 2));
+  fs.renameSync(tmp, USERS_FILE);
+};
 const PRO_DAYS = 30;
 const TRIAL_DAYS = 3;
 
@@ -65,15 +72,20 @@ function isPro(uid) {
   const u = loadUsers()[String(uid)];
   return !!(u && new Date(u.until) > new Date());
 }
-function grant(uid, name, days = PRO_DAYS) {
+// считаем новую дату окончания поверх действующей подписки
+function extendUntil(u, days = PRO_DAYS) {
+  const base = u.until && new Date(u.until) > new Date() ? new Date(u.until) : new Date();
+  base.setDate(base.getDate() + days);
+  return base.toISOString();
+}
+function grant(uid, name, days = PRO_DAYS, extra = {}) {
   const users = loadUsers();
   const prev = users[String(uid)] || {};
-  const base = prev.until && new Date(prev.until) > new Date() ? new Date(prev.until) : new Date();
-  base.setDate(base.getDate() + days);
-  // сохраняем все прежние поля (payments, trial и т.д.)
-  users[String(uid)] = { ...prev, until: base.toISOString(), name: name || prev.name || '' };
+  const until = extendUntil(prev, days);
+  // сохраняем все прежние поля (payments, trial и т.д.) — одна запись за вызов
+  users[String(uid)] = { ...prev, ...extra, until, name: name || prev.name || '' };
   saveUsers(users);
-  return users[String(uid)].until;
+  return until;
 }
 
 // ---------- HTTP API ----------
@@ -89,6 +101,10 @@ const server = http.createServer(async (req, res) => {
     if (url.pathname === '/status') {
       const uid = url.searchParams.get('uid');
       const u = loadUsers()[String(uid)];
+      // историю платежей отдаём только владельцу (валидная подпись Telegram),
+      // иначе статус любого uid можно было перебрать
+      const auth = validateInitData(url.searchParams.get('initData') || '');
+      const own = !!(auth && String(auth.id) === String(uid));
       res.writeHead(200, { 'Content-Type': 'application/json', ...cors });
       return res.end(JSON.stringify({
         pro: isPro(uid),
@@ -96,7 +112,7 @@ const server = http.createServer(async (req, res) => {
         price: STARS_PRICE,
         days: PRO_DAYS,
         trialUsed: !!u?.trial,
-        payments: u?.payments || [],
+        payments: own ? (u?.payments || []) : [],
       }));
     }
     if (url.pathname === '/trial' && req.method === 'POST') {
@@ -118,10 +134,7 @@ const server = http.createServer(async (req, res) => {
         res.writeHead(200, { 'Content-Type': 'application/json', ...cors });
         return res.end(JSON.stringify({ ok: false, reason: 'used' }));
       }
-      const until = grant(user.id, user.first_name, TRIAL_DAYS);
-      const users2 = loadUsers();
-      users2[String(user.id)].trial = true;
-      saveUsers(users2);
+      const until = grant(user.id, user.first_name, TRIAL_DAYS, { trial: true });
       console.log(`TRIAL: ${user.username || user.id} -> until ${until}`);
       res.writeHead(200, { 'Content-Type': 'application/json', ...cors });
       return res.end(JSON.stringify({ ok: true, until }));
@@ -145,7 +158,8 @@ const server = http.createServer(async (req, res) => {
     }
     res.writeHead(404, cors); res.end();
   } catch (e) {
-    res.writeHead(500, cors); res.end(JSON.stringify({ error: String(e) }));
+    console.error('API error:', e);
+    res.writeHead(500, cors); res.end(JSON.stringify({ error: 'internal' }));
   }
 });
 server.listen(PORT, () => console.log(`API on :${PORT}`));
@@ -159,22 +173,35 @@ async function poll() {
       offset = upd.update_id + 1;
       const msg = upd.message;
       if (upd.pre_checkout_query) {
-        await api('answerPreCheckoutQuery', { pre_checkout_query_id: upd.pre_checkout_query.id, ok: true });
+        // принимаем только свой payload — инвойсы с чужим/поддельным payload отклоняем
+        const okPay = upd.pre_checkout_query.payload === `pro_${PRO_DAYS}d`;
+        await api('answerPreCheckoutQuery', {
+          pre_checkout_query_id: upd.pre_checkout_query.id,
+          ok: okPay,
+          error_message: okPay ? undefined : 'Счёт устарел — оформите подписку заново',
+        });
         continue;
       }
       if (!msg) continue;
       const chatId = msg.chat.id;
       if (msg.successful_payment) {
-        const until = grant(chatId, msg.from.first_name);
-        // сохраняем историю платежей
+        const pay = msg.successful_payment;
         const users = loadUsers();
-        const u = users[String(chatId)];
-        if (u) {
-          u.payments = u.payments || [];
-          u.payments.push({ d: new Date().toISOString(), stars: msg.successful_payment.total_amount });
-          if (u.payments.length > 30) u.payments = u.payments.slice(-30);
-          saveUsers(users);
-        }
+        const u = users[String(chatId)] || {};
+        u.charges = u.charges || [];
+        // идемпотентность: после перезапуска бот может получить апдейт повторно —
+        // один charge_id = одно продление
+        if (u.charges.includes(pay.telegram_payment_charge_id)) continue;
+        u.charges.push(pay.telegram_payment_charge_id);
+        if (u.charges.length > 50) u.charges = u.charges.slice(-50);
+        const until = extendUntil(u);
+        u.until = until;
+        u.name = msg.from.first_name || u.name || '';
+        u.payments = u.payments || [];
+        u.payments.push({ d: new Date().toISOString(), stars: pay.total_amount });
+        if (u.payments.length > 30) u.payments = u.payments.slice(-30);
+        users[String(chatId)] = u;
+        saveUsers(users);
         console.log(`PAYMENT: ${msg.from.username || chatId} -> PRO until ${until}`);
         await api('sendMessage', { chat_id: chatId, text: `💎 PRO активирована до ${new Date(until).toLocaleDateString('ru-RU')}!\nОткрой мини-апп заново — статус обновится.\n\n_Напоминаем: прогнозы не гарантируют результат, 18+_`, parse_mode: 'Markdown' });
         continue;
@@ -192,3 +219,23 @@ async function poll() {
 }
 poll();
 console.log(`Bot polling started. Stars price: ${STARS_PRICE}`);
+
+// ---------- автосайтап: кнопка меню с мини-аппом + команды ----------
+// кнопка ставится только если задан MINIAPP_URL (config.json или env) —
+// чтобы случайно не перебить кнопку, настроенную вручную через BotFather
+(async () => {
+  if (MINIAPP_URL) {
+    const r = await api('setChatMenuButton', {
+      menu_button: { type: 'web_app', text: '🎮 Открыть AI', web_app: { url: MINIAPP_URL } },
+    });
+    console.log(r.ok ? `Menu button -> ${MINIAPP_URL}` : 'Menu button setup failed: ' + r.description);
+  } else {
+    console.log('Подсказка: добавь в server/config.json "MINIAPP_URL": "https://..." — у бота появится кнопка мини-аппа в углу чата');
+  }
+  await api('setMyCommands', {
+    commands: [
+      { command: 'start', description: 'Запустить бота' },
+      { command: 'subscribe', description: 'Оформить PRO-подписку' },
+    ],
+  });
+})();
