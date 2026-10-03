@@ -35,7 +35,7 @@ const api = async (method, body) => {
 
 const sendInvoice = (chatId) => api('sendInvoice', {
   chat_id: chatId,
-  title: 'PRO-подписка PAXABET2016 AI',
+  title: 'PRO-подписка PXAXBEY2016 AI',
   description: `Доступ к VIP-прогнозам Pro-ИИ на ${PRO_DAYS} дней`,
   payload: `pro_${PRO_DAYS}d`,
   currency: 'XTR', // Telegram Stars
