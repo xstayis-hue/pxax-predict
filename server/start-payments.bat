@@ -1,5 +1,5 @@
 @echo off
-title PXAXBEY2016 AI - payments
+title PXAXBET2016 AI - payments
 echo [1/2] Starting payment server (node server.js)...
 start "pxax-server" /min cmd /c "node server.js"
 echo [2/2] Starting cloudflared tunnel...
