@@ -524,6 +524,27 @@
   }
   .empty .i { font-size:34px; display:block; margin-bottom:8px; }
 
+  /* ---------- pull-to-refresh ---------- */
+  .ptr {
+    position:fixed; top:0; left:0; right:0; z-index:100;
+    height:0; overflow:hidden;
+    background:linear-gradient(180deg, rgba(0,229,255,.12), transparent);
+    transition:height .2s ease-out;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .ptr-content {
+    font-size:12px; color:var(--neon); opacity:0;
+    transition:opacity .2s; display:flex; align-items:center; gap:8px;
+  }
+  .ptr.show { height:60px; }
+  .ptr.show .ptr-content { opacity:1; }
+  .ptr-spinner {
+    width:20px; height:20px; border:2px solid rgba(0,229,255,.3);
+    border-top-color:var(--neon); border-radius:50%;
+    animation:spin .8s linear infinite;
+  }
+  @keyframes spin { to { transform:rotate(360deg); } }
+
   /* ---------- manage subscription bottom-sheet ---------- */
   .modal-ov {
     position:fixed; inset:0; z-index:100; background:rgba(4,6,14,.78);
@@ -572,6 +593,13 @@
 </style>
 </head>
 <body>
+
+<div class="ptr" id="pullToRefresh">
+  <div class="ptr-content">
+    <div class="ptr-spinner"></div>
+    <span>Обновление...</span>
+  </div>
+</div>
 
 <header class="header">
   <div class="brand">
@@ -630,7 +658,7 @@
   <div class="footer">
     <b>18+</b> · Играйте ответственно. Ставки — это риск.<br>
     Реклама букмекера-партнёра · есть риск проигрыша
-    <br><span class="age">18+</span>
+    <br><span class="age">18+</span> · v${CONFIG.VERSION}
   </div>
 </main>
 
@@ -658,7 +686,7 @@
   </div>
 
   <div class="footer">
-    Pro-ИИ тоже ошибается: <b>вероятность не 100%</b>. Играйте ответственно, <b>18+</b>.
+    Pro-ИИ тоже ошибается: <b>вероятность не 100%</b>. Играйте ответственно, <b>18+</b>. · v${CONFIG.VERSION}
   </div>
 </main>
 
@@ -758,7 +786,8 @@
 
   <div class="footer">
     PXAXBET2016 AI · прогнозы на спорт<br>
-    Прогнозы анализирует ИИ. Прошлые результаты не гарантируют будущих.
+    Прогнозы анализирует ИИ. Прошлые результаты не гарантируют будущих.<br>
+    Версия ${CONFIG.VERSION}
   </div>
 </main>
 
@@ -779,28 +808,30 @@ if (tg) { try { tg.expand(); tg.disableVerticalSwipes?.(); } catch(e) {} }
 const user = tg?.initDataUnsafe?.user;
 
 /* ================= реальные данные (GitHub Actions -> data/*.json) ================= */
-const REAL = { loaded: false, date: null, free: [], pro: [], results: null };
+const REAL = { loaded: false, date: null, free: [], pro: [], results: null, lastUpdate: null };
 async function loadReal() {
   try {
     const r = await fetch('data/predictions.json?v=' + Date.now(), { cache: 'no-store' });
     if (r.ok) {
       const d = await r.json();
       REAL.loaded = true;
+      REAL.lastUpdate = d.generated || new Date().toISOString();
       if (d.date === today && Array.isArray(d.predictions)) {
         REAL.date = d.date;
         REAL.free = d.predictions.filter(p => p.tier === 'free');
         REAL.pro = d.predictions.filter(p => p.tier === 'pro');
       }
     }
-  } catch (e) {}
+  } catch (e) { console.warn('Failed to load predictions:', e); }
   try {
     const r = await fetch('data/results.json?v=' + Date.now(), { cache: 'no-store' });
     if (r.ok) { const j = await r.json(); if (Array.isArray(j) && j.length) REAL.results = j; }
-  } catch (e) {}
+  } catch (e) { console.warn('Failed to load results:', e); }
 }
 
 /* ================= settings ================= */
 const CONFIG = {
+  VERSION: '0.3.1', // версия приложения для отслеживания обновлений
   SUBSCRIBE_URL: 'https://t.me/pxaxbetai_bot',
   API_BASE: 'https://senate-insurance-sprint-designs.trycloudflare.com', // адрес бэкенда (cloudflared tunnel), обновляется при перезапуске туннеля
   FREE_DAILY: 5,   // бесплатных прогнозов в день
@@ -962,6 +993,17 @@ if (last !== today) {
   localStorage.setItem('pxax_visits', visits);
   localStorage.setItem('pxax_streak', streak);
   localStorage.setItem('pxax_last', today);
+}
+// запоминаем последний открытый таб
+let lastTab = localStorage.getItem('pxax_last_tab') || 'home';
+// проверка новой версии
+const lastVersion = localStorage.getItem('pxax_version');
+if (lastVersion !== CONFIG.VERSION) {
+  localStorage.setItem('pxax_version', CONFIG.VERSION);
+  if (lastVersion) {
+    // версия изменилась - покажем уведомление при первом рендере
+    setTimeout(() => toast(`🚀 Обновлено до v${CONFIG.VERSION}`), 2000);
+  }
 }
 
 let freeToday = generateDay(today, 'free');
@@ -1342,7 +1384,10 @@ async function goSubscribe() {
       } else {
         toast('Не удалось выставить счёт, попробуй позже');
       }
-    } catch (e) { toast('Сервер оплаты недоступен 😔'); }
+    } catch (e) {
+    console.warn('Payment error:', e);
+    toast('Сервер оплаты недоступен 😔');
+  }
     return;
   }
   if (tg?.openTelegramLink) tg.openTelegramLink(CONFIG.SUBSCRIBE_URL + '?start=subscribe');
@@ -1362,12 +1407,19 @@ async function loadServerPro() {
   try {
     const r = await fetch(CONFIG.API_BASE + '/status?uid=' + user.id +
       '&initData=' + encodeURIComponent(tg.initData || ''), { cache: 'no-store' });
+    if (!r.ok) {
+      console.warn('Server status returned', r.status);
+      return false;
+    }
     const j = await r.json();
     store.pro = !!j.pro;
     TRIAL.available = !j.pro && !j.trialUsed;
     if (j.price) { PRICE = j.price; syncPriceLabels(); }
     return j.pro;
-  } catch (e) { return false; }
+  } catch (e) {
+    console.warn('Failed to load server pro status:', e);
+    return false;
+  }
 }
 // активация бесплатного пробного периода (3 дня)
 async function startTrial() {
@@ -1471,9 +1523,22 @@ document.querySelectorAll('.tab').forEach(btn => {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     btn.classList.add('active');
     document.getElementById('view-' + btn.dataset.view).classList.add('active');
+    localStorage.setItem('pxax_last_tab', btn.dataset.view);
     window.scrollTo(0, 0);
   };
 });
+
+// восстанавливаем последний открытый таб при запуске
+const savedTab = localStorage.getItem('pxax_last_tab');
+if (savedTab) {
+  const tabBtn = document.querySelector(`.tab[data-view="${savedTab}"]`);
+  if (tabBtn) {
+    document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    tabBtn.classList.add('active');
+    document.getElementById('view-' + savedTab).classList.add('active');
+  }
+}
 
 // «ИИ думает» — раз в день
 if (sessionStorage.getItem('intro_' + today)) {
@@ -1486,6 +1551,48 @@ if (sessionStorage.getItem('intro_' + today)) {
     sessionStorage.setItem('intro_' + today, '1');
   }, 1600);
 }
+
+// ---------- pull-to-refresh ----------
+let ptrY = 0, ptrStart = 0, ptrActive = false;
+const ptrEl = document.getElementById('pullToRefresh');
+
+document.addEventListener('touchstart', e => {
+  if (window.scrollY === 0) {
+    ptrStart = e.touches[0].clientY;
+    ptrActive = true;
+  }
+}, { passive: true });
+
+document.addEventListener('touchmove', e => {
+  if (!ptrActive) return;
+  const y = e.touches[0].clientY;
+  ptrY = Math.max(0, y - ptrStart);
+  if (ptrY > 0) {
+    ptrEl.style.height = Math.min(80, ptrY) + 'px';
+    if (ptrY > 60) ptrEl.classList.add('show');
+    else ptrEl.classList.remove('show');
+  }
+}, { passive: true });
+
+document.addEventListener('touchend', async () => {
+  if (!ptrActive) return;
+  ptrActive = false;
+  if (ptrY > 60) {
+    ptrEl.classList.add('show');
+    toast('🔄 Обновление данных...');
+    await loadReal();
+    await loadServerPro();
+    render();
+    setTimeout(() => {
+      ptrEl.classList.remove('show');
+      ptrEl.style.height = '0';
+    }, 500);
+  } else {
+    ptrEl.classList.remove('show');
+    ptrEl.style.height = '0';
+  }
+  ptrY = 0;
+}, { passive: true });
 
 (async () => {
   const serverPro = await loadServerPro();
