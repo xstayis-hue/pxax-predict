@@ -1,8 +1,8 @@
 {
-  "date": "2026-10-05",
-  "generated": "2026-10-04T23:00:06.583Z",
+  "date": "2026-10-04",
+  "generated": "2026-10-04T20:41:38.887Z",
   "model": "poisson-v2 @ ESPN standings + odds",
-  "count": 10,
+  "count": 8,
   "valueCount": 2,
   "thresholds": {
     "freeMin": 55,
@@ -77,41 +77,6 @@
       ],
       "record": "0-0 / 0-0",
       "note": "Ожидаемые очки: 122,38 : 113,76 (модель по таблице лиги). Исходы: П1 70% · П2 30%. Модель даёт 70% на «П1».",
-      "tier": "pro"
-    },
-    {
-      "id": "401901820",
-      "lgKey": "basketball/nba",
-      "lgName": "NBA",
-      "sport": "🏀",
-      "type": "us",
-      "home": "Charlotte Hornets",
-      "away": "Brooklyn Nets",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/cha.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/bkn.png",
-      "time": "02:00 МСК",
-      "matchDate": "2026-10-06T23:00Z",
-      "market": "П1",
-      "confidence": 68,
-      "modelProb": 0.676,
-      "odds": null,
-      "impliedProb": null,
-      "edge": null,
-      "value": false,
-      "expected": {
-        "home": 115.84,
-        "away": 108.34
-      },
-      "markets": [
-        {
-          "market": "П1",
-          "prob": 68,
-          "odds": null,
-          "edge": null
-        }
-      ],
-      "record": "0-0 / 0-0",
-      "note": "Ожидаемые очки: 115,84 : 108,34 (модель по таблице лиги). Исходы: П1 68% · П2 32%. Модель даёт 68% на «П1».",
       "tier": "pro"
     },
     {
@@ -252,41 +217,6 @@
       ],
       "record": "1-1-0 / 0-1-2",
       "note": "Ожидаемые шайбы: 3,77 : 2,80 (модель по таблице лиги). Исходы: П1 64% · П2 34%. Модель даёт 64% на «П1». Линия 1,52 недооценивает исход: перевес модели +1%.",
-      "tier": "free"
-    },
-    {
-      "id": "401892449",
-      "lgKey": "hockey/nhl",
-      "lgName": "NHL",
-      "sport": "🏒",
-      "type": "us",
-      "home": "Toronto Maple Leafs",
-      "away": "Nashville Predators",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/tor.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/nsh.png",
-      "time": "02:00 МСК",
-      "matchDate": "2026-10-06T23:00Z",
-      "market": "П1",
-      "confidence": 62,
-      "modelProb": 0.618,
-      "odds": null,
-      "impliedProb": null,
-      "edge": null,
-      "value": false,
-      "expected": {
-        "home": 3.53,
-        "away": 2.74
-      },
-      "markets": [
-        {
-          "market": "П1",
-          "prob": 62,
-          "odds": null,
-          "edge": null
-        }
-      ],
-      "record": "1-2-0 / 1-1-0",
-      "note": "Ожидаемые шайбы: 3,53 : 2,74 (модель по таблице лиги). Исходы: П1 62% · П2 37%. Модель даёт 62% на «П1».",
       "tier": "free"
     },
     {
