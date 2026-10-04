@@ -1,0 +1,24 @@
+name: daily-backtest
+on:
+  schedule:
+    - cron: '10 1 * * *' # ежедневно, 04:10 МСК, вне пика (бэктест — ~340 запросов к ESPN, чаще не нужно)
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Бэктест модели по последним 42 дням
+        run: node scripts/backtest.mjs
+      - name: Commit data
+        run: |
+          git config user.name "pxax-bot"
+          git config user.email "bot@pxax.local"
+          git add data
+          git diff --cached --quiet || git commit -m "data: backtest update $(date -u +%F)"
+          git push

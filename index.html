@@ -1089,7 +1089,7 @@ if (tg) { try { tg.expand(); tg.disableVerticalSwipes?.(); } catch(e) {} }
 const user = tg?.initDataUnsafe?.user;
 
 /* ================= реальные данные (GitHub Actions -> data/*.json) ================= */
-const REAL = { loaded: false, date: null, free: [], pro: [], results: null, lastUpdate: null };
+const REAL = { loaded: false, date: null, free: [], pro: [], results: null, backtest: null, lastUpdate: null };
 async function loadReal() {
   try {
     const r = await fetch('data/predictions.json?v=' + Date.now(), { cache: 'no-store' });
@@ -1108,6 +1108,10 @@ async function loadReal() {
     const r = await fetch('data/results.json?v=' + Date.now(), { cache: 'no-store' });
     if (r.ok) { const j = await r.json(); if (Array.isArray(j) && j.length) REAL.results = j; }
   } catch (e) { console.warn('Failed to load results:', e); }
+  try {
+    const r = await fetch('data/backtest.json?v=' + Date.now(), { cache: 'no-store' });
+    if (r.ok) { const j = await r.json(); if (j && j.signals > 0) REAL.backtest = j; }
+  } catch (e) { /* бэктест — необязательный бонус */ }
 }
 
 /* ================= settings ================= */
@@ -1522,7 +1526,21 @@ function render() {
   const hasReal = !!(REAL.results && REAL.results.length);
   const statsAll = hasReal ? collectStats(CONFIG.STAT_DAYS) : null;
   const statsView = hasReal ? collectStats(CONFIG.STAT_DAYS, statFilter) : null;
-  document.getElementById('statRate').textContent = hasReal ? statsAll.rate + '%' : '—';
+  // честная статистика: живая история — когда её уже достаточно (>= 20), иначе — бэктест модели (явно подписан)
+  const liveN = hasReal ? REAL.results.length : 0;
+  const bt = REAL.backtest && REAL.backtest.signals >= 30 && REAL.backtest.hitRate != null ? REAL.backtest : null;
+  const rateEl = document.getElementById('statRate');
+  const rateLbl = document.querySelector('#view-home .stats .stat .l');
+  if (hasReal && (liveN >= 20 || !bt)) {
+    rateEl.textContent = statsAll.rate + '%';
+    if (rateLbl) rateLbl.textContent = 'заходов 14д';
+  } else if (bt) {
+    rateEl.textContent = Math.round(bt.hitRate * 100) + '%';
+    if (rateLbl) rateLbl.textContent = 'бэктест · ' + bt.windowDays + 'д';
+  } else {
+    rateEl.textContent = '—';
+    if (rateLbl) rateLbl.textContent = 'заходов 14д';
+  }
   document.getElementById('statFree').textContent = freeToday.length;
   document.getElementById('statProCnt').textContent = proToday.length;
   document.getElementById('hHits').textContent = hasReal ? statsView.hits : '—';
@@ -1691,7 +1709,10 @@ function renderProfileExtras(statsAll) {
     document.getElementById('cmpPro').textContent = '—';
     document.getElementById('cmpProD').textContent = 'мало данных';
     v.className = 'verdict neutral';
-    v.innerHTML = '👀 Статистика появится после первых сыгранных матчей — пока сравнивать нечего.';
+    const bt = REAL.backtest && REAL.backtest.signals >= 30 && REAL.backtest.hitRate != null ? REAL.backtest : null;
+    v.innerHTML = bt
+      ? `👀 Живая статистика накапливается. Бэктест модели за ${bt.windowDays} дней: ${Math.round(bt.hitRate * 100)}% на ${bt.hits}/${bt.signals} сигналах по ${bt.matches} матчам — честно, без заглядывания в будущее.`
+      : '👀 Статистика появится после первых сыгранных матчей — пока сравнивать нечего.';
     return;
   }
   const sf = collectStats(CONFIG.STAT_DAYS, 'free');

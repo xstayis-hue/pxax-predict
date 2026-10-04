@@ -8,10 +8,12 @@
 
 - `index.html` — всё приложение одним файлом (без сборки): UI, свайп-колоды, пейвол
 - `scripts/generate-predictions.mjs` — генератор прогнозов по данным ESPN (модель `poisson-v2`, без ключей)
-- `scripts/resolve-results.mjs` — резолвер: вчерашние прогнозы сверяются с реальными результатами ESPN + калибровка
-- `.github/workflows/predict.yml` — раз в 2 часа: генерация + резолв + коммит `data/*.json`
+- `scripts/resolve-results.mjs` — резолвер: матчи последних 72 ч сверяются по id с реальными результатами ESPN (несыгранные возвращаются на следующий проход, отменённые — push) + калибровка
+- `scripts/model.mjs` — Пуассон/нормальное приближение (общий для генератора и бэктеста)
+- `scripts/backtest.mjs` — бэктест модели по завершённым матчам за 42 дня (без заглядывания: только форма до матча + средний тотал лиги) → `data/backtest.json`
+- `.github/workflows/predict.yml` — раз в 2 часа: генерация + резолв + коммит `data/*.json`; `.github/workflows/backtest.yml` — бэктест ежедневно
 - `server/server.js` — бэкенд подписки (Telegram Stars): `/status`, `/trial`, `/pay`, long-polling; Node >= 18, без зависимостей
-- `data/predictions.json` — прогнозы на сегодня (free/pro), `data/results.json` — накопленная история, `data/calibration.json` — Brier-калибровка, `data/archive/` — по дням
+- `data/predictions.json` — прогнозы на сегодня (free/pro), `data/results.json` — накопленная история, `data/backtest.json` — ежедневный бэктест модели, `data/calibration.json` — Brier-калибровка, `data/archive/` — по дням
 
 Фронтенд сначала показывает мок (локальное превью без хостинга), но как только `data/predictions.json` за сегодня доступен — переходит на реальные данные и честную статистику. Отменённые матчи считаются возвратом (push) и не портят проходимость.
 
