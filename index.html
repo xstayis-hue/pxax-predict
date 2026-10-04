@@ -256,6 +256,61 @@
   .res-chip.miss { color:var(--warn); background:rgba(255,82,82,.1); border:1px solid rgba(255,82,82,.4); }
   .res-chip.push { color:var(--gold); background:rgba(255,201,60,.1); border:1px solid rgba(255,201,60,.4); }
 
+  /* ---------- fresh chip: таймер до следующего обновления ---------- */
+  .fresh-chip {
+    margin: 10px 16px 0; padding: 7px 12px;
+    background: rgba(0,229,255,.06); border: 1px solid rgba(0,229,255,.18);
+    border-radius: 11px; font-size: 11px; color: var(--muted);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .fresh-chip b { color: var(--neon); font-weight: 800; }
+  .fresh-chip .pulse {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--neon);
+    box-shadow: 0 0 8px rgba(0,229,255,.7); animation: dot 1.6s infinite; flex: none;
+  }
+
+  /* ---------- скелетоны карточек при загрузке ---------- */
+  @keyframes skPulse { 0%,100% { opacity:.35; } 50% { opacity:.75; } }
+  .sk-slide { min-width:100%; padding:0 1px; scroll-snap-align:start; scroll-snap-stop:always; }
+  .sk-card {
+    border-radius: var(--radius); background: var(--card);
+    border: 1px solid rgba(139,163,199,.12); padding: 20px 18px; position: relative; overflow: hidden;
+  }
+  .sk-line {
+    height: 12px; border-radius: 6px; margin-bottom: 12px;
+    background: rgba(139,163,199,.14); animation: skPulse 1.4s ease-in-out infinite;
+  }
+  .sk-line.w40 { width:40%; } .sk-line.w60 { width:60%; }
+  .sk-line.w80 { width:80%; } .sk-line.w100 { width:100%; }
+  .sk-teams { display:flex; align-items:center; justify-content:center; gap:18px; margin: 16px 0; }
+  .sk-badge {
+    width:44px; height:44px; border-radius:50%;
+    background: rgba(139,163,199,.14); animation: skPulse 1.4s ease-in-out infinite;
+  }
+  .sk-vs { font-size:11px; color:var(--muted); font-weight:800; }
+  .sk-bar { height:7px; border-radius:6px; background:rgba(139,163,199,.14); margin-top:18px; animation: skPulse 1.4s ease-in-out infinite; }
+
+  /* ---------- конфетти по «зашёл» ---------- */
+  .confetti-layer { position:fixed; inset:0; pointer-events:none; z-index:120; overflow:hidden; }
+  .confetti {
+    position:absolute; top:-16px; border-radius:2px; opacity:.95;
+    animation: confFall var(--dur,2.4s) cubic-bezier(.3,.4,.6,1) var(--del,0s) forwards;
+  }
+  @keyframes confFall { to { transform: translateY(105vh) rotate(var(--rot,540deg)); opacity:.15; } }
+
+  /* ---------- онбординг ---------- */
+  .ob-icon { text-align:center; font-size:44px; margin: 4px 0 10px; animation: bob 2s ease-in-out infinite; }
+  .ob-title { font-size:16px; text-align:center; font-weight:800; margin-bottom:7px; }
+  .ob-txt { font-size:12.5px; color:var(--muted); line-height:1.55; text-align:center; min-height: 58px; }
+  .ob-dots { display:flex; gap:6px; justify-content:center; margin: 14px 0 14px; }
+  .ob-dot { width:6px; height:6px; border-radius:4px; background:rgba(139,163,199,.3); transition: all .25s; }
+  .ob-dot.on { width:18px; background:var(--neon); box-shadow:0 0 8px rgba(0,229,255,.6); }
+  .ob-skip {
+    display:block; margin: 12px auto 0; background:none; border:none;
+    color:#5f7396; font-size:11.5px; cursor:pointer; letter-spacing:.04em;
+  }
+
+
   /* swipe dots */
   .deck-nav { display:flex; align-items:center; justify-content:center; gap:7px; padding: 13px 0 4px; }
   .dn {
@@ -739,6 +794,11 @@
     <div class="stat"><div class="v" id="statFree">5</div><div class="l">бесплатно сегодня</div></div>
     <div class="stat"><div class="v" style="color:var(--gold)" id="statProCnt">5</div><div class="l">в PRO</div></div>
   </div>
+
+  <div class="fresh-chip" id="freshChip" hidden>
+    <span class="pulse"></span><span id="freshTxt"></span>
+  </div>
+
 
   <div class="sport-filter" id="sportFilter"></div>
 
@@ -1553,6 +1613,7 @@ function render() {
   requestAnimationFrame(() => requestAnimationFrame(() => {
     document.querySelectorAll('.bar i').forEach(i => i.style.width = i.dataset.w + '%');
   }));
+  tickFresh();
 }
 
 /* ================= профиль: уровень, ачивки, привычки, сравнение ================= */
@@ -1821,6 +1882,7 @@ document.querySelectorAll('.tab').forEach(btn => {
     document.getElementById('view-' + btn.dataset.view).classList.add('active');
     localStorage.setItem('pxax_last_tab', btn.dataset.view);
     window.scrollTo(0, 0);
+    if (btn.dataset.view === 'history') maybeCelebrate();
   };
 });
 
@@ -1835,6 +1897,7 @@ if (savedTab) {
     document.getElementById('view-' + savedTab).classList.add('active');
   }
 }
+if (savedTab === 'history') setTimeout(maybeCelebrate, 500);
 
 // «ИИ думает» — раз в день
 if (sessionStorage.getItem('intro_' + today)) {
@@ -1890,6 +1953,117 @@ document.addEventListener('touchend', async () => {
   ptrY = 0;
 }, { passive: true });
 
+/* ================= скелетоны до первого рендера ================= */
+function skSlide() {
+  return `<div class="sk-slide"><div class="sk-card">
+    <div class="sk-line w40"></div>
+    <div class="sk-teams"><div class="sk-badge"></div><div class="sk-vs">VS</div><div class="sk-badge"></div></div>
+    <div class="sk-line w60"></div>
+    <div class="sk-line w80"></div>
+    <div class="sk-bar"></div>
+  </div></div>`;
+}
+(function fillSkeletons() {
+  for (const id of ['freeTrack', 'proTrack']) {
+    const el = document.getElementById(id);
+    if (el && !el.children.length) el.innerHTML = skSlide() + skSlide() + skSlide();
+  }
+})();
+
+/* ================= таймер до следующего обновления витрины ================= */
+function tickFresh() {
+  const el = document.getElementById('freshChip');
+  if (!el) return;
+  if (!REAL.lastUpdate) { el.hidden = true; return; }
+  el.hidden = false;
+  const lastMs = new Date(REAL.lastUpdate).getTime();
+  const left = lastMs + 2 * 3600e3 - Date.now();
+  const d = new Date(lastMs + 3 * 3600e3);
+  const up = String(d.getUTCHours()).padStart(2, '0') + ':' + String(d.getUTCMinutes()).padStart(2, '0');
+  const t = document.getElementById('freshTxt');
+  if (!t) return;
+  if (left <= 0) t.innerHTML = 'обновление витрины… <b>⏳</b>';
+  else {
+    const m = Math.round(left / 60000);
+    const h = Math.floor(m / 60), mm = String(m % 60).padStart(2, '0');
+    t.innerHTML = `Обновлено ${up} · следующие через <b>${h}:${mm}</b>`;
+  }
+}
+setInterval(tickFresh, 30000);
+
+/* ================= конфетти по «зашёл» на Статистике ================= */
+const reducedMotion = (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+function fireConfetti() {
+  if (reducedMotion) return;
+  const layer = document.createElement('div');
+  layer.className = 'confetti-layer';
+  const colors = ['#00e5ff', '#ff2bd6', '#ffc93c', '#00e676', '#9d6bff'];
+  for (let i = 0; i < 60; i++) {
+    const c = document.createElement('i');
+    c.className = 'confetti';
+    c.style.left = (Math.random() * 100).toFixed(2) + 'vw';
+    c.style.background = colors[i % colors.length];
+    c.style.width = (6 + Math.random() * 6).toFixed(1) + 'px';
+    c.style.height = (10 + Math.random() * 8).toFixed(1) + 'px';
+    c.style.setProperty('--dur', (2 + Math.random() * 1.6).toFixed(2) + 's');
+    c.style.setProperty('--del', (Math.random() * 0.8).toFixed(2) + 's');
+    c.style.setProperty('--rot', Math.round(360 + Math.random() * 720) + 'deg');
+    layer.appendChild(c);
+  }
+  document.body.appendChild(layer);
+  setTimeout(() => layer.remove(), 4500);
+}
+function maybeCelebrate() {
+  if (!REAL.results || !REAL.results.length) return;
+  let lastDate = REAL.results[0].date;
+  for (const r of REAL.results) if (r.date > lastDate) lastDate = r.date;
+  const hits = REAL.results.filter(r => r.date === lastDate && r.result === 'hit').length;
+  const key = 'pxax_celebrate_' + lastDate;
+  if (hits > 0 && localStorage.getItem(key) !== '1') {
+    localStorage.setItem(key, '1');
+    setTimeout(fireConfetti, 250);
+  }
+}
+
+/* ================= онбординг первого визита ================= */
+function showOnboarding() {
+  if (localStorage.getItem('pxax_onboarded') === '1') return;
+  const steps = [
+    { i: '🎯', t: 'Привет! Это PXAX AI', d: 'Каждый день — свежие прогнозы на спорт от ИИ: 5 бесплатных прогнозов и отбор Pro-ИИ с value-ставками.' },
+    { i: '💎', t: 'PRO — value-ставки', d: 'Модель сравнивает свои вероятности с линией букмекера и берёт рынки с перевесом. 3 ⭐/мес, плюс бесплатная проба 3 дня.' },
+    { i: '🛡️', t: 'Честные правила', d: 'Прогнозы — аналитика ИИ, а не гарантия: вероятность не 100%. Ставьте только то, что готовы потерять. 18+.' },
+  ];
+  let cur = 0;
+  const ov = document.createElement('div');
+  ov.className = 'modal-ov';
+  ov.innerHTML = `
+    <div class="modal">
+      <div class="ob-icon" id="obIcon"></div>
+      <div class="ob-title" id="obTitle"></div>
+      <div class="ob-txt" id="obTxt"></div>
+      <div class="ob-dots" id="obDots">${steps.map(() => '<span class="ob-dot"></span>').join('')}</div>
+      <button class="btn-sub" id="obNext">Дальше</button>
+      <button class="ob-skip" id="obSkip">Пропустить</button>
+    </div>`;
+  const close = () => { localStorage.setItem('pxax_onboarded', '1'); ov.remove(); };
+  const paint = () => {
+    const s = steps[cur];
+    document.getElementById('obIcon').textContent = s.i;
+    document.getElementById('obTitle').textContent = s.t;
+    document.getElementById('obTxt').textContent = s.d;
+    ov.querySelectorAll('.ob-dot').forEach((d, j) => d.classList.toggle('on', j === cur));
+    document.getElementById('obNext').textContent = cur === steps.length - 1 ? 'Начать' : 'Дальше';
+  };
+  ov.querySelector('#obNext').onclick = () => {
+    try { tg && tg.HapticFeedback && tg.HapticFeedback.selectionChanged(); } catch (e) {}
+    if (cur < steps.length - 1) { cur++; paint(); } else close();
+  };
+  ov.querySelector('#obSkip').onclick = close;
+  paint();
+  document.body.appendChild(ov);
+}
+
+
 (async () => {
   const serverPro = await loadServerPro();
   await loadReal();
@@ -1901,6 +2075,7 @@ document.addEventListener('touchend', async () => {
   }
   render();
   if (serverPro) toast('💎 PRO активна — спасибо за поддержку!');
+  setTimeout(showOnboarding, 600);
 })();
 </script>
 </body>
