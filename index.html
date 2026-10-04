@@ -590,6 +590,39 @@
     transition: transform .12s ease; margin-bottom: 10px;
   }
   .btn-trial:active { transform: scale(.97); }
+
+  /* ---------- PXAX ecosystem ---------- */
+  .ecosystem {
+    margin: 16px 16px 0; padding: 14px;
+    background: linear-gradient(135deg, rgba(0,229,255,.08), rgba(255,201,60,.06));
+    border-radius: var(--radius);
+    border: 1px solid rgba(0,229,255,.2);
+  }
+  .ecosystem h4 {
+    font-size:12px; color:var(--neon); letter-spacing:.12em;
+    text-transform:uppercase; margin-bottom:10px; display:flex; align-items:center; gap:6px;
+  }
+  .eco-grid {
+    display:grid; grid-template-columns:1fr 1fr; gap:8px;
+  }
+  .eco-item {
+    background:var(--card); border-radius:12px; padding:10px;
+    border:1px solid rgba(139,163,199,.15); text-decoration:none;
+    display:flex; flex-direction:column; gap:4px; transition:all .2s;
+  }
+  .eco-item:hover {
+    border-color:var(--neon); transform:translateY(-2px);
+    box-shadow:0 4px 12px rgba(0,229,255,.2);
+  }
+  .eco-item .icon { font-size:20px; }
+  .eco-item .name { font-size:11px; font-weight:700; color:var(--text); }
+  .eco-item .desc { font-size:9px; color:var(--muted); line-height:1.3; }
+  .eco-badge {
+    display:inline-block; margin-top:8px; padding:4px 10px;
+    background:rgba(255,201,60,.12); border:1px solid rgba(255,201,60,.3);
+    border-radius:20px; font-size:9px; color:var(--gold); font-weight:700;
+    letter-spacing:.05em;
+  }
 </style>
 </head>
 <body>
@@ -606,7 +639,7 @@
     <div class="logo">PX</div>
     <div>
       <h1>PXAXBET2016 <b>AI</b></h1>
-      <small>прогнозы на спорт</small>
+      <small>экосистема PXAX · прогнозы на спорт</small>
     </div>
     <div class="sub-badge free" id="subBadge">free</div>
   </div>
@@ -655,10 +688,37 @@
     <button class="btn-sub" onclick="goSubscribe()">Открыть PRO · 777 ⭐/мес</button>
   </div>
 
+  <div class="ecosystem">
+    <h4>🌐 Экосистема PXAX</h4>
+    <div class="eco-grid">
+      <a class="eco-item" href="https://xstayis-hue.github.io/PxAxAi/" target="_blank" rel="noopener">
+        <span class="icon">🤖</span>
+        <span class="name">PxAxAi</span>
+        <span class="desc">3D AI-компаньон</span>
+      </a>
+      <a class="eco-item" href="https://xstayis-hue.github.io/pxax-predict/" target="_blank" rel="noopener">
+        <span class="icon">🎯</span>
+        <span class="name">Прогнозы</span>
+        <span class="desc">AI-прогнозы на спорт</span>
+      </a>
+      <a class="eco-item" href="https://xstayis-hue.github.io/PHXcoin/" target="_blank" rel="noopener">
+        <span class="icon">💎</span>
+        <span class="name">PHXcoin</span>
+        <span class="desc">Мем-токен TON</span>
+      </a>
+      <a class="eco-item" href="https://github.com/xstayis-hue/Vph" target="_blank" rel="noopener">
+        <span class="icon">📈</span>
+        <span class="name">Vph</span>
+        <span class="desc">Крипто-трейдинг</span>
+      </a>
+    </div>
+    <div class="eco-badge">Единый бренд PXAX</div>
+  </div>
+
   <div class="footer">
     <b>18+</b> · Играйте ответственно. Ставки — это риск.<br>
     Реклама букмекера-партнёра · есть риск проигрыша
-    <br><span class="age">18+</span> · v${CONFIG.VERSION}
+    <br><span class="age">18+</span> · v${CONFIG.VERSION} · Экосистема PXAX
   </div>
 </main>
 
@@ -685,8 +745,35 @@
     <button class="btn-sub" onclick="goSubscribe()">Оформить PRO · 777 ⭐/мес</button>
   </div>
 
+  <div class="ecosystem">
+    <h4>🌐 Экосистема PXAX</h4>
+    <div class="eco-grid">
+      <a class="eco-item" href="https://xstayis-hue.github.io/PxAxAi/" target="_blank" rel="noopener">
+        <span class="icon">🤖</span>
+        <span class="name">PxAxAi</span>
+        <span class="desc">3D AI-компаньон</span>
+      </a>
+      <a class="eco-item" href="https://xstayis-hue.github.io/pxax-predict/" target="_blank" rel="noopener">
+        <span class="icon">🎯</span>
+        <span class="name">Прогнозы</span>
+        <span class="desc">AI-прогнозы на спорт</span>
+      </a>
+      <a class="eco-item" href="https://xstayis-hue.github.io/PHXcoin/" target="_blank" rel="noopener">
+        <span class="icon">💎</span>
+        <span class="name">PHXcoin</span>
+        <span class="desc">Мем-токен TON</span>
+      </a>
+      <a class="eco-item" href="https://github.com/xstayis-hue/Vph" target="_blank" rel="noopener">
+        <span class="icon">📈</span>
+        <span class="name">Vph</span>
+        <span class="desc">Крипто-трейдинг</span>
+      </a>
+    </div>
+    <div class="eco-badge">Единый бренд PXAX</div>
+  </div>
+
   <div class="footer">
-    Pro-ИИ тоже ошибается: <b>вероятность не 100%</b>. Играйте ответственно, <b>18+</b>. · v${CONFIG.VERSION}
+    Pro-ИИ тоже ошибается: <b>вероятность не 100%</b>. Играйте ответственно, <b>18+</b>. · v${CONFIG.VERSION} · Экосистема PXAX
   </div>
 </main>
 
@@ -712,6 +799,33 @@
   <div class="verdict neutral" id="verdict"></div>
 
   <div class="h-list" id="historyList"></div>
+
+  <div class="ecosystem">
+    <h4>🌐 Экосистема PXAX</h4>
+    <div class="eco-grid">
+      <a class="eco-item" href="https://xstayis-hue.github.io/PxAxAi/" target="_blank" rel="noopener">
+        <span class="icon">🤖</span>
+        <span class="name">PxAxAi</span>
+        <span class="desc">3D AI-компаньон</span>
+      </a>
+      <a class="eco-item" href="https://xstayis-hue.github.io/pxax-predict/" target="_blank" rel="noopener">
+        <span class="icon">🎯</span>
+        <span class="name">Прогнозы</span>
+        <span class="desc">AI-прогнозы на спорт</span>
+      </a>
+      <a class="eco-item" href="https://xstayis-hue.github.io/PHXcoin/" target="_blank" rel="noopener">
+        <span class="icon">💎</span>
+        <span class="name">PHXcoin</span>
+        <span class="desc">Мем-токен TON</span>
+      </a>
+      <a class="eco-item" href="https://github.com/xstayis-hue/Vph" target="_blank" rel="noopener">
+        <span class="icon">📈</span>
+        <span class="name">Vph</span>
+        <span class="desc">Крипто-трейдинг</span>
+      </a>
+    </div>
+    <div class="eco-badge">Единый бренд PXAX</div>
+  </div>
 
   <div class="footer">
     Статистика ведётся по завершённым матчам. Прошлые результаты не гарантируют будущих.
@@ -771,6 +885,17 @@
     <div class="adv">реклама · 18+</div>
   </div>
 
+  <div class="section-title">Реферальная система</div>
+  <div class="promo-box">
+    <div class="lbl">Твой реферальный код PXAX</div>
+    <div class="code">
+      <b id="referralCode">—</b>
+      <button class="copy" onclick="copyReferral()">копировать</button>
+    </div>
+    <div class="desc">Поделись кодом с друзьями — получи бонусы в экосистеме PXAX.</div>
+    <div class="adv">экосистема PXAX</div>
+  </div>
+
   <div class="section-title">Аккаунт</div>
   <div class="h-list">
     <div class="h-item" style="border-left:3px solid var(--neon)">
@@ -782,6 +907,33 @@
   </div>
   <div class="prof-actions">
     <button class="btn-sub" id="btnSubscribe2">Управлять подпиской</button>
+  </div>
+
+  <div class="ecosystem">
+    <h4>🌐 Экосистема PXAX</h4>
+    <div class="eco-grid">
+      <a class="eco-item" href="https://xstayis-hue.github.io/PxAxAi/" target="_blank" rel="noopener">
+        <span class="icon">🤖</span>
+        <span class="name">PxAxAi</span>
+        <span class="desc">3D AI-компаньон</span>
+      </a>
+      <a class="eco-item" href="https://xstayis-hue.github.io/pxax-predict/" target="_blank" rel="noopener">
+        <span class="icon">🎯</span>
+        <span class="name">Прогнозы</span>
+        <span class="desc">AI-прогнозы на спорт</span>
+      </a>
+      <a class="eco-item" href="https://xstayis-hue.github.io/PHXcoin/" target="_blank" rel="noopener">
+        <span class="icon">💎</span>
+        <span class="name">PHXcoin</span>
+        <span class="desc">Мем-токен TON</span>
+      </a>
+      <a class="eco-item" href="https://github.com/xstayis-hue/Vph" target="_blank" rel="noopener">
+        <span class="icon">📈</span>
+        <span class="name">Vph</span>
+        <span class="desc">Крипто-трейдинг</span>
+      </a>
+    </div>
+    <div class="eco-badge">Единый бренд PXAX</div>
   </div>
 
   <div class="footer">
@@ -831,7 +983,7 @@ async function loadReal() {
 
 /* ================= settings ================= */
 const CONFIG = {
-  VERSION: '0.3.1', // версия приложения для отслеживания обновлений
+  VERSION: '0.4.0', // версия приложения для отслеживания обновлений
   SUBSCRIBE_URL: 'https://t.me/pxaxbetai_bot',
   API_BASE: 'https://senate-insurance-sprint-designs.trycloudflare.com', // адрес бэкенда (cloudflared tunnel), обновляется при перезапуске туннеля
   FREE_DAILY: 5,   // бесплатных прогнозов в день
@@ -840,6 +992,14 @@ const CONFIG = {
   // --- партнёрская программа ---
   PARTNER_URL: 'https://r1wjvzfr.life/?p=gfuv',
   PROMO: 'PXAXBET2026',
+  // --- экосистема PXAX ---
+  REFERRAL_CODE: 'PXAX' + Date.now().toString(36).toUpperCase(), // уникальный код пользователя
+  ECOSYSTEM_LINKS: {
+    pxaxai: 'https://xstayis-hue.github.io/PxAxAi/',
+    predict: 'https://xstayis-hue.github.io/pxax-predict/',
+    phxcoin: 'https://xstayis-hue.github.io/PHXcoin/',
+    vph: 'https://github.com/xstayis-hue/Vph',
+  },
 };
 
 // партнёрская ссылка с суб-метками: sub1 = id прогноза, sub2 = экран
@@ -1002,7 +1162,10 @@ if (lastVersion !== CONFIG.VERSION) {
   localStorage.setItem('pxax_version', CONFIG.VERSION);
   if (lastVersion) {
     // версия изменилась - покажем уведомление при первом рендере
-    setTimeout(() => toast(`🚀 Обновлено до v${CONFIG.VERSION}`), 2000);
+    setTimeout(() => {
+      toast(`🚀 Обновлено до v${CONFIG.VERSION}`);
+      setTimeout(() => toast('🌐 Добавлена экосистема PXAX'), 2500);
+    }, 2000);
   }
 }
 
@@ -1253,6 +1416,14 @@ function render() {
   document.getElementById('profSince').textContent =
     'в приложении с ' + new Date(since + 'T00:00:00').toLocaleDateString('ru-RU', { day:'numeric', month:'short' });
 
+  // реферальный код
+  let refCode = localStorage.getItem('pxax_referral');
+  if (!refCode) {
+    refCode = CONFIG.REFERRAL_CODE;
+    localStorage.setItem('pxax_referral', refCode);
+  }
+  document.getElementById('referralCode').textContent = refCode;
+
   renderProfileExtras(statsAll);
 
   // полосы уверенности
@@ -1450,6 +1621,20 @@ function copyPromo() {
 function fallbackCopy(done) {
   const ta = document.createElement('textarea');
   ta.value = CONFIG.PROMO; document.body.appendChild(ta);
+  ta.select(); try { document.execCommand('copy'); done(); } catch(e) {}
+  ta.remove();
+}
+// копирование реферального кода
+function copyReferral() {
+  const code = localStorage.getItem('pxax_referral') || CONFIG.REFERRAL_CODE;
+  const done = () => toast('Реферальный код скопирован ✅');
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(code).then(done).catch(() => fallbackCopyRef(done, code));
+  } else fallbackCopyRef(done, code);
+}
+function fallbackCopyRef(done, code) {
+  const ta = document.createElement('textarea');
+  ta.value = code; document.body.appendChild(ta);
   ta.select(); try { document.execCommand('copy'); done(); } catch(e) {}
   ta.remove();
 }
