@@ -1,8 +1,25 @@
 {
   "date": "2026-10-04",
-  "generated": "2026-10-04T08:19:44.207Z",
+  "generated": "2026-10-04T15:16:54.906Z",
   "model": "rules-v1 @ ESPN data",
   "predictions": [
+    {
+      "id": "401892445",
+      "lgKey": "hockey/nhl",
+      "lgName": "NHL",
+      "sport": "🏒",
+      "type": "us",
+      "home": "Tampa Bay Lightning",
+      "away": "Philadelphia Flyers",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/tb.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/phi.png",
+      "time": "02:00 МСК",
+      "matchDate": "2026-10-05T23:00Z",
+      "market": "П1",
+      "confidence": 73,
+      "note": "Баланс сил: Tampa Bay Lightning 1-1-0 против Philadelphia Flyers 0-1-2. Процент побед выше у фаворита, модель учитывает домашнюю площадку: 73%.",
+      "tier": "pro"
+    },
     {
       "id": "401891824",
       "lgKey": "hockey/nhl",
@@ -18,40 +35,6 @@
       "market": "П1",
       "confidence": 69,
       "note": "Баланс сил: Seattle Kraken 1-1-0 против Calgary Flames 0-2-0. Процент побед выше у фаворита, модель учитывает домашнюю площадку: 69%.",
-      "tier": "pro"
-    },
-    {
-      "id": "401883162",
-      "lgKey": "soccer/esp.2",
-      "lgName": "La Liga 2",
-      "sport": "⚽",
-      "type": "soccer",
-      "home": "Castellón",
-      "away": "Ceuta",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/4438.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/5404.png",
-      "time": "19:30 МСК",
-      "matchDate": "2026-10-04T16:30Z",
-      "market": "П1",
-      "confidence": 68,
-      "note": "Форма: Castellón 6-1-0 (очков/матч 2.71) против Ceuta 1-1-5 (0.57). Модель с домашним фактором даёт 68% на П1.",
-      "tier": "pro"
-    },
-    {
-      "id": "401841584",
-      "lgKey": "soccer/arg.1",
-      "lgName": "Аргентина",
-      "sport": "⚽",
-      "type": "soccer",
-      "home": "Talleres (Córdoba)",
-      "away": "Belgrano (Córdoba)",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/19.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/4.png",
-      "time": "23:00 МСК",
-      "matchDate": "2026-10-04T20:00Z",
-      "market": "Х2",
-      "confidence": 68,
-      "note": "Форма: Talleres (Córdoba) 2-2-6 (очков/матч 0.80) против Belgrano (Córdoba) 4-4-2 (1.60). Модель с домашним фактором даёт 68% на Х2.",
       "tier": "pro"
     },
     {
@@ -72,23 +55,6 @@
       "tier": "pro"
     },
     {
-      "id": "401883160",
-      "lgKey": "soccer/esp.2",
-      "lgName": "La Liga 2",
-      "sport": "⚽",
-      "type": "soccer",
-      "home": "Girona",
-      "away": "Mallorca",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/9812.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/84.png",
-      "time": "22:00 МСК",
-      "matchDate": "2026-10-04T19:00Z",
-      "market": "Х2",
-      "confidence": 60,
-      "note": "Форма: Girona 4-1-2 (очков/матч 1.86) против Mallorca 4-1-2 (1.86). Модель с домашним фактором даёт 60% на Х2.",
-      "tier": "pro"
-    },
-    {
       "id": "401891778",
       "lgKey": "hockey/nhl",
       "lgName": "NHL",
@@ -103,7 +69,7 @@
       "market": "П1",
       "confidence": 59,
       "note": "Баланс сил: Anaheim Ducks 1-0-0 против Florida Panthers 1-0-1. Процент побед выше у фаворита, модель учитывает домашнюю площадку: 59%.",
-      "tier": "free"
+      "tier": "pro"
     },
     {
       "id": "401892444",
@@ -123,40 +89,6 @@
       "tier": "free"
     },
     {
-      "id": "401883192",
-      "lgKey": "soccer/esp.2",
-      "lgName": "La Liga 2",
-      "sport": "⚽",
-      "type": "soccer",
-      "home": "Las Palmas",
-      "away": "Real Valladolid",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/98.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/95.png",
-      "time": "19:30 МСК",
-      "matchDate": "2026-10-04T16:30Z",
-      "market": "Х2",
-      "confidence": 56,
-      "note": "Форма: Las Palmas 3-1-3 (очков/матч 1.43) против Real Valladolid 2-2-3 (1.14). Модель с домашним фактором даёт 56% на Х2.",
-      "tier": "free"
-    },
-    {
-      "id": "401841589",
-      "lgKey": "soccer/arg.1",
-      "lgName": "Аргентина",
-      "sport": "⚽",
-      "type": "soccer",
-      "home": "Huracán",
-      "away": "Aldosivi",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/10.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/9739.png",
-      "time": "20:45 МСК",
-      "matchDate": "2026-10-04T17:45Z",
-      "market": "П1",
-      "confidence": 56,
-      "note": "Форма: Huracán 4-4-2 (очков/матч 1.60) против Aldosivi 2-2-6 (0.80). Модель с домашним фактором даёт 56% на П1.",
-      "tier": "free"
-    },
-    {
       "id": "401892443",
       "lgKey": "hockey/nhl",
       "lgName": "NHL",
@@ -171,23 +103,6 @@
       "market": "П2",
       "confidence": 53,
       "note": "Баланс сил: New York Rangers 2-1-0 против Utah Mammoth 2-0-0. Процент побед выше у фаворита, модель учитывает домашнюю площадку: 53%.",
-      "tier": "free"
-    },
-    {
-      "id": "401892442",
-      "lgKey": "hockey/nhl",
-      "lgName": "NHL",
-      "sport": "🏒",
-      "type": "us",
-      "home": "Detroit Red Wings",
-      "away": "Winnipeg Jets",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/det.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/wpg.png",
-      "time": "20:00 МСК",
-      "matchDate": "2026-10-04T17:00Z",
-      "market": "П1",
-      "confidence": 52,
-      "note": "Баланс сил: Detroit Red Wings 0-1-0 против Winnipeg Jets 0-0-1. Процент побед выше у фаворита, модель учитывает домашнюю площадку: 52%.",
       "tier": "free"
     },
     {
