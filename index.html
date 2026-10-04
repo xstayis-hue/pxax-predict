@@ -196,6 +196,39 @@
   .pick.gold { border-color:rgba(255,201,60,.4); background:rgba(255,201,60,.07); }
   .pick.gold .v { color:var(--gold); text-shadow:0 0 14px rgba(255,201,60,.5); }
   .pick.gold .v.unavailable { color:var(--muted); font-size:12px; text-shadow:none; }
+  .pick .sub { font-size:11px; color:var(--muted); margin-top:3px; }
+  /* value-бейдж: модельная вероятность заметно выше линии */
+  .value-badge {
+    display:inline-flex; align-items:center; gap:4px; margin-left:auto;
+    font-size:10px; font-weight:800; letter-spacing:.05em;
+    color:#0a0d16; background:linear-gradient(135deg,#7bffb0,#00e676);
+    padding:3px 8px; border-radius:10px; box-shadow:0 0 12px rgba(0,230,118,.45);
+  }
+  .line-chip {
+    display:flex; align-items:center; gap:8px; justify-content:space-between;
+    margin:10px 16px 0; padding:8px 12px; border-radius:11px;
+    background:rgba(139,163,199,.07); border:1px solid rgba(139,163,199,.16);
+    font-size:11.5px; color:var(--muted);
+  }
+  .line-chip b { color:var(--text); }
+  .line-chip .edge.up { color:var(--ok); font-weight:800; }
+  .line-chip .edge.down { color:var(--warn); font-weight:800; }
+  .share-btn {
+    display:flex; align-items:center; justify-content:center; gap:6px;
+    margin:2px 16px 12px; padding:9px 14px; cursor:pointer;
+    border:1px solid rgba(139,163,199,.3); border-radius:12px;
+    background:transparent; color:var(--muted); font-size:12px; font-weight:700;
+  }
+  .share-btn:active { border-color:var(--neon); color:var(--neon); }
+  /* фильтр по видам спорта */
+  .sport-filter { display:flex; gap:7px; overflow-x:auto; padding:10px 16px 2px; scrollbar-width:none; }
+  .sport-filter::-webkit-scrollbar { display:none; }
+  .sf-btn {
+    flex:none; padding:6px 13px; border-radius:20px; cursor:pointer;
+    background:rgba(139,163,199,.1); border:1px solid rgba(139,163,199,.2);
+    color:var(--muted); font-size:11.5px; font-weight:700; white-space:nowrap;
+  }
+  .sf-btn.on { border-color:var(--neon); color:var(--neon); background:rgba(0,229,255,.1); }
   .conf { padding: 10px 18px 8px; }
   .conf .lbl { display:flex; justify-content:space-between; font-size:10.5px; color:var(--muted); margin-bottom:6px; }
   .conf .lbl b { color:var(--text); }
@@ -663,6 +696,8 @@
     <div class="stat"><div class="v" style="color:var(--gold)" id="statProCnt">5</div><div class="l">в PRO</div></div>
   </div>
 
+  <div class="sport-filter" id="sportFilter"></div>
+
   <div class="deck-wrap">
     <div class="deck" id="freeDeck">
       <div class="deck-track" id="freeTrack"></div>
@@ -683,7 +718,7 @@
 
   <div class="paywall-cta" id="paywallCta">
     <h3 id="payProTitle">💎 Ещё 5 прогнозов — у Pro-ИИ</h3>
-    <p>Отдельная нейросеть: value-ставки, скан линий 20+ букмекеров, повышенная точность</p>
+    <p>Модель сравнивает вероятности с линией букмекера и берёт рынки с перевесом (value). Плюс история без замков</p>
     <button class="btn-trial" id="btnTrialHome" style="display:none" onclick="startTrial()">🎁 Попробовать бесплатно · 3 дня</button>
     <button class="btn-sub" onclick="goSubscribe()">Открыть PRO · 777 ⭐/мес</button>
   </div>
@@ -718,7 +753,7 @@
   <div class="footer">
     <b>18+</b> · Играйте ответственно. Ставки — это риск.<br>
     Реклама букмекера-партнёра · есть риск проигрыша
-    <br><span class="age">18+</span> · v${CONFIG.VERSION} · Экосистема PXAX
+    <br><span class="age">18+</span> · v <span class="ver">0.5.0</span> · Экосистема PXAX
   </div>
 </main>
 
@@ -726,8 +761,8 @@
 <main id="view-pro" class="view">
   <div class="pro-hero">
     <div class="orb a"></div><div class="orb b"></div>
-    <h3><span class="crown">💎</span> Pro-ИИ · углублённая модель</h3>
-    <p>Больший объём данных, анализ коэффициентов 20+ букмекеров, расчёт value-ставок. <b id="proCnt">…</b></p>
+    <h3><span class="crown">💎</span> Pro-ИИ · value-ставки</h3>
+    <p>Отдельный отбор: модель сравнивает свои вероятности с коэффициентами букмекеров и берёт рынки с перевесом. <b id="proCnt">…</b></p>
   </div>
 
   <div class="deck-wrap">
@@ -740,7 +775,7 @@
 
   <div class="paywall-cta" id="proPaywall">
     <h3>💎 Станьте PRO</h3>
-    <p>Полный доступ к 5 прогнозам Pro-ИИ каждый день + история без замков</p>
+    <p>Value-ставки Pro-ИИ каждый день: модель находит рынки, где линия букмекера занижает вероятность. Плюс история без замков</p>
     <button class="btn-trial" id="btnTrialPro" style="display:none" onclick="startTrial()">🎁 Попробовать бесплатно · 3 дня</button>
     <button class="btn-sub" onclick="goSubscribe()">Оформить PRO · 777 ⭐/мес</button>
   </div>
@@ -773,7 +808,7 @@
   </div>
 
   <div class="footer">
-    Pro-ИИ тоже ошибается: <b>вероятность не 100%</b>. Играйте ответственно, <b>18+</b>. · v${CONFIG.VERSION} · Экосистема PXAX
+    Pro-ИИ тоже ошибается: <b>вероятность не 100%</b>. Играйте ответственно, <b>18+</b>. · v <span class="ver">0.5.0</span> · Экосистема PXAX
   </div>
 </main>
 
@@ -929,7 +964,7 @@
   <div class="footer">
     PXAXBET2016 AI · прогнозы на спорт<br>
     Прогнозы анализирует ИИ. Прошлые результаты не гарантируют будущих.<br>
-    Версия ${CONFIG.VERSION}
+    Версия <span id="footerVer">0.5.0</span>
   </div>
 </main>
 
@@ -973,7 +1008,7 @@ async function loadReal() {
 
 /* ================= settings ================= */
 const CONFIG = {
-  VERSION: '0.4.0', // версия приложения для отслеживания обновлений
+  VERSION: '0.5.0', // версия приложения для отслеживания обновлений
   SUBSCRIBE_URL: 'https://t.me/pxaxbetai_bot',
   API_BASE: 'https://site-technician-lee-aerial.trycloudflare.com', // адрес бэкенда (cloudflared tunnel), обновляется при перезапуске туннеля
   FREE_DAILY: 5,   // бесплатных прогнозов в день
@@ -998,6 +1033,26 @@ function betLink(p) {
 }
 function betBtn(p) {
   return `<a class="bet-btn" data-plink="${betLink(p)}" href="${betLink(p)}" rel="noopener">🎲 Сделать ставку в БК</a>`;
+}
+// поделиться карточкой прогноза в Telegram (или через Web Share API)
+function sharePred(id) {
+  const all = [...freeToday, ...proToday];
+  const p = all.find(x => String(x.id) === String(id));
+  if (!p) return;
+  const dateTxt = p.matchDate ? new Date(p.matchDate).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' }) : '';
+  const txt = `🤖 PXAX AI прогноз\n${p.sport} ${p.league}\n${p.home} — ${p.away}\n${dateTxt} ${p.time}\n\nПрогноз: ${p.market} · уверенность ${p.confidence}%`
+    + (p.value ? `\n⚡ value-ставка (перевес модели +${Math.round((p.edge || 0) * 100)}%)` : '')
+    + `\n\nПрогнозы делает ИИ, вероятность не 100%. 18+`;
+  const url = 'https://xstayis-hue.github.io/pxax-predict/';
+  if (tg?.shareURL || tg?.openTelegramLink) {
+    const share = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(txt)}`;
+    if (tg.openTelegramLink) tg.openTelegramLink(share);
+    else tg.shareURL(share);
+  } else if (navigator.share) {
+    navigator.share({ title: 'PXAX AI прогноз', text: txt, url }).catch(() => {});
+  } else {
+    navigator.clipboard?.writeText(txt + '\n' + url).then(() => toast('Прогноз скопирован ✅')).catch(() => {});
+  }
 }
 
 /* ================= мок-движок ИИ ================= */
@@ -1078,13 +1133,26 @@ function generateDay(dateStr, kind) {
     } while (used.has(key) && ++guard < 30);
     used.add(key);
     const hour = 14 + Math.floor(rand() * 9);
+    const conf = Math.round(kind === 'pro' ? 62 + rand() * 26 : 58 + rand() * 22);
+    // демо-линия и value: в проде эти поля приходят из data/predictions.json (модель poisson-v2)
+    const odds = +(1.4 + rand() * 1.4).toFixed(2);
+    const implied = +(1 / odds * 0.94).toFixed(3);
+    const edge = +(conf / 100 / implied - 1);
+    const market = MARKETS[Math.floor(rand() * MARKETS.length)];
     preds.push({
       id: kind + '-' + dateStr + '-' + i,
       kind, sport: lg.sport, league: lg.name,
       home: pair[0], away: pair[1],
       time: `${hour}:${rand() < .5 ? '00' : '30'} МСК`,
-      market: MARKETS[Math.floor(rand() * MARKETS.length)],
-      confidence: Math.round(kind === 'pro' ? 62 + rand() * 26 : 58 + rand() * 22),
+      market,
+      confidence: conf,
+      modelProb: +(conf / 100).toFixed(3),
+      odds, impliedProb: implied, edge: +edge.toFixed(3),
+      value: edge > 0.03,
+      markets: [
+        { market, prob: conf, odds, edge: Math.round(edge * 100) },
+        { market: market === 'П1' ? 'ТБ 2.5' : 'П2', prob: 44 + Math.round(rand() * 14), odds: +(1.7 + rand() * 0.6).toFixed(2), edge: null },
+      ],
       note: (kind === 'pro' ? PRO_NOTES : AI_NOTES)[Math.floor(rand() * 6)],
     });
   }
@@ -1128,6 +1196,27 @@ function collectStats(days, onlyKind) {
 
 /* ================= user state ================= */
 let statFilter = 'all'; // all | free | pro
+let sportFilter = 'all'; // all | ⚽ | 🏀 | 🏒
+function applySportFilter(list) {
+  if (sportFilter === 'all') return list;
+  return list.filter(p => p.sport === sportFilter);
+}
+// строим панель фильтра по видам спорта из доступных прогнозов
+function renderSportFilter() {
+  const el = document.getElementById('sportFilter');
+  if (!el) return;
+  const all = [...freeToday, ...proToday];
+  const sports = [...new Set(all.map(p => p.sport))];
+  if (sports.length < 2) { el.innerHTML = ''; el.style.display = 'none'; return; }
+  el.style.display = 'flex';
+  const items = [{ k: 'all', t: 'Все' }, ...sports.map(s => ({ k: s, t: s }))];
+  if (!items.some(i => i.k === sportFilter)) sportFilter = 'all';
+  el.innerHTML = items.map(i =>
+    `<button class="sf-btn ${i.k === sportFilter ? 'on' : ''}" data-sf="${i.k}">${i.t}</button>`).join('');
+  el.querySelectorAll('.sf-btn').forEach(b => {
+    b.onclick = () => { sportFilter = b.dataset.sf; render(); };
+  });
+}
 const store = {
   get pro() { return localStorage.getItem('pxax_pro') === '1'; },
   set pro(v) { localStorage.setItem('pxax_pro', v ? '1' : '0'); },
@@ -1153,7 +1242,7 @@ if (lastVersion !== CONFIG.VERSION) {
     // версия изменилась - покажем уведомление при первом рендере
     setTimeout(() => {
       toast(`🚀 Обновлено до v${CONFIG.VERSION}`);
-      setTimeout(() => toast('🌐 Добавлена экосистема PXAX'), 2500);
+      setTimeout(() => toast('🧠 Модель Пуассона + value-ставки'), 2500);
     }, 2000);
   }
 }
@@ -1250,6 +1339,31 @@ function slideHTML(p, unlocked, isPro, isHistory) {
       ? `<span class="soon-tag">⚡ через ${Math.max(1, Math.round(mdi.hours))} ч</span>`
       : `<span class="rel-tag">завтра</span>`;
   }
+  // value-бейдж: модельная вероятность заметно выше честной вероятности линии
+  const valBadge = (!isHistory && p.value && p.edge != null && p.edge > 0.03) ? `<span class="value-badge">⚡ VALUE</span>` : '';
+  // строка линии: коэффициент, вероятность линии и перевес модели
+  let lineChip = '';
+  if (!isHistory && p.odds) {
+    const imp = p.impliedProb != null ? Math.round(p.impliedProb * 100) : null;
+    const edge = p.edge != null ? Math.round(p.edge * 100) : null;
+    const edgeCls = edge > 0 ? 'up' : 'down';
+    const edgeTxt = edge == null ? '' : `${edge > 0 ? '+' : ''}${edge}%`;
+    const edgeLabel = edge == null ? '' : edge > 0 ? 'перевес модели' : 'модель ниже линии';
+    lineChip = `<div class="line-chip">
+      <span>Линия <b>${p.odds.toFixed(2)}</b>${imp != null ? ` · вероятность линии <b>${imp}%</b>` : ''}</span>
+      ${edge != null ? `<span class="edge ${edgeCls}">${edgeLabel} ${edgeTxt}</span>` : ''}
+    </div>`;
+  }
+  // дополнительные рынки модели (кроме основного прогноза)
+  const others = (!isHistory && Array.isArray(p.markets))
+    ? p.markets.filter(m => m.market !== p.market).slice(0, 2) : [];
+  const extraMarkets = others.length
+    ? `<div class="p-picks" style="padding-top:0">${others.map(m =>
+        `<div class="pick"><div class="m">${m.market}</div><div class="v">${m.prob}%</div>${
+          m.odds ? `<div class="sub">кэф ${m.odds.toFixed(2)}</div>` : ''}</div>`).join('')}</div>`
+    : '';
+  const shareBtn = !isHistory
+    ? `<button class="share-btn" onclick="sharePred('${p.id}')">📤 Поделиться прогнозом</button>` : '';
   return `
     <div class="slide ${unlocked ? '' : 'locked'}">
       <div class="p-card ${isPro ? 'pro-card' : ''}">
@@ -1260,6 +1374,7 @@ function slideHTML(p, unlocked, isPro, isHistory) {
             <span class="sport">${p.sport}</span><span>${p.league}</span>
             <span class="ai-tag ${isPro ? 'pro' : ''}">${isPro ? '💎 Pro AI' : '🤖 AI'}</span>
             ${statusTag}
+            ${valBadge}
           </div>
           <div class="p-body">
             <div class="league-line"><span class="lg-dot"></span>${p.league}</div>
@@ -1282,7 +1397,10 @@ function slideHTML(p, unlocked, isPro, isHistory) {
               <div class="v">${p.market}</div>
             </div>
           </div>
+          ${extraMarkets}
+          ${lineChip}
           <div class="bet-wrap">${unlocked ? betBtn(p) : ''}</div>
+          ${unlocked ? shareBtn : ''}
           <div class="conf">
             <div class="lbl"><span>уверенность ИИ</span><b>${p.confidence}%</b></div>
             <div class="bar"><i data-w="${p.confidence}"></i></div>
@@ -1338,19 +1456,22 @@ function render() {
   document.getElementById('proCnt').textContent = `${proToday.length} ${plural(proToday.length, 'прогноз', 'прогноза', 'прогнозов')} в VIP на сегодня`;
 
   // колоды (+ честные пустые состояния, если матчей в окне нет)
+  const freeView = applySportFilter(freeToday);
+  const proView = applySportFilter(proToday);
+  renderSportFilter();
   const EMPTY_DECK = `<div class="empty" style="margin:0">🕐 В окне 6–48 часов подходящих матчей нет — прогнозы появятся в ближайшем обновлении.</div>`;
   const ft = document.getElementById('freeTrack');
   const pt = document.getElementById('proTrack');
-  if (freeToday.length) {
-    ft.innerHTML = freeToday.map(p => slideHTML(p, true, false, false)).join('');
-    freeDeckObj = makeDeck(ft, document.getElementById('freeNav'), freeToday.length, 'free');
+  if (freeView.length) {
+    ft.innerHTML = freeView.map(p => slideHTML(p, true, false, false)).join('');
+    freeDeckObj = makeDeck(ft, document.getElementById('freeNav'), freeView.length, 'free');
   } else {
     ft.innerHTML = EMPTY_DECK;
     document.getElementById('freeNav').innerHTML = '';
   }
-  if (proToday.length) {
-    pt.innerHTML = proToday.map(p => slideHTML(p, pro, true, false)).join('');
-    proDeckObj = makeDeck(pt, document.getElementById('proNav'), proToday.length, 'pro');
+  if (proView.length) {
+    pt.innerHTML = proView.map(p => slideHTML(p, pro, true, false)).join('');
+    proDeckObj = makeDeck(pt, document.getElementById('proNav'), proView.length, 'pro');
   } else {
     pt.innerHTML = `<div class="empty" style="margin:0">💎 Сигналы Pro-ИИ появятся перед ближайшими матчами.</div>`;
     document.getElementById('proNav').innerHTML = '';

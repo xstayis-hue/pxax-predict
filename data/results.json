@@ -1,29 +1,16 @@
 [
   {
     "date": "2026-10-04",
-    "id": "401892441",
-    "kind": "pro",
+    "id": "401891814",
+    "kind": "free",
     "sport": "🏒",
     "league": "NHL",
-    "home": "San Jose Sharks",
-    "away": "Los Angeles Kings",
-    "market": "П1",
-    "confidence": 69,
-    "score": "5:4",
-    "result": "hit"
-  },
-  {
-    "date": "2026-10-04",
-    "id": "401892440",
-    "kind": "pro",
-    "sport": "🏒",
-    "league": "NHL",
-    "home": "Vancouver Canucks",
-    "away": "Calgary Flames",
-    "market": "П1",
-    "confidence": 62,
+    "home": "Minnesota Wild",
+    "away": "Boston Bruins",
+    "market": "П2",
+    "confidence": 51,
     "score": "4:1",
-    "result": "hit"
+    "result": "miss"
   },
   {
     "date": "2026-10-04",
@@ -53,15 +40,28 @@
   },
   {
     "date": "2026-10-04",
-    "id": "401891814",
-    "kind": "free",
+    "id": "401892440",
+    "kind": "pro",
     "sport": "🏒",
     "league": "NHL",
-    "home": "Minnesota Wild",
-    "away": "Boston Bruins",
-    "market": "П2",
-    "confidence": 51,
+    "home": "Vancouver Canucks",
+    "away": "Calgary Flames",
+    "market": "П1",
+    "confidence": 62,
     "score": "4:1",
-    "result": "miss"
+    "result": "hit"
+  },
+  {
+    "date": "2026-10-04",
+    "id": "401892441",
+    "kind": "pro",
+    "sport": "🏒",
+    "league": "NHL",
+    "home": "San Jose Sharks",
+    "away": "Los Angeles Kings",
+    "market": "П1",
+    "confidence": 69,
+    "score": "5:4",
+    "result": "hit"
   }
 ]
