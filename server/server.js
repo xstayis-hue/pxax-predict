@@ -17,7 +17,7 @@ if (!TOKEN && process.env.BOT_TOKEN) TOKEN = process.env.BOT_TOKEN;
 if (!MINIAPP_URL && process.env.MINIAPP_URL) MINIAPP_URL = process.env.MINIAPP_URL;
 if (!TOKEN) {
   console.error('Нет токена: создай server/config.json {"TOKEN":"..."}');
-  console.error('Сервер работает в ограниченном режиме: /status и /ref без initData недоступны оплата/бот.');
+  console.error('Оплата/бот недоступны без токена.');
 }
 const HAS_TOKEN = !!TOKEN;
 
@@ -100,22 +100,6 @@ function grant(uid, name, days = PRO_DAYS, extra = {}) {
   return until;
 }
 
-// ---------- рефералка ----------
-// код = PX + base36(id) + контрольный символ — короткий, не раскрывает сырой id
-function refCode(uid) {
-  const b = BigInt(uid).toString(36).toUpperCase();
-  const c = (String(uid).split('').reduce((a, ch) => a + ch.charCodeAt(0), 0) % 36).toString(36).toUpperCase();
-  return 'PX' + b + c;
-}
-function parseRefCode(code) {
-  const m = /^PX([0-9A-Z]+)([0-9A-Z])$/.exec(String(code || '').trim().toUpperCase());
-  if (!m) return null;
-  let uid;
-  try { uid = BigInt(parseInt(m[1], 36)); } catch { return null; }
-  const c = (String(uid).split('').reduce((a, ch) => a + ch.charCodeAt(0), 0) % 36).toString(36).toUpperCase();
-  return c === m[2] ? uid.toString() : null;
-}
-const REF_BONUS_DAYS = 3;
 
 // ---------- HTTP API ----------
 const server = http.createServer(async (req, res) => {
@@ -185,55 +169,7 @@ const server = http.createServer(async (req, res) => {
         needs_start: inv.description?.includes('initiated') || false,
       }));
     }
-    if (url.pathname === '/redeem' && req.method === 'POST') {
-      let body = '';
-      for await (const chunk of req) body += chunk;
-      const { initData, code } = JSON.parse(body || '{}');
-      const user = validateInitData(initData || '');
-      if (!user) {
-        res.writeHead(401, { 'Content-Type': 'application/json', ...cors });
-        return res.end(JSON.stringify({ ok: false, error: 'bad_auth' }));
-      }
-      const ownerId = parseRefCode(code);
-      if (!ownerId || ownerId === String(user.id)) {
-        res.writeHead(200, { 'Content-Type': 'application/json', ...cors });
-        return res.end(JSON.stringify({ ok: false, error: 'bad_code' }));
-      }
-      const users = loadUsers();
-      const me = users[String(user.id)] || {};
-      if ((me.refBy || '') === ownerId) {
-        res.writeHead(200, { 'Content-Type': 'application/json', ...cors });
-        return res.end(JSON.stringify({ ok: false, error: 'already' }));
-      }
-      // бонус получают оба: приглашённый и пригласивший
-      const untilMe = grant(user.id, user.first_name, REF_BONUS_DAYS, { refBy: ownerId });
-      const owner = users[ownerId] || {};
-      const untilOwner = extendUntil(owner, REF_BONUS_DAYS);
-      owner.until = untilOwner;
-      owner.refs = (owner.refs || 0) + 1;
-      owner.name = owner.name || '';
-      users[ownerId] = owner;
-      saveUsers(users);
-      console.log(`REF: ${user.username || user.id} used code of ${ownerId}`);
-      // уведомляем пригласившего, если бот может ему написать
-      try {
-        await api('sendMessage', { chat_id: ownerId, text: `🤝 По твоему коду пришёл новый пользователь — +${REF_BONUS_DAYS} дней PRO!` });
-      } catch (e) {}
-      res.writeHead(200, { 'Content-Type': 'application/json', ...cors });
-      return res.end(JSON.stringify({ ok: true, until: untilMe, bonusDays: REF_BONUS_DAYS }));
-    }
-    if (url.pathname === '/ref') {
-      const uid = url.searchParams.get('uid');
-      const auth = validateInitData(url.searchParams.get('initData') || '');
-      const own = !!(auth && String(auth.id) === String(uid));
-      if (!own) {
-        res.writeHead(401, { 'Content-Type': 'application/json', ...cors });
-        return res.end(JSON.stringify({ ok: false, error: 'bad_auth' }));
-      }
-      const u = loadUsers()[String(uid)] || {};
-      res.writeHead(200, { 'Content-Type': 'application/json', ...cors });
-      return res.end(JSON.stringify({ ok: true, code: refCode(uid), refs: u.refs || 0, refBy: u.refBy || null, bonusDays: REF_BONUS_DAYS }));
-    }
+
     res.writeHead(404, cors); res.end();
   } catch (e) {
     console.error('API error:', e);
@@ -296,29 +232,7 @@ async function poll() {
         continue;
       }
       const text = msg.text || '';
-      // /start ref_XXXX — реферальный код из мини-аппа
-      const refMatch = /\/start\s+ref_([A-Za-z0-9]+)/.exec(text);
-      if (refMatch) {
-        const ownerId = parseRefCode(refMatch[1]);
-        if (ownerId && ownerId !== String(chatId)) {
-          const users = loadUsers();
-          const me = users[String(chatId)] || {};
-          if ((me.refBy || '') !== ownerId) {
-            const untilMe = grant(chatId, msg.from.first_name, REF_BONUS_DAYS, { refBy: ownerId });
-            const owner = users[ownerId] || {};
-            const untilOwner = extendUntil(owner, REF_BONUS_DAYS);
-            owner.until = untilOwner;
-            owner.refs = (owner.refs || 0) + 1;
-            users[ownerId] = owner;
-            saveUsers(users);
-            await api('sendMessage', { chat_id: chatId, text: `🎁 Реферальный код принят: +${REF_BONUS_DAYS} дней PRO до ${new Date(untilMe).toLocaleDateString('ru-RU')}` });
-            try {
-              await api('sendMessage', { chat_id: ownerId, text: `🤝 По твоему коду пришёл новый пользователь — +${REF_BONUS_DAYS} дней PRO!` });
-            } catch (e) {}
-            continue;
-          }
-        }
-      }
+
       if (text.startsWith('/start')) {
         // приветствие с кнопкой приложения — счёт не навязываем
         const kb = MINIAPP_URL ? welcomeKeyboard() : undefined;

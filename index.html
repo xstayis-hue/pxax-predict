@@ -885,24 +885,6 @@
     <div class="adv">реклама · 18+</div>
   </div>
 
-  <div class="section-title">Реферальная система</div>
-  <div class="promo-box" style="border-color:rgba(92,225,230,.25);background:rgba(92,225,230,.05)">
-    <div class="lbl" style="color:var(--neon)">Твой реферальный код</div>
-    <div class="code">
-      <b id="refCode">…</b>
-      <button class="copy" onclick="copyRef()">копировать</button>
-    </div>
-    <div class="desc">Поделись кодом — оба получите <b id="refBonus">+3</b> дня PRO. Приглашено: <b id="refCount">0</b></div>
-    <div class="ref-apply" style="display:flex;gap:7px;margin-top:10px">
-      <input id="refInput" placeholder="Ввести чужой код…" autocomplete="off"
-        style="flex:1;min-width:0;padding:10px 12px;border-radius:11px;font-family:inherit;font-size:13px;
-        background:rgba(0,0,0,.35);border:1px solid rgba(92,225,230,.2);color:var(--text);outline:none">
-      <button id="btnRefApply" style="padding:10px 16px;border-radius:11px;font-family:inherit;font-weight:700;font-size:13px;
-        background:linear-gradient(120deg,rgba(92,225,230,.25),rgba(155,123,255,.2));border:1px solid rgba(92,225,230,.35);
-        color:#e6fffd;cursor:pointer">ОК</button>
-    </div>
-    <div class="adv">экосистема PXAX</div>
-  </div>
 
   <div class="section-title">Аккаунт</div>
   <div class="h-list">
@@ -1001,7 +983,6 @@ const CONFIG = {
   PARTNER_URL: 'https://r1wjvzfr.life/?p=gfuv',
   PROMO: 'PXAXBET2026',
   // --- экосистема PXAX ---
-  REFERRAL_CODE: 'PXAX' + Date.now().toString(36).toUpperCase(), // уникальный код пользователя
   ECOSYSTEM_LINKS: {
     pxaxai: 'https://xstayis-hue.github.io/PxAxAi/',
     predict: 'https://xstayis-hue.github.io/pxax-predict/',
@@ -1424,36 +1405,7 @@ function render() {
   document.getElementById('profSince').textContent =
     'в приложении с ' + new Date(since + 'T00:00:00').toLocaleDateString('ru-RU', { day:'numeric', month:'short' });
 
-  // реферальный код
-  let refCode = localStorage.getItem('pxax_referral');
-  if (!refCode) {
-    refCode = CONFIG.REFERRAL_CODE;
-    localStorage.setItem('pxax_referral', refCode);
-  }
-  document.getElementById('referralCode').textContent = refCode;
-
   renderProfileExtras(statsAll);
-
-  // рефералка: код с сервера; без сети — локальный код из CONFIG
-  if (user && !window.__refLoading) {
-    window.__refLoading = true;
-    fetch(CONFIG.API_BASE + '/ref?uid=' + user.id + '&initData=' + encodeURIComponent(tg?.initData || ''))
-      .then(r => r.json())
-      .then(res => {
-        window.__refLoading = false;
-        if (res.ok) {
-          localStorage.setItem('pxax_referral', res.code);
-          document.getElementById('refCode').textContent = res.code;
-          document.getElementById('refCount').textContent = res.refs || 0;
-          document.getElementById('refBonus').textContent = '+' + res.bonusDays;
-        }
-      })
-      .catch(() => {
-        window.__refLoading = false;
-        const el = document.getElementById('refCode');
-        if (el && el.textContent === '…') el.textContent = localStorage.getItem('pxax_referral') || CONFIG.REFERRAL_CODE;
-      });
-  }
 
   // полосы уверенности
   requestAnimationFrame(() => requestAnimationFrame(() => {
@@ -1640,38 +1592,7 @@ async function startTrial() {
     else { toast('Не удалось активировать, попробуй позже'); }
   } catch (e) { toast('Сервер недоступен 😔'); }
 }
-document.getElementById('btnRefApply')?.addEventListener('click', applyRef);
-document.getElementById('refInput')?.addEventListener('keydown', e => { if (e.key === 'Enter') applyRef(); });
-// рефералка: загрузка кода, копирование, применение чужого
-function copyRef() {
-  const code = document.getElementById('refCode').textContent;
-  if (!code || code === '…') return;
-  const done = () => toast('Код скопирован ✅');
-  if (navigator.clipboard) navigator.clipboard.writeText(code).then(done).catch(() => {});
-  else done();
-}
-function applyRef() {
-  const inp = document.getElementById('refInput');
-  const code = (inp.value || '').trim();
-  if (!code) return;
-  const btn = document.getElementById('btnRefApply');
-  btn.disabled = true;
-  fetch(API_BASE + '/redeem', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ initData: tg?.initData || '', code })
-  }).then(r => r.json()).then(res => {
-    btn.disabled = false;
-    if (res.ok) {
-      inp.value = '';
-      toast(`Код принят: +${res.bonusDays} дня PRO 🎁`);
-      if (typeof loadProfile === 'function') loadProfile();
-    } else if (res.error === 'bad_code') toast('Неверный код ❌');
-    else if (res.error === 'already') toast('Этот код уже применён');
-    else if (res.error === 'bad_auth') toast('Открой мини-апп через Telegram');
-    else toast('Не получилось, попробуй позже');
-  }).catch(() => { btn.disabled = false; toast('Сеть недоступна'); });
-}
+
 // копирование промокода
 function copyPromo() {
   const done = () => toast('Промокод скопирован ✅');
@@ -1682,20 +1603,6 @@ function copyPromo() {
 function fallbackCopy(done) {
   const ta = document.createElement('textarea');
   ta.value = CONFIG.PROMO; document.body.appendChild(ta);
-  ta.select(); try { document.execCommand('copy'); done(); } catch(e) {}
-  ta.remove();
-}
-// копирование реферального кода
-function copyReferral() {
-  const code = localStorage.getItem('pxax_referral') || CONFIG.REFERRAL_CODE;
-  const done = () => toast('Реферальный код скопирован ✅');
-  if (navigator.clipboard?.writeText) {
-    navigator.clipboard.writeText(code).then(done).catch(() => fallbackCopyRef(done, code));
-  } else fallbackCopyRef(done, code);
-}
-function fallbackCopyRef(done, code) {
-  const ta = document.createElement('textarea');
-  ta.value = code; document.body.appendChild(ta);
   ta.select(); try { document.execCommand('copy'); done(); } catch(e) {}
   ta.remove();
 }
