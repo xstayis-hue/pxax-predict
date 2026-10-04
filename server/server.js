@@ -32,6 +32,14 @@ const saveUsers = (u) => {
 const PRO_DAYS = 30;
 const TRIAL_DAYS = 3;
 
+// ---------- приветствие с кнопкой мини-аппа ----------
+function welcomeKeyboard() {
+  const rows = [];
+  if (MINIAPP_URL) rows.push([{ text: '⚡ Открыть приложение', web_app: { url: MINIAPP_URL } }]);
+  rows.push([{ text: '💎 Оформить PRO', callback_data: 'subscribe' }]);
+  return { inline_keyboard: rows };
+}
+
 // ---------- Telegram API ----------
 const api = async (method, body) => {
   const res = await fetch(`https://api.telegram.org/bot${TOKEN}/${method}`, {
@@ -243,6 +251,16 @@ async function poll() {
     for (const upd of j.result || []) {
       offset = upd.update_id + 1;
       const msg = upd.message;
+      if (upd.callback_query) {
+        if (upd.callback_query.data === 'subscribe') {
+          const inv = await sendInvoice(upd.callback_query.message.chat.id);
+          if (!inv.ok) {
+            await api('sendMessage', { chat_id: upd.callback_query.message.chat.id, text: '⚠️ Не удалось выставить счёт. Попробуй позже.' });
+          }
+        }
+        await api('answerCallbackQuery', { callback_query_id: upd.callback_query.id });
+        continue;
+      }
       if (upd.pre_checkout_query) {
         // принимаем только свой payload — инвойсы с чужим/поддельным payload отклоняем
         const okPay = upd.pre_checkout_query.payload === `pro_${PRO_DAYS}d`;
@@ -301,7 +319,20 @@ async function poll() {
           }
         }
       }
-      if (text.startsWith('/start') || text.startsWith('/subscribe')) {
+      if (text.startsWith('/start')) {
+        // приветствие с кнопкой приложения — счёт не навязываем
+        const kb = MINIAPP_URL ? welcomeKeyboard() : undefined;
+        await api('sendMessage', {
+          chat_id: chatId,
+          text: `👋 Привет!
+
+⚡ PXAXBET2016 AI — ИИ-прогнозы на спорт каждый день.
+Жми «Открыть приложение»${MINIAPP_URL ? '' : ' или /subscribe'} — прогнозы уже там.
+
+⚠️ Прогнозы делает ИИ, это не 100% вероятность. 18+`,
+          reply_markup: kb,
+        });
+      } else if (text.startsWith('/subscribe')) {
         const inv = await sendInvoice(chatId);
         if (!inv.ok) {
           await api('sendMessage', { chat_id: chatId, text: '⚠️ Не удалось выставить счёт. Попробуй позже.' });
