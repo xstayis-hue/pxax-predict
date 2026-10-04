@@ -15,7 +15,11 @@ if (fs.existsSync(CONFIG_FILE)) {
 }
 if (!TOKEN && process.env.BOT_TOKEN) TOKEN = process.env.BOT_TOKEN;
 if (!MINIAPP_URL && process.env.MINIAPP_URL) MINIAPP_URL = process.env.MINIAPP_URL;
-if (!TOKEN) { console.error('Нет токена: создай server/config.json {"TOKEN":"..."}'); process.exit(1); }
+if (!TOKEN) {
+  console.error('Нет токена: создай server/config.json {"TOKEN":"..."}');
+  console.error('Сервер работает в ограниченном режиме: /status и /ref без initData недоступны оплата/бот.');
+}
+const HAS_TOKEN = !!TOKEN;
 
 const USERS_FILE = path.join(__dirname, 'users.json'); // gitignore!
 const loadUsers = () => { try { return JSON.parse(fs.readFileSync(USERS_FILE, 'utf8')); } catch { return {}; } };
@@ -228,10 +232,11 @@ const server = http.createServer(async (req, res) => {
     res.writeHead(500, cors); res.end(JSON.stringify({ error: 'internal' }));
   }
 });
-server.listen(PORT, () => console.log(`API on :${PORT}`));
+server.listen(PORT, () => console.log(`API on :${PORT}${HAS_TOKEN ? '' : ' (limited: no TOKEN)'}`));
 
-// ---------- long polling ----------
+// ---------- long polling (только с токеном) ----------
 let offset = 0;
+const poll0 = poll;
 async function poll() {
   try {
     const j = await api('getUpdates', { timeout: 25, offset });
@@ -306,13 +311,13 @@ async function poll() {
   } catch (e) { console.warn('poll:', String(e).slice(0, 120)); }
   setTimeout(poll, 500);
 }
-poll();
-console.log(`Bot polling started. Stars price: ${STARS_PRICE}`);
+if (HAS_TOKEN) { poll(); console.log(`Bot polling started. Stars price: ${STARS_PRICE}`); }
 
 // ---------- автосайтап: кнопка меню с мини-аппом + команды ----------
 // кнопка ставится только если задан MINIAPP_URL (config.json или env) —
 // чтобы случайно не перебить кнопку, настроенную вручную через BotFather
 (async () => {
+  if (!HAS_TOKEN) return;
   if (MINIAPP_URL) {
     const r = await api('setChatMenuButton', {
       menu_button: { type: 'web_app', text: '🎮 Открыть AI', web_app: { url: MINIAPP_URL } },
