@@ -213,13 +213,6 @@
   .line-chip b { color:var(--text); }
   .line-chip .edge.up { color:var(--ok); font-weight:800; }
   .line-chip .edge.down { color:var(--warn); font-weight:800; }
-  .share-btn {
-    display:flex; align-items:center; justify-content:center; gap:6px;
-    margin:2px 16px 12px; padding:9px 14px; cursor:pointer;
-    border:1px solid rgba(139,163,199,.3); border-radius:12px;
-    background:transparent; color:var(--muted); font-size:12px; font-weight:700;
-  }
-  .share-btn:active { border-color:var(--neon); color:var(--neon); }
   /* фильтр по видам спорта */
   .sport-filter { display:flex; gap:7px; overflow-x:auto; padding:10px 16px 2px; scrollbar-width:none; }
   .sport-filter::-webkit-scrollbar { display:none; }
@@ -1085,25 +1078,6 @@ function betLink(p) {
 function betBtn(p) {
   return `<a class="bet-btn" data-plink="${betLink(p)}" href="${betLink(p)}" rel="noopener">🎲 Сделать ставку в БК</a>`;
 }
-// поделиться карточкой прогноза в Telegram (или через Web Share API)
-function sharePred(id) {
-  const all = [...freeToday, ...proToday];
-  const p = all.find(x => String(x.id) === String(id));
-  if (!p) return;
-  const dateTxt = p.matchDate ? new Date(p.matchDate).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' }) : '';
-  const txt = `🤖 PXAX AI прогноз\n${p.sport} ${p.league}\n${p.home} — ${p.away}\n${dateTxt} ${p.time}\n\nПрогноз: ${p.market} · уверенность ${p.confidence}%`
-    + (p.value ? `\n⚡ value-ставка (перевес модели +${Math.round((p.edge || 0) * 100)}%)` : '')
-    + `\n\nПрогнозы делает ИИ, вероятность не 100%. 18+`;
-  const url = 'https://xstayis-hue.github.io/pxax-predict/';
-  if (tg?.shareURL || tg?.openTelegramLink) {
-    const share = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(txt)}`;
-    if (tg.openTelegramLink) tg.openTelegramLink(share);
-    else tg.shareURL(share);
-  } else if (navigator.share) {
-    navigator.share({ title: 'PXAX AI прогноз', text: txt, url }).catch(() => {});
-  } else {
-    navigator.clipboard?.writeText(txt + '\n' + url).then(() => toast('Прогноз скопирован ✅')).catch(() => {});
-  }
 }
 
 /* ================= мок-движок ИИ ================= */
@@ -1413,8 +1387,6 @@ function slideHTML(p, unlocked, isPro, isHistory) {
         `<div class="pick"><div class="m">${m.market}</div><div class="v">${m.prob}%</div>${
           m.odds ? `<div class="sub">кэф ${m.odds.toFixed(2)}</div>` : ''}</div>`).join('')}</div>`
     : '';
-  const shareBtn = !isHistory
-    ? `<button class="share-btn" onclick="sharePred('${p.id}')">📤 Поделиться прогнозом</button>` : '';
   return `
     <div class="slide ${unlocked ? '' : 'locked'}">
       <div class="p-card ${isPro ? 'pro-card' : ''}">
@@ -1451,7 +1423,6 @@ function slideHTML(p, unlocked, isPro, isHistory) {
           ${extraMarkets}
           ${lineChip}
           <div class="bet-wrap">${unlocked ? betBtn(p) : ''}</div>
-          ${unlocked ? shareBtn : ''}
           <div class="conf">
             <div class="lbl"><span>уверенность ИИ</span><b>${p.confidence}%</b></div>
             <div class="bar"><i data-w="${p.confidence}"></i></div>
