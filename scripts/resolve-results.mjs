@@ -1,10 +1,12 @@
-// Резолвер: проверяет прогнозы за вчера по реальным результатам ESPN.
-// Источники: data/predictions.json (если за вчера) + data/archive/*.json
+// Резолвер: проверяет прогнозы по реальным результатам ESPN.
+// Проверяет все матчи за последние 2 дня, которые уже должны были сыграть.
+// Источники: data/predictions.json + data/archive/*.json
 import { writeFileSync, readFileSync, existsSync, readdirSync } from 'node:fs';
 
 const UA = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36' };
 const mskNow = Date.now() + 3 * 3600e3;
-const yest = new Date(mskNow - 86400e3).toISOString().slice(0, 10);
+// проверяем матчи за последние 2 дня (48 часов)
+const cutoffDate = new Date(mskNow - 48 * 3600e3).toISOString().slice(0, 10);
 
 // fetch с таймаутом и ретраями — сетевые сбои не должны терять результаты
 async function fetchJson(url, tries = 3) {
@@ -20,50 +22,72 @@ async function fetchJson(url, tries = 3) {
   }
 }
 
-// собираем файлы с прогнозами за вчера
+// собираем все файлы с прогнозами (текущий + архив) и отбираем те, где есть матчи в нужном окне
 const sources = [];
-if (existsSync('data/predictions.json')) {
+const checkFile = (file) => {
   try {
-    const p = JSON.parse(readFileSync('data/predictions.json', 'utf8'));
-    if (p.date === yest) sources.push({ file: 'data/predictions.json', data: p });
-  } catch (e) { console.warn('bad predictions.json'); }
+    const p = JSON.parse(readFileSync(file, 'utf8'));
+    if (!Array.isArray(p.predictions)) return;
+    // проверяем, есть ли в этом файле матчи за последние 48 часов
+    const hasRecent = p.predictions.some(pred => {
+      const matchDate = pred.matchDate ? pred.matchDate.slice(0, 10) : null;
+      return matchDate && matchDate >= cutoffDate;
+    });
+    if (hasRecent) {
+      sources.push({ file, data: p });
+    }
+  } catch (e) { console.warn('bad file', file, e); }
+};
+
+if (existsSync('data/predictions.json')) {
+  checkFile('data/predictions.json');
 }
 if (existsSync('data/archive')) {
   for (const f of readdirSync('data/archive')) {
     if (!f.endsWith('.json')) continue;
-    try {
-      const p = JSON.parse(readFileSync(`data/archive/${f}`, 'utf8'));
-      if (p.date === yest) sources.push({ file: `data/archive/${f}`, data: p });
-    } catch (e) { console.warn('bad archive file', f); }
+    checkFile(`data/archive/${f}`);
   }
 }
-if (!sources.length) { console.log(`no predictions for ${yest}`); process.exit(0); }
+if (!sources.length) { console.log(`no predictions with matches after ${cutoffDate}`); process.exit(0); }
 
 const results = [];
+const processedIds = new Set(); // чтобы не обрабатывать один прогноз дважды
+
 for (const src of sources) {
-  if (src.data.resolved) continue;
-  let pending = false; // есть матчи, по которым вердикта ещё нет — файл оставляем неразрешённым
   for (const p of src.data.predictions) {
+    // пропускаем матчи старше 48 часов
+    const matchDate = p.matchDate ? p.matchDate.slice(0, 10) : null;
+    if (!matchDate || matchDate < cutoffDate) continue;
+
+    // пропускаем уже обработанные
+    const key = p.date + ':' + p.id;
+    if (processedIds.has(key)) continue;
+    processedIds.add(key);
+
     try {
       const j = await fetchJson(`https://site.api.espn.com/apis/site/v2/sports/${p.lgKey}/summary?event=${p.id}`);
       const comp = j.header?.competitions?.[0];
-      if (!comp) { pending = true; continue; }
+      if (!comp) continue;
+
       const desc = (comp.status?.type?.description || '').toLowerCase();
       // отмена/перенос — это не «мисс», а возврат (push), иначе портим статистику
       if (/cancel|postpon|abandon|suspend|forfeit/.test(desc)) {
         results.push({
-          date: yest, id: p.id, kind: p.tier === 'pro' ? 'pro' : 'free',
+          date: matchDate, id: p.id, kind: p.tier === 'pro' ? 'pro' : 'free',
           sport: p.sport, league: p.lgName, home: p.home, away: p.away,
           market: p.market, confidence: p.confidence,
           score: '—', result: 'push',
         });
         continue;
       }
-      if (comp.status?.type?.state !== 'post') { pending = true; continue; } // ещё не сыгран
+
+      if (comp.status?.type?.state !== 'post') continue; // ещё не сыгран
+
       const H = comp.competitors.find(c => c.homeAway === 'home');
       const A = comp.competitors.find(c => c.homeAway === 'away');
       const hs = Number(H?.score), as = Number(A?.score);
-      if (isNaN(hs) || isNaN(as)) { pending = true; continue; }
+      if (isNaN(hs) || isNaN(as)) continue;
+
       let r;
       switch (p.market) {
         case 'П1': r = hs > as ? 'hit' : 'miss'; break;
@@ -75,22 +99,14 @@ for (const src of sources) {
         default: r = 'push'; // незнакомый рынок — возврат, а не автоматический «мисс»
       }
       results.push({
-        date: yest, id: p.id, kind: p.tier === 'pro' ? 'pro' : 'free',
+        date: matchDate, id: p.id, kind: p.tier === 'pro' ? 'pro' : 'free',
         sport: p.sport, league: p.lgName, home: p.home, away: p.away,
         market: p.market, confidence: p.confidence,
         score: `${hs}:${as}`, result: r,
       });
     } catch (err) {
-      pending = true; // сеть/5xx — попробуем в следующем прогоне
       console.warn('skip', p.id, String(err));
     }
-  }
-  // помечаем источник разрешённым только когда вердикт есть по всем матчам
-  if (!pending) {
-    src.data.resolved = true;
-    writeFileSync(src.file, JSON.stringify(src.data, null, 2));
-  } else {
-    console.log(`pending: не все матчи в ${src.file} сыграли — вернёмся в следующем прогоне`);
   }
 }
 
@@ -107,4 +123,4 @@ hist = hist.slice(-400);
 writeFileSync(file, JSON.stringify(hist, null, 2));
 
 const hits = results.filter(x => x.result === 'hit').length;
-console.log(`OK: resolved ${results.length} new results (${hits} hit) for ${yest}; total history ${hist.length}`);
+console.log(`OK: resolved ${results.length} new results (${hits} hit) for matches after ${cutoffDate}; total history ${hist.length}`);
