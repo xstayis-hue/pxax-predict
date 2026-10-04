@@ -390,27 +390,37 @@ if (existsSync('data/predictions.json')) {
   } catch (e) { console.warn('archive skip:', String(e)); }
 }
 
+// порог уверенности: ниже него прогноз не показываем вовсе.
+// free — не ниже 55%, pro (value) — не ниже 60%: слабые сигналы только портят доверие.
+const FREE_MIN = 55, PRO_MIN = 60;
+const pool = preds.filter(p => p.confidence >= FREE_MIN);
+if (!pool.length) {
+  console.error(`FAIL: 0 predictions with confidence >= ${FREE_MIN}% — все сигналы ниже порога. Прежние данные не тронуты.`);
+  process.exit(1);
+}
+
 // тарификация: PRO = value-ставки (реальный перевес над линией), FREE = самые надёжные.
-// value-ставка должна быть уверенной (>52%), но не «паровозной» — так подписка покупает смысл, а не сортировку.
-const valueBets = preds.filter(p => p.value && p.confidence >= 52).sort((a, b) => b.edge - a.edge);
-const rest = preds.filter(p => !valueBets.includes(p));
-const proCount = Math.min(5, Math.max(2, Math.round(preds.length * 0.4)));
+// в PRO попадают только value-ставки с уверенностью >= PRO_MIN; остальное — бесплатно.
+const valueBets = pool.filter(p => p.value && p.confidence >= PRO_MIN).sort((a, b) => b.edge - a.edge);
+const proCount = Math.min(5, Math.max(2, Math.round(pool.length * 0.4)));
 const proIds = new Set(valueBets.slice(0, proCount).map(p => p.id));
-// если value-ставок мало — добираем самыми уверенными
-for (const p of rest.sort((a, b) => b.confidence - a.confidence)) {
+// если value-ставок мало — добираем самыми уверенными (но не ниже PRO_MIN)
+for (const p of pool.filter(p => !proIds.has(p.id) && p.confidence >= PRO_MIN).sort((a, b) => b.confidence - a.confidence)) {
   if (proIds.size >= proCount) break;
   proIds.add(p.id);
 }
-preds.sort((a, b) => b.confidence - a.confidence);
-preds.forEach(p => { p.tier = proIds.has(p.id) ? 'pro' : 'free'; });
+const final = pool
+  .map(p => ({ ...p, tier: proIds.has(p.id) ? 'pro' : 'free' }))
+  .sort((a, b) => b.confidence - a.confidence);
 
 mkdirSync('data', { recursive: true });
 writeFileSync('data/predictions.json', JSON.stringify({
   date: dateStr,
   generated: new Date().toISOString(),
   model: 'poisson-v2 @ ESPN standings + odds',
-  count: preds.length,
-  valueCount: preds.filter(p => p.value).length,
-  predictions: preds,
+  count: final.length,
+  valueCount: final.filter(p => p.value).length,
+  thresholds: { freeMin: FREE_MIN, proMin: PRO_MIN },
+  predictions: final,
 }, null, 2));
-console.log(`OK: ${preds.length} predictions (pro=${preds.filter(p => p.tier === 'pro').length}, free=${preds.filter(p => p.tier === 'free').length}, value=${preds.filter(p => p.value).length}) for ${dateStr}`);
+console.log(`OK: ${final.length} predictions (pro=${final.filter(p => p.tier === 'pro').length}, free=${final.filter(p => p.tier === 'free').length}, value=${final.filter(p => p.value).length}) for ${dateStr} [free>=${FREE_MIN}%, pro>=${PRO_MIN}%]`);

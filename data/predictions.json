@@ -1,9 +1,13 @@
 {
   "date": "2026-10-04",
-  "generated": "2026-10-04T20:23:01.524Z",
+  "generated": "2026-10-04T20:41:38.887Z",
   "model": "poisson-v2 @ ESPN standings + odds",
-  "count": 9,
+  "count": 8,
   "valueCount": 2,
+  "thresholds": {
+    "freeMin": 55,
+    "proMin": 60
+  },
   "predictions": [
     {
       "id": "401908947",
@@ -283,47 +287,6 @@
       ],
       "record": "2-0-0 / 1-0-1",
       "note": "Ожидаемые шайбы: 2,89 : 3,43 (модель по таблице лиги). Исходы: П1 42% · П2 57%. Модель даёт 57% на «П2». Линия 2,42 недооценивает исход: перевес модели +43%.",
-      "tier": "pro"
-    },
-    {
-      "id": "401892446",
-      "lgKey": "hockey/nhl",
-      "lgName": "NHL",
-      "sport": "🏒",
-      "type": "us",
-      "home": "Boston Bruins",
-      "away": "Ottawa Senators",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/bos.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/ott.png",
-      "time": "02:30 МСК",
-      "matchDate": "2026-10-05T23:30Z",
-      "market": "П2",
-      "confidence": 50,
-      "modelProb": 0.501,
-      "odds": 1.9090909090909092,
-      "impliedProb": 0.5,
-      "edge": 0.001,
-      "value": false,
-      "expected": {
-        "home": 3.02,
-        "away": 3.11
-      },
-      "markets": [
-        {
-          "market": "П2",
-          "prob": 50,
-          "odds": 1.9090909090909092,
-          "edge": 0
-        },
-        {
-          "market": "П1",
-          "prob": 49,
-          "odds": 1.9090909090909092,
-          "edge": -2
-        }
-      ],
-      "record": "2-1-0 / 1-0-0",
-      "note": "Ожидаемые шайбы: 3,02 : 3,11 (модель по таблице лиги). Исходы: П1 49% · П2 50%. Модель даёт 50% на «П2». Линия 1,91 примерно совпадает с моделью.",
       "tier": "free"
     }
   ]

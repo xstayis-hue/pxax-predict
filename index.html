@@ -626,35 +626,86 @@
 
   /* ---------- PXAX ecosystem ---------- */
   .ecosystem {
-    margin: 16px 16px 0; padding: 14px;
-    background: linear-gradient(135deg, rgba(0,229,255,.08), rgba(255,201,60,.06));
+    margin: 16px 16px 0; padding: 16px; position: relative; overflow: hidden;
     border-radius: var(--radius);
-    border: 1px solid rgba(0,229,255,.2);
+    border: 1px solid rgba(139,163,199,.16);
+    background:
+      radial-gradient(120% 130% at 0% 0%, rgba(0,229,255,.10), transparent 55%),
+      radial-gradient(120% 130% at 100% 0%, rgba(255,201,60,.08), transparent 55%),
+      rgba(18,23,40,.55);
+  }
+  /* тонкая сетка на фоне — «техно»-подложка */
+  .ecosystem::before {
+    content:''; position:absolute; inset:0; pointer-events:none;
+    background-image:
+      linear-gradient(rgba(139,163,199,.055) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(139,163,199,.055) 1px, transparent 1px);
+    background-size: 22px 22px;
+    -webkit-mask-image: radial-gradient(circle at 50% 25%, #000, transparent 78%);
+    mask-image: radial-gradient(circle at 50% 25%, #000, transparent 78%);
   }
   .ecosystem h4 {
-    font-size:12px; color:var(--neon); letter-spacing:.12em;
-    text-transform:uppercase; margin-bottom:10px; display:flex; align-items:center; gap:6px;
+    position:relative; font-size:11.5px; color:var(--neon); letter-spacing:.14em;
+    text-transform:uppercase; margin-bottom:12px; display:flex; align-items:center; gap:7px;
   }
-  .eco-grid {
-    display:grid; grid-template-columns:1fr 1fr; gap:8px;
+  .ecosystem h4::after {
+    content:''; flex:1; height:1px;
+    background:linear-gradient(90deg, rgba(0,229,255,.35), transparent);
   }
+  .eco-grid { display:grid; grid-template-columns:1fr 1fr; gap:9px; position:relative; }
   .eco-item {
-    background:var(--card); border-radius:12px; padding:10px;
-    border:1px solid rgba(139,163,199,.15); text-decoration:none;
-    display:flex; flex-direction:column; gap:4px; transition:all .2s;
+    position:relative; overflow:hidden; isolation:isolate;
+    --accent:#00e5ff;
+    background:linear-gradient(180deg, rgba(23,29,51,.92), rgba(15,20,36,.92));
+    border-radius:14px; padding:12px 11px 11px;
+    border:1px solid rgba(139,163,199,.16); text-decoration:none;
+    display:flex; flex-direction:column; gap:7px;
+    transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
   }
-  .eco-item:hover {
-    border-color:var(--neon); transform:translateY(-2px);
-    box-shadow:0 4px 12px rgba(0,229,255,.2);
+  /* акцентное свечение в углу — цвет зависит от сервиса */
+  .eco-item::before {
+    content:''; position:absolute; top:-30%; right:-25%; width:110px; height:110px;
+    background:radial-gradient(circle, var(--accent), transparent 68%);
+    opacity:.16; pointer-events:none; transition:opacity .18s ease;
   }
-  .eco-item .icon { font-size:20px; }
-  .eco-item .name { font-size:11px; font-weight:700; color:var(--text); }
-  .eco-item .desc { font-size:9px; color:var(--muted); line-height:1.3; }
+  .eco-item:hover { transform:translateY(-3px); border-color:var(--accent); box-shadow:0 12px 26px -14px var(--accent); }
+  .eco-item:hover::before { opacity:.3; }
+  .eco-item .icon {
+    width:34px; height:34px; border-radius:11px; flex:none;
+    display:flex; align-items:center; justify-content:center; font-size:17px;
+    background:rgba(139,163,199,.09); border:1px solid rgba(139,163,199,.2);
+    box-shadow: inset 0 0 14px rgba(139,163,199,.06);
+  }
+  .eco-item .name { display:flex; align-items:center; gap:5px; font-size:11.5px; font-weight:800; color:var(--text); letter-spacing:.02em; }
+  .eco-item .desc { font-size:9px; color:var(--muted); line-height:1.3; letter-spacing:.03em; }
+  /* фирменные акценты сервисов */
+  .eco-item.ai      { --accent:#9d6bff; }
+  .eco-item.ai .icon      { background:rgba(157,107,255,.14); border-color:rgba(157,107,255,.32); }
+  .eco-item.predict { --accent:#00e5ff; }
+  .eco-item.predict .icon { background:rgba(0,229,255,.12); border-color:rgba(0,229,255,.3); }
+  .eco-item.coin    { --accent:#ffc93c; }
+  .eco-item.coin .icon    { background:rgba(255,201,60,.14); border-color:rgba(255,201,60,.34); }
+  .eco-item.coin .name    { color:var(--gold); }
+  .eco-item.vpn     { --accent:#41e6c8; }
+  .eco-item.vpn .icon     { background:rgba(65,230,200,.13); border-color:rgba(65,230,200,.3); }
+  /* блеск по «вайбкойну», чтобы карточка смотрелась живее остальных */
+  .eco-item.coin::after {
+    content:''; position:absolute; inset:0; pointer-events:none;
+    background:linear-gradient(115deg, transparent 30%, rgba(255,201,60,.14) 48%, transparent 66%);
+    background-size:250% 100%; background-position:120% 0;
+    animation: ecoSheen 3.6s ease-in-out infinite;
+  }
+  @keyframes ecoSheen { 0%,55% { background-position:120% 0; } 85%,100% { background-position:-40% 0; } }
+  .eco-pill {
+    font-size:8px; font-weight:800; letter-spacing:.08em; text-transform:uppercase;
+    color:#0a0d16; background:linear-gradient(135deg,var(--gold),#ffe08a);
+    padding:2px 6px; border-radius:8px;
+  }
   .eco-badge {
-    display:inline-block; margin-top:8px; padding:4px 10px;
-    background:rgba(255,201,60,.12); border:1px solid rgba(255,201,60,.3);
+    display:inline-block; margin-top:10px; padding:4px 11px; position:relative;
+    background:rgba(255,201,60,.1); border:1px solid rgba(255,201,60,.28);
     border-radius:20px; font-size:9px; color:var(--gold); font-weight:700;
-    letter-spacing:.05em;
+    letter-spacing:.06em;
   }
 </style>
 </head>
@@ -720,28 +771,28 @@
     <h3 id="payProTitle">💎 Ещё 5 прогнозов — у Pro-ИИ</h3>
     <p>Модель сравнивает вероятности с линией букмекера и берёт рынки с перевесом (value). Плюс история без замков</p>
     <button class="btn-trial" id="btnTrialHome" style="display:none" onclick="startTrial()">🎁 Попробовать бесплатно · 3 дня</button>
-    <button class="btn-sub" onclick="goSubscribe()">Открыть PRO · 777 ⭐/мес</button>
+    <button class="btn-sub" onclick="goSubscribe()">Открыть PRO · 3 ⭐/мес</button>
   </div>
 
   <div class="ecosystem">
     <h4>🌐 Экосистема PXAX</h4>
     <div class="eco-grid">
-      <a class="eco-item" href="https://xstayis-hue.github.io/PxAxAi/" target="_blank" rel="noopener">
+      <a class="eco-item ai" href="https://xstayis-hue.github.io/PxAxAi/" target="_blank" rel="noopener">
         <span class="icon">🤖</span>
         <span class="name">PxAxAi</span>
         <span class="desc">3D AI-компаньон</span>
       </a>
-      <a class="eco-item" href="https://xstayis-hue.github.io/pxax-predict/" target="_blank" rel="noopener">
+      <a class="eco-item predict" href="https://xstayis-hue.github.io/pxax-predict/" target="_blank" rel="noopener">
         <span class="icon">🎯</span>
         <span class="name">Прогнозы</span>
         <span class="desc">AI-прогнозы на спорт</span>
       </a>
-      <a class="eco-item" href="https://xstayis-hue.github.io/PHXcoin/" target="_blank" rel="noopener">
-        <span class="icon">💎</span>
-        <span class="name">PHXcoin</span>
-        <span class="desc">Мем-токен TON</span>
+      <a class="eco-item coin" href="https://xstayis-hue.github.io/PHXcoin/" target="_blank" rel="noopener">
+        <span class="icon">🪙</span>
+        <span class="name">VibeCoin <span class="eco-pill">VPHX</span></span>
+        <span class="desc">Мем-токен TON · pre-launch</span>
       </a>
-      <a class="eco-item" href="https://github.com/xstayis-hue/Vph" target="_blank" rel="noopener">
+      <a class="eco-item vpn" href="https://xstayis-hue.github.io/Vph/" target="_blank" rel="noopener">
         <span class="icon">🛡️</span>
         <span class="name">Vph</span>
         <span class="desc">VPN-подписка</span>
@@ -753,7 +804,7 @@
   <div class="footer">
     <b>18+</b> · Играйте ответственно. Ставки — это риск.<br>
     Реклама букмекера-партнёра · есть риск проигрыша
-    <br><span class="age">18+</span> · v <span class="ver">0.5.0</span> · Экосистема PXAX
+    <br><span class="age">18+</span> · v <span class="ver">0.6.0</span> · Экосистема PXAX
   </div>
 </main>
 
@@ -777,28 +828,28 @@
     <h3>💎 Станьте PRO</h3>
     <p>Value-ставки Pro-ИИ каждый день: модель находит рынки, где линия букмекера занижает вероятность. Плюс история без замков</p>
     <button class="btn-trial" id="btnTrialPro" style="display:none" onclick="startTrial()">🎁 Попробовать бесплатно · 3 дня</button>
-    <button class="btn-sub" onclick="goSubscribe()">Оформить PRO · 777 ⭐/мес</button>
+    <button class="btn-sub" onclick="goSubscribe()">Оформить PRO · 3 ⭐/мес</button>
   </div>
 
   <div class="ecosystem">
     <h4>🌐 Экосистема PXAX</h4>
     <div class="eco-grid">
-      <a class="eco-item" href="https://xstayis-hue.github.io/PxAxAi/" target="_blank" rel="noopener">
+      <a class="eco-item ai" href="https://xstayis-hue.github.io/PxAxAi/" target="_blank" rel="noopener">
         <span class="icon">🤖</span>
         <span class="name">PxAxAi</span>
         <span class="desc">3D AI-компаньон</span>
       </a>
-      <a class="eco-item" href="https://xstayis-hue.github.io/pxax-predict/" target="_blank" rel="noopener">
+      <a class="eco-item predict" href="https://xstayis-hue.github.io/pxax-predict/" target="_blank" rel="noopener">
         <span class="icon">🎯</span>
         <span class="name">Прогнозы</span>
         <span class="desc">AI-прогнозы на спорт</span>
       </a>
-      <a class="eco-item" href="https://xstayis-hue.github.io/PHXcoin/" target="_blank" rel="noopener">
-        <span class="icon">💎</span>
-        <span class="name">PHXcoin</span>
-        <span class="desc">Мем-токен TON</span>
+      <a class="eco-item coin" href="https://xstayis-hue.github.io/PHXcoin/" target="_blank" rel="noopener">
+        <span class="icon">🪙</span>
+        <span class="name">VibeCoin <span class="eco-pill">VPHX</span></span>
+        <span class="desc">Мем-токен TON · pre-launch</span>
       </a>
-      <a class="eco-item" href="https://github.com/xstayis-hue/Vph" target="_blank" rel="noopener">
+      <a class="eco-item vpn" href="https://xstayis-hue.github.io/Vph/" target="_blank" rel="noopener">
         <span class="icon">🛡️</span>
         <span class="name">Vph</span>
         <span class="desc">VPN-подписка</span>
@@ -808,7 +859,7 @@
   </div>
 
   <div class="footer">
-    Pro-ИИ тоже ошибается: <b>вероятность не 100%</b>. Играйте ответственно, <b>18+</b>. · v <span class="ver">0.5.0</span> · Экосистема PXAX
+    Pro-ИИ тоже ошибается: <b>вероятность не 100%</b>. Играйте ответственно, <b>18+</b>. · v <span class="ver">0.6.0</span> · Экосистема PXAX
   </div>
 </main>
 
@@ -838,22 +889,22 @@
   <div class="ecosystem">
     <h4>🌐 Экосистема PXAX</h4>
     <div class="eco-grid">
-      <a class="eco-item" href="https://xstayis-hue.github.io/PxAxAi/" target="_blank" rel="noopener">
+      <a class="eco-item ai" href="https://xstayis-hue.github.io/PxAxAi/" target="_blank" rel="noopener">
         <span class="icon">🤖</span>
         <span class="name">PxAxAi</span>
         <span class="desc">3D AI-компаньон</span>
       </a>
-      <a class="eco-item" href="https://xstayis-hue.github.io/pxax-predict/" target="_blank" rel="noopener">
+      <a class="eco-item predict" href="https://xstayis-hue.github.io/pxax-predict/" target="_blank" rel="noopener">
         <span class="icon">🎯</span>
         <span class="name">Прогнозы</span>
         <span class="desc">AI-прогнозы на спорт</span>
       </a>
-      <a class="eco-item" href="https://xstayis-hue.github.io/PHXcoin/" target="_blank" rel="noopener">
-        <span class="icon">💎</span>
-        <span class="name">PHXcoin</span>
-        <span class="desc">Мем-токен TON</span>
+      <a class="eco-item coin" href="https://xstayis-hue.github.io/PHXcoin/" target="_blank" rel="noopener">
+        <span class="icon">🪙</span>
+        <span class="name">VibeCoin <span class="eco-pill">VPHX</span></span>
+        <span class="desc">Мем-токен TON · pre-launch</span>
       </a>
-      <a class="eco-item" href="https://github.com/xstayis-hue/Vph" target="_blank" rel="noopener">
+      <a class="eco-item vpn" href="https://xstayis-hue.github.io/Vph/" target="_blank" rel="noopener">
         <span class="icon">🛡️</span>
         <span class="name">Vph</span>
         <span class="desc">VPN-подписка</span>
@@ -937,22 +988,22 @@
   <div class="ecosystem">
     <h4>🌐 Экосистема PXAX</h4>
     <div class="eco-grid">
-      <a class="eco-item" href="https://xstayis-hue.github.io/PxAxAi/" target="_blank" rel="noopener">
+      <a class="eco-item ai" href="https://xstayis-hue.github.io/PxAxAi/" target="_blank" rel="noopener">
         <span class="icon">🤖</span>
         <span class="name">PxAxAi</span>
         <span class="desc">3D AI-компаньон</span>
       </a>
-      <a class="eco-item" href="https://xstayis-hue.github.io/pxax-predict/" target="_blank" rel="noopener">
+      <a class="eco-item predict" href="https://xstayis-hue.github.io/pxax-predict/" target="_blank" rel="noopener">
         <span class="icon">🎯</span>
         <span class="name">Прогнозы</span>
         <span class="desc">AI-прогнозы на спорт</span>
       </a>
-      <a class="eco-item" href="https://xstayis-hue.github.io/PHXcoin/" target="_blank" rel="noopener">
-        <span class="icon">💎</span>
-        <span class="name">PHXcoin</span>
-        <span class="desc">Мем-токен TON</span>
+      <a class="eco-item coin" href="https://xstayis-hue.github.io/PHXcoin/" target="_blank" rel="noopener">
+        <span class="icon">🪙</span>
+        <span class="name">VibeCoin <span class="eco-pill">VPHX</span></span>
+        <span class="desc">Мем-токен TON · pre-launch</span>
       </a>
-      <a class="eco-item" href="https://github.com/xstayis-hue/Vph" target="_blank" rel="noopener">
+      <a class="eco-item vpn" href="https://xstayis-hue.github.io/Vph/" target="_blank" rel="noopener">
         <span class="icon">🛡️</span>
         <span class="name">Vph</span>
         <span class="desc">VPN-подписка</span>
@@ -1008,7 +1059,7 @@ async function loadReal() {
 
 /* ================= settings ================= */
 const CONFIG = {
-  VERSION: '0.5.0', // версия приложения для отслеживания обновлений
+  VERSION: '0.6.0', // версия приложения для отслеживания обновлений
   SUBSCRIBE_URL: 'https://t.me/pxaxbetai_bot',
   API_BASE: 'https://site-technician-lee-aerial.trycloudflare.com', // адрес бэкенда (cloudflared tunnel), обновляется при перезапуске туннеля
   FREE_DAILY: 5,   // бесплатных прогнозов в день
@@ -1022,7 +1073,7 @@ const CONFIG = {
     pxaxai: 'https://xstayis-hue.github.io/PxAxAi/',
     predict: 'https://xstayis-hue.github.io/pxax-predict/',
     phxcoin: 'https://xstayis-hue.github.io/PHXcoin/',
-    vph: 'https://github.com/xstayis-hue/Vph',
+    vph: 'https://xstayis-hue.github.io/Vph/',
   },
 };
 
@@ -1242,7 +1293,7 @@ if (lastVersion !== CONFIG.VERSION) {
     // версия изменилась - покажем уведомление при первом рендере
     setTimeout(() => {
       toast(`🚀 Обновлено до v${CONFIG.VERSION}`);
-      setTimeout(() => toast('🧠 Модель Пуассона + value-ставки'), 2500);
+      setTimeout(() => toast('🌐 Обновлён блок экосистемы'), 2500);
     }, 2000);
   }
 }
@@ -1668,8 +1719,9 @@ async function goSubscribe() {
 }
 // реальный PRO-статус с бэкенда (сервер — источник правды)
 let TRIAL = { available: null };
-// цена из /status (источник правды — config.json сервера); 777 — только заглушка до ответа
-let PRICE = 777;
+// цена из /status (источник правды — config.json сервера); 3 — только заглушка до ответа
+// (временно снижена с 777, пока оплата может отваливаться из-за туннельного API_BASE)
+let PRICE = 3;
 function syncPriceLabels() {
   document.querySelectorAll('button.btn-sub[onclick="goSubscribe()"]').forEach(b => {
     b.textContent = b.textContent.replace(/\d+(?=\s*⭐)/, PRICE);
@@ -1737,7 +1789,7 @@ document.addEventListener('click', e => {
 });
 // ---- управление подпиской (bottom-sheet) ----
 async function openManage() {
-  let st = { pro: store.pro, until: null, payments: [], price: 777, days: 30, demo: !isTg };
+  let st = { pro: store.pro, until: null, payments: [], price: 3, days: 30, demo: !isTg };
   if (isTg && user && CONFIG.API_BASE && !CONFIG.API_BASE.startsWith('__')) {
     try {
       const r = await fetch(CONFIG.API_BASE + '/status?uid=' + user.id +

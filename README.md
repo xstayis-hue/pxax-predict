@@ -40,7 +40,7 @@
 
 1. `server/config.json` (не коммитится):
    ```json
-   { "TOKEN": "токен бота", "STARS_PRICE": 777, "PORT": 8787, "MINIAPP_URL": "https://<адрес мини-аппа>/" }
+   { "TOKEN": "токен бота", "STARS_PRICE": 3, "PORT": 8787, "MINIAPP_URL": "https://<адрес мини-аппа>/" }
    ```
 2. `node server/server.js` (или `start-payments.bat`)
 3. Если задан `MINIAPP_URL`, при старте бот сам поставит кнопку мини-аппа в чат (`setChatMenuButton`) и команды `/start`, `/subscribe`. Если ключ не задан — кнопка не трогается (чтобы не перебить настроенную через BotFather).
