@@ -1,1 +1,67 @@
-[]
+[
+  {
+    "date": "2026-10-04",
+    "id": "401892441",
+    "kind": "pro",
+    "sport": "🏒",
+    "league": "NHL",
+    "home": "San Jose Sharks",
+    "away": "Los Angeles Kings",
+    "market": "П1",
+    "confidence": 69,
+    "score": "5:4",
+    "result": "hit"
+  },
+  {
+    "date": "2026-10-04",
+    "id": "401892440",
+    "kind": "pro",
+    "sport": "🏒",
+    "league": "NHL",
+    "home": "Vancouver Canucks",
+    "away": "Calgary Flames",
+    "market": "П1",
+    "confidence": 62,
+    "score": "4:1",
+    "result": "hit"
+  },
+  {
+    "date": "2026-10-04",
+    "id": "401892438",
+    "kind": "free",
+    "sport": "🏒",
+    "league": "NHL",
+    "home": "Nashville Predators",
+    "away": "Dallas Stars",
+    "market": "П1",
+    "confidence": 52,
+    "score": "2:1",
+    "result": "hit"
+  },
+  {
+    "date": "2026-10-04",
+    "id": "401892439",
+    "kind": "free",
+    "sport": "🏒",
+    "league": "NHL",
+    "home": "Colorado Avalanche",
+    "away": "St. Louis Blues",
+    "market": "П1",
+    "confidence": 52,
+    "score": "6:1",
+    "result": "hit"
+  },
+  {
+    "date": "2026-10-04",
+    "id": "401891814",
+    "kind": "free",
+    "sport": "🏒",
+    "league": "NHL",
+    "home": "Minnesota Wild",
+    "away": "Boston Bruins",
+    "market": "П2",
+    "confidence": 51,
+    "score": "4:1",
+    "result": "miss"
+  }
+]
