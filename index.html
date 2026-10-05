@@ -1135,7 +1135,7 @@ async function loadReal() {
 
 /* ================= settings ================= */
 const CONFIG = {
-  VERSION: '0.7.1', // версия приложения для отслеживания обновлений
+  VERSION: '0.7.2', // версия приложения для отслеживания обновлений
   SUBSCRIBE_URL: 'https://t.me/pxaxbetai_bot',
   API_BASE: 'https://site-technician-lee-aerial.trycloudflare.com', // адрес бэкенда (cloudflared tunnel), обновляется при перезапуске туннеля
   FREE_DAILY: 5,   // бесплатных прогнозов в день
@@ -1445,7 +1445,7 @@ if (lastVersion !== CONFIG.VERSION) {
     // версия изменилась - покажем уведомление при первом рендере
     setTimeout(() => {
       toast(`🚀 Обновлено до v${CONFIG.VERSION}`);
-      setTimeout(() => toast('🔄 Витрина теперь обновляется сама — без перезапуска'), 2500);
+      setTimeout(() => toast('📈 Без плашек «недостоверно»: живой % + бэктест модели за 90 дней'), 2500);
     }, 2000);
   }
 }
@@ -1660,20 +1660,12 @@ function render() {
     rateEl.textContent = '—';
     if (rateLbl) rateLbl.textContent = 'заходов 14д';
   }
-  // «собираем данные» — честная плашка, пока живой статистики мало
+  // Плашка «собираем данные / цифры недостоверны» убрана (v0.7.2):
+  // каждая цифра и так считается по реальным завершённым матчам (data/results.json,
+  // ESPN final scores), а пометка «недостоверно» мешала объективно оценивать потенциал.
+  // Размер выборки всё равно виден в подписи счётчика («заходов · N рез.»).
   const cEl = document.getElementById('collectChip');
-  const cTxt = document.getElementById('collectTxt');
-  if (cEl && cTxt) {
-    if (hasReal && liveN > 0 && liveN < 20) {
-      cEl.hidden = false;
-      cTxt.innerHTML = `Живая статистика ещё <b>собирается</b>: сыграно ${liveN} из 20. Пока это первые результаты — цифры недостоверны, ориентируйся на бэктест модели.`;
-    } else if (!hasReal && bt) {
-      cEl.hidden = false;
-      cTxt.innerHTML = `Модель в режиме <b>сбора данных</b>: завершённых матчей пока нет. Ориентир — бэктест за ${bt.windowDays} дней: ${Math.round(bt.hitRate * 100)}% на ${bt.hits}/${bt.signals} сигналов (без заглядывания в будущее).`;
-    } else {
-      cEl.hidden = true;
-    }
-  }
+  if (cEl) cEl.hidden = true;
   document.getElementById('statFree').textContent = freeToday.length;
   document.getElementById('statProCnt').textContent = proToday.length;
   document.getElementById('hHits').textContent = hasReal ? statsView.hits : '—';

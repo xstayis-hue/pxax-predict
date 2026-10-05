@@ -1,7 +1,7 @@
 name: daily-backtest
 on:
   schedule:
-    - cron: '10 1 * * *' # ежедневно, 04:10 МСК, вне пика (бэктест — ~340 запросов к ESPN, чаще не нужно)
+    - cron: '10 1 * * *' # ежедневно, 04:10 МСК, вне пика (бэктест — ~720 запросов к ESPN, чаще не нужно)
   workflow_dispatch:
 permissions:
   contents: write
@@ -13,7 +13,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Бэктест модели по последним 42 дням
+      - name: Бэктест модели по последним 90 дням
         run: node scripts/backtest.mjs
       - name: Commit data
         run: |
