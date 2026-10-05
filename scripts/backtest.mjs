@@ -80,6 +80,12 @@ function marketHit(market, hs, as) {
     case 'П1': return hs > as;
     case 'П2': return as > hs;
     case 'Х': return hs === as;
+    case 'Х2': return as >= hs;
+    case 'ТБ 2.5': return hs + as > 2.5;
+    case 'ТМ 2.5': return hs + as < 2.5;
+    default: return null;
+  }
+}
 const byLeague = {};
 const leagueNames = [];
 let totalAnalyzed = 0, totalSignals = 0, totalHits = 0, brierSum = 0;
@@ -177,9 +183,3 @@ const report = {
 mkdirSync('data', { recursive: true });
 writeFileSync('data/backtest.json', JSON.stringify(report, null, 2));
 console.log('OK: backtest', report.windowDays + 'd,', report.matches + ' матчей,', report.signals + ' сигналов, hit ' + report.hitRate + ' (Brier ' + report.brier + ')');
-    case 'Х2': return as >= hs;
-    case 'ТБ 2.5': return hs + as > 2.5;
-    case 'ТМ 2.5': return hs + as < 2.5;
-    default: return null;
-  }
-}
