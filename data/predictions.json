@@ -1,9 +1,9 @@
 {
   "date": "2026-10-05",
-  "generated": "2026-10-05T05:24:30.316Z",
+  "generated": "2026-10-05T14:25:08.341Z",
   "model": "pxax-v2 @ ESPN standings + odds",
-  "count": 11,
-  "valueCount": 3,
+  "count": 13,
+  "valueCount": 4,
   "thresholds": {
     "freeMin": 55,
     "proMin": 60,
@@ -215,6 +215,47 @@
       "tier": "pro"
     },
     {
+      "id": "401841590",
+      "lgKey": "soccer/arg.1",
+      "lgName": "Аргентина",
+      "sport": "⚽",
+      "type": "soccer",
+      "home": "Estudiantes de La Plata",
+      "away": "Gimnasia (Mendoza)",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/8.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/11972.png",
+      "time": "01:00 МСК",
+      "matchDate": "2026-10-05T22:00Z",
+      "market": "Х2",
+      "confidence": 64,
+      "modelProb": 0.645,
+      "odds": 2.170391061452514,
+      "impliedProb": 0.434,
+      "edge": 0.484,
+      "value": true,
+      "expected": {
+        "home": 1.19,
+        "away": 1.21
+      },
+      "markets": [
+        {
+          "market": "Х2",
+          "prob": 64,
+          "odds": 2.170391061452514,
+          "edge": 48
+        },
+        {
+          "market": "ТМ 2.5",
+          "prob": 57,
+          "odds": 1.6451612903225805,
+          "edge": 0
+        }
+      ],
+      "record": "3-1-6 / 5-2-3",
+      "note": "Ожидаемые голы: 1,19 : 1,21 (модель таблица лиги). Исходы: П1 36% · Х 28% · П2 37%. Модель даёт 64% на «Х2». Линия 2,17 недооценивает исход: перевес модели +48%. Дополнительно модель видит «ТМ 2.5» с вероятностью 57%.",
+      "tier": "pro"
+    },
+    {
       "id": "401898388",
       "lgKey": "basketball/nba",
       "lgName": "NBA",
@@ -264,9 +305,9 @@
       "market": "П1",
       "confidence": 64,
       "modelProb": 0.638,
-      "odds": 1.5208333333333335,
-      "impliedProb": 0.631,
-      "edge": 0.01,
+      "odds": 1.4587155963302751,
+      "impliedProb": 0.657,
+      "edge": -0.03,
       "value": false,
       "expected": {
         "home": 3.77,
@@ -276,12 +317,12 @@
         {
           "market": "П1",
           "prob": 64,
-          "odds": 1.5208333333333335,
-          "edge": 1
+          "odds": 1.4587155963302751,
+          "edge": -3
         }
       ],
       "record": "1-1-0 / 0-1-2",
-      "note": "Ожидаемые шайбы: 3,77 : 2,80 (модель таблица лиги). Исходы: П1 64% · П2 34%. Модель даёт 64% на «П1». Линия 1,52 недооценивает исход: перевес модели +1%. Травмы: Tampa Bay Lightning — Emil Lilleberg, Yanni Gourde, Dominic James; Philadelphia Flyers — Nikita Grebenkin, Rasmus Ristolainen, Helge Grans.",
+      "note": "Ожидаемые шайбы: 3,77 : 2,80 (модель таблица лиги). Исходы: П1 64% · П2 34%. Модель даёт 64% на «П1». Линия 1,46 примерно совпадает с моделью. Травмы: Tampa Bay Lightning — Emil Lilleberg, Yanni Gourde, Dominic James; Philadelphia Flyers — Nikita Grebenkin, Rasmus Ristolainen, Helge Grans.",
       "tier": "free"
     },
     {
@@ -300,8 +341,8 @@
       "confidence": 63,
       "modelProb": 0.629,
       "odds": 2.1,
-      "impliedProb": 0.453,
-      "edge": 0.387,
+      "impliedProb": 0.449,
+      "edge": 0.399,
       "value": true,
       "expected": {
         "home": 1.53,
@@ -318,11 +359,11 @@
           "market": "ТБ 2.5",
           "prob": 63,
           "odds": 2.1,
-          "edge": 39
+          "edge": 40
         }
       ],
       "record": "12-6-8 / 15-5-6",
-      "note": "Ожидаемые голы: 1,53 : 1,72 (модель таблица лиги). Исходы: П1 34% · Х 23% · П2 42%. Модель даёт 63% на «ТБ 2.5». Линия 2,10 недооценивает исход: перевес модели +39%. Дополнительно модель видит «Х2» с вероятностью 66%.",
+      "note": "Ожидаемые голы: 1,53 : 1,72 (модель таблица лиги). Исходы: П1 34% · Х 23% · П2 42%. Модель даёт 63% на «ТБ 2.5». Линия 2,10 недооценивает исход: перевес модели +40%. Дополнительно модель видит «Х2» с вероятностью 66%.",
       "tier": "pro"
     },
     {
@@ -410,9 +451,9 @@
       "market": "П2",
       "confidence": 57,
       "modelProb": 0.567,
-      "odds": 2.42,
-      "impliedProb": 0.396,
-      "edge": 0.431,
+      "odds": 2.5,
+      "impliedProb": 0.384,
+      "edge": 0.478,
       "value": true,
       "expected": {
         "home": 2.89,
@@ -422,12 +463,53 @@
         {
           "market": "П2",
           "prob": 57,
-          "odds": 2.42,
-          "edge": 43
+          "odds": 2.5,
+          "edge": 48
         }
       ],
       "record": "2-0-0 / 1-0-1",
-      "note": "Ожидаемые шайбы: 2,89 : 3,43 (модель таблица лиги). Исходы: П1 42% · П2 57%. Модель даёт 57% на «П2». Линия 2,42 недооценивает исход: перевес модели +43%. Травмы: Pittsburgh Penguins — Bryan Rust, Justin Brazeau, Ryan Graves; Winnipeg Jets — Connor Hellebuyck, Garrett Brown, Walker Duehr.",
+      "note": "Ожидаемые шайбы: 2,89 : 3,43 (модель таблица лиги). Исходы: П1 42% · П2 57%. Модель даёт 57% на «П2». Линия 2,50 недооценивает исход: перевес модели +48%. Травмы: Pittsburgh Penguins — Bryan Rust, Justin Brazeau, Ryan Graves; Winnipeg Jets — Connor Hellebuyck, Garrett Brown, Walker Duehr.",
+      "tier": "free"
+    },
+    {
+      "id": "401841595",
+      "lgKey": "soccer/arg.1",
+      "lgName": "Аргентина",
+      "sport": "⚽",
+      "type": "soccer",
+      "home": "Banfield",
+      "away": "Rosario Central",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/235.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/17.png",
+      "time": "03:15 МСК",
+      "matchDate": "2026-10-06T00:15Z",
+      "market": "ТМ 2.5",
+      "confidence": 55,
+      "modelProb": 0.554,
+      "odds": 1.606060606060606,
+      "impliedProb": 0.578,
+      "edge": -0.042,
+      "value": false,
+      "expected": {
+        "home": 1.18,
+        "away": 1.28
+      },
+      "markets": [
+        {
+          "market": "Х2",
+          "prob": 66,
+          "odds": 1.2226027397260275,
+          "edge": -15
+        },
+        {
+          "market": "ТМ 2.5",
+          "prob": 55,
+          "odds": 1.606060606060606,
+          "edge": -4
+        }
+      ],
+      "record": "2-3-5 / 5-3-2",
+      "note": "Ожидаемые голы: 1,18 : 1,28 (модель таблица лиги). Исходы: П1 34% · Х 27% · П2 39%. Модель даёт 55% на «ТМ 2.5». Линия 1,61 примерно совпадает с моделью. Дополнительно модель видит «Х2» с вероятностью 66%.",
       "tier": "free"
     }
   ]
