@@ -1098,11 +1098,15 @@ const user = tg?.initDataUnsafe?.user;
 
 /* ================= реальные данные (GitHub Actions -> data/*.json) ================= */
 const REAL = { loaded: false, date: null, free: [], pro: [], results: null, backtest: null, botd: null, lastUpdate: null };
+// отпечатки загруженных файлов — чтобы автообновление не перерисовывало UI, когда данные не изменились
+let feedFingerprint = null, resultsFp = null, backtestFp = null;
+function resultsFingerprint(j) { return j.map(r => r.id + '|' + r.result).join(';'); }
 async function loadReal() {
   try {
     const r = await fetch('data/predictions.json?v=' + Date.now(), { cache: 'no-store' });
     if (r.ok) {
       const d = await r.json();
+      feedFingerprint = (d.generated || '') + '|' + (d.date || '');
       REAL.loaded = true;
       REAL.lastUpdate = d.generated || new Date().toISOString();
       if (d.date === today && Array.isArray(d.predictions)) {
@@ -1115,17 +1119,23 @@ async function loadReal() {
   } catch (e) { console.warn('Failed to load predictions:', e); }
   try {
     const r = await fetch('data/results.json?v=' + Date.now(), { cache: 'no-store' });
-    if (r.ok) { const j = await r.json(); if (Array.isArray(j) && j.length) REAL.results = j; }
+    if (r.ok) {
+      const j = await r.json();
+      if (Array.isArray(j) && j.length) { REAL.results = j; resultsFp = resultsFingerprint(j); }
+    }
   } catch (e) { console.warn('Failed to load results:', e); }
   try {
     const r = await fetch('data/backtest.json?v=' + Date.now(), { cache: 'no-store' });
-    if (r.ok) { const j = await r.json(); if (j && j.signals > 0) REAL.backtest = j; }
+    if (r.ok) {
+      const j = await r.json();
+      if (j && j.signals > 0) { REAL.backtest = j; backtestFp = j.windowDays + ':' + j.matches + ':' + j.signals; }
+    }
   } catch (e) { /* бэктест — необязательный бонус */ }
 }
 
 /* ================= settings ================= */
 const CONFIG = {
-  VERSION: '0.7.0', // версия приложения для отслеживания обновлений
+  VERSION: '0.7.1', // версия приложения для отслеживания обновлений
   SUBSCRIBE_URL: 'https://t.me/pxaxbetai_bot',
   API_BASE: 'https://site-technician-lee-aerial.trycloudflare.com', // адрес бэкенда (cloudflared tunnel), обновляется при перезапуске туннеля
   FREE_DAILY: 5,   // бесплатных прогнозов в день
@@ -1435,7 +1445,7 @@ if (lastVersion !== CONFIG.VERSION) {
     // версия изменилась - покажем уведомление при первом рендере
     setTimeout(() => {
       toast(`🚀 Обновлено до v${CONFIG.VERSION}`);
-      setTimeout(() => toast('🌐 Обновлён блок экосистемы'), 2500);
+      setTimeout(() => toast('🔄 Витрина теперь обновляется сама — без перезапуска'), 2500);
     }, 2000);
   }
 }
@@ -2213,7 +2223,7 @@ function tickFresh() {
   const up = String(d.getUTCHours()).padStart(2, '0') + ':' + String(d.getUTCMinutes()).padStart(2, '0');
   const t = document.getElementById('freshTxt');
   if (!t) return;
-  if (left <= 0) t.innerHTML = 'обновление витрины… <b>⏳</b>';
+  if (left <= 0) t.innerHTML = 'обновление витрины… <b>⏳</b> <span>· чек каждые 5 мин</span>';
   else {
     const m = Math.round(left / 60000);
     const h = Math.floor(m / 60), mm = String(m % 60).padStart(2, '0');
@@ -2221,6 +2231,61 @@ function tickFresh() {
   }
 }
 setInterval(tickFresh, 30000);
+
+/* ================= автообновление витрины =================
+   Вебвью в Telegram может висеть открытым часами, а фид пересчитывается
+   каждые 2 часа — поэтому во время открытой страницы раз в 5 минут проверяем
+   данные: если файлы обновились, тихо перерисовываем (без перезагрузки и без
+   прыжка на другую вкладку). Смена суток (день МСК поменялся) — полный
+   перезапуск страницы: мок/статистика корректно сбросятся на новый день. */
+async function autoRefresh() {
+  try {
+    if (dayKey() !== today) { location.reload(); return; }
+    let changed = false;
+    const r = await fetch('data/predictions.json?v=' + Date.now(), { cache: 'no-store' });
+    if (r.ok) {
+      const d = await r.json();
+      const fp = (d.generated || '') + '|' + (d.date || '');
+      if (fp !== feedFingerprint) {
+        feedFingerprint = fp;
+        changed = true;
+        REAL.lastUpdate = d.generated || new Date().toISOString();
+        if (d.date === today && Array.isArray(d.predictions)) {
+          REAL.loaded = true;
+          REAL.date = d.date;
+          REAL.free = d.predictions.filter(p => p.tier === 'free');
+          REAL.pro = d.predictions.filter(p => p.tier === 'pro');
+          REAL.botd = (d.botd && Array.isArray(d.botd.legs) && d.botd.legs.length >= 2) ? d.botd : null;
+          freeToday = REAL.free.slice(0, 5).map(p => ({ ...p, kind: 'free', league: p.lgName }));
+          proToday = REAL.pro.slice(0, 5).map(p => ({ ...p, kind: 'pro', league: p.lgName }));
+        }
+      }
+    }
+    try {
+      const rr = await fetch('data/results.json?v=' + Date.now(), { cache: 'no-store' });
+      if (rr.ok) {
+        const j = await rr.json();
+        if (Array.isArray(j) && j.length && resultsFingerprint(j) !== resultsFp) {
+          resultsFp = resultsFingerprint(j);
+          REAL.results = j;
+          changed = true;
+        }
+      }
+    } catch (e) {}
+    try {
+      const br = await fetch('data/backtest.json?v=' + Date.now(), { cache: 'no-store' });
+      if (br.ok) {
+        const j = await br.json();
+        if (j && j.signals > 0) {
+          const fp = j.windowDays + ':' + j.matches + ':' + j.signals;
+          if (fp !== backtestFp) { backtestFp = fp; REAL.backtest = j; changed = true; }
+        }
+      }
+    } catch (e) {}
+    if (changed) { render(); maybeCelebrate(); }
+  } catch (e) { console.warn('autoRefresh:', e); }
+}
+setInterval(autoRefresh, 5 * 60 * 1000); // чек каждые 5 минут
 
 /* ================= конфетти по «зашёл» на Статистике ================= */
 const reducedMotion = (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
