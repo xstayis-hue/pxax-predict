@@ -14,6 +14,9 @@
   }
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   html, body { height:100%; }
+  /* [hidden] должен побеждать авторские display:flex — иначе пустые плашки
+     (collect-chip, fresh-chip, botd-card) остаются на экране, хотя скрыты в JS */
+  [hidden] { display:none !important; }
   body {
     background: var(--bg); color: var(--text);
     font-family: -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
