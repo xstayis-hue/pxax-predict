@@ -1,6 +1,6 @@
 {
   "date": "2026-10-05",
-  "generated": "2026-10-05T01:18:57.231Z",
+  "generated": "2026-10-05T05:24:30.316Z",
   "model": "pxax-v2 @ ESPN standings + odds",
   "count": 11,
   "valueCount": 3,
@@ -194,9 +194,9 @@
       "market": "П1",
       "confidence": 66,
       "modelProb": 0.662,
-      "odds": 1.6024096385542168,
-      "impliedProb": 0.6,
-      "edge": 0.105,
+      "odds": 1.5714285714285714,
+      "impliedProb": 0.609,
+      "edge": 0.087,
       "value": true,
       "expected": {
         "home": 3.85,
@@ -206,12 +206,12 @@
         {
           "market": "П1",
           "prob": 66,
-          "odds": 1.6024096385542168,
-          "edge": 10
+          "odds": 1.5714285714285714,
+          "edge": 9
         }
       ],
       "record": "0-2-0 / 2-0-0",
-      "note": "Ожидаемые шайбы: 3,85 : 2,69 (модель таблица лиги). Исходы: П1 66% · П2 32%. Модель даёт 66% на «П1». Линия 1,60 недооценивает исход: перевес модели +10%. Травмы: Dallas Stars — Matt Duchene, Harrison Scott, Luke Krys; San Jose Sharks — Adam Gaudette, Alex Barre-Boulet, Quentin Musty.",
+      "note": "Ожидаемые шайбы: 3,85 : 2,69 (модель таблица лиги). Исходы: П1 66% · П2 32%. Модель даёт 66% на «П1». Линия 1,57 недооценивает исход: перевес модели +9%. Травмы: Dallas Stars — Matt Duchene, Harrison Scott, Luke Krys; San Jose Sharks — Adam Gaudette, Alex Barre-Boulet, Quentin Musty.",
       "tier": "pro"
     },
     {
