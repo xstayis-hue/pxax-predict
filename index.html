@@ -351,13 +351,7 @@
   .sk-vs { font-size:11px; color:var(--muted); font-weight:800; }
   .sk-bar { height:7px; border-radius:6px; background:rgba(139,163,199,.14); margin-top:18px; animation: skPulse 1.4s ease-in-out infinite; }
 
-  /* ---------- конфетти по «зашёл» ---------- */
-  .confetti-layer { position:fixed; inset:0; pointer-events:none; z-index:120; overflow:hidden; }
-  .confetti {
-    position:absolute; top:-16px; border-radius:2px; opacity:.95;
-    animation: confFall var(--dur,2.4s) cubic-bezier(.3,.4,.6,1) var(--del,0s) forwards;
-  }
-  @keyframes confFall { to { transform: translateY(105vh) rotate(var(--rot,540deg)); opacity:.15; } }
+  /* (конфетти убрано) */
 
   /* ---------- онбординг ---------- */
   .ob-icon { text-align:center; font-size:44px; margin: 4px 0 10px; animation: bob 2s ease-in-out infinite; }
@@ -2118,7 +2112,7 @@ document.querySelectorAll('.tab').forEach(btn => {
     document.getElementById('view-' + btn.dataset.view).classList.add('active');
     localStorage.setItem('pxax_last_tab', btn.dataset.view);
     window.scrollTo(0, 0);
-    if (btn.dataset.view === 'history') maybeCelebrate();
+    /* maybeCelebrate убрано */
   };
 });
 
@@ -2133,7 +2127,7 @@ if (savedTab) {
     document.getElementById('view-' + savedTab).classList.add('active');
   }
 }
-if (savedTab === 'history') setTimeout(maybeCelebrate, 500);
+/* maybeCelebrate убрано */
 
 // «ИИ думает» — раз в день
 if (sessionStorage.getItem('intro_' + today)) {
@@ -2277,44 +2271,12 @@ async function autoRefresh() {
         }
       }
     } catch (e) {}
-    if (changed) { render(); maybeCelebrate(); }
+    if (changed) { render(); }
   } catch (e) { console.warn('autoRefresh:', e); }
 }
 setInterval(autoRefresh, 5 * 60 * 1000); // чек каждые 5 минут
 
-/* ================= конфетти по «зашёл» на Статистике ================= */
-const reducedMotion = (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
-function fireConfetti() {
-  if (reducedMotion) return;
-  const layer = document.createElement('div');
-  layer.className = 'confetti-layer';
-  const colors = ['#00e5ff', '#ff2bd6', '#ffc93c', '#00e676', '#9d6bff'];
-  for (let i = 0; i < 60; i++) {
-    const c = document.createElement('i');
-    c.className = 'confetti';
-    c.style.left = (Math.random() * 100).toFixed(2) + 'vw';
-    c.style.background = colors[i % colors.length];
-    c.style.width = (6 + Math.random() * 6).toFixed(1) + 'px';
-    c.style.height = (10 + Math.random() * 8).toFixed(1) + 'px';
-    c.style.setProperty('--dur', (2 + Math.random() * 1.6).toFixed(2) + 's');
-    c.style.setProperty('--del', (Math.random() * 0.8).toFixed(2) + 's');
-    c.style.setProperty('--rot', Math.round(360 + Math.random() * 720) + 'deg');
-    layer.appendChild(c);
-  }
-  document.body.appendChild(layer);
-  setTimeout(() => layer.remove(), 4500);
-}
-function maybeCelebrate() {
-  if (!REAL.results || !REAL.results.length) return;
-  let lastDate = REAL.results[0].date;
-  for (const r of REAL.results) if (r.date > lastDate) lastDate = r.date;
-  const hits = REAL.results.filter(r => r.date === lastDate && r.result === 'hit').length;
-  const key = 'pxax_celebrate_' + lastDate;
-  if (hits > 0 && localStorage.getItem(key) !== '1') {
-    localStorage.setItem(key, '1');
-    setTimeout(fireConfetti, 250);
-  }
-}
+/* (конфетти убрано) */
 
 /* ================= онбординг первого визита ================= */
 function showOnboarding() {
