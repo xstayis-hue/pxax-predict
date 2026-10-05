@@ -1,9 +1,9 @@
 {
-  "date": "2026-10-05",
-  "generated": "2026-10-05T14:25:08.341Z",
+  "date": "2026-10-06",
+  "generated": "2026-10-05T22:32:24.635Z",
   "model": "pxax-v2 @ ESPN standings + odds",
-  "count": 13,
-  "valueCount": 4,
+  "count": 11,
+  "valueCount": 7,
   "thresholds": {
     "freeMin": 55,
     "proMin": 60,
@@ -12,101 +12,130 @@
   "botd": {
     "legs": [
       {
-        "id": "401908947",
-        "home": "Detroit Pistons",
-        "away": "Phoenix Suns",
+        "id": "401898389",
+        "home": "Oklahoma City Thunder",
+        "away": "New Orleans Pelicans",
         "market": "П1",
-        "odds": 1.3,
-        "confidence": 77,
+        "odds": 1.68,
+        "confidence": 91,
         "sport": "🏀",
         "league": "NBA",
-        "value": false
+        "value": true
       },
       {
-        "id": "401898716",
-        "home": "Sacramento Kings",
-        "away": "Los Angeles Lakers",
-        "market": "П1",
-        "odds": 1.43,
-        "confidence": 70,
+        "id": "401914128",
+        "home": "Utah Jazz",
+        "away": "Denver Nuggets",
+        "market": "ТБ 230.5",
+        "odds": 1.91,
+        "confidence": 80,
         "sport": "🏀",
         "league": "NBA",
-        "value": false
+        "value": true
+      },
+      {
+        "id": "401901820",
+        "home": "Charlotte Hornets",
+        "away": "Brooklyn Nets",
+        "market": "ТБ 212.5",
+        "odds": 1.91,
+        "confidence": 75,
+        "sport": "🏀",
+        "league": "NBA",
+        "value": true
       }
     ],
-    "combinedOdds": 1.86,
-    "combinedProb": 0.538,
-    "minConfidence": 70
+    "combinedOdds": 6.11,
+    "combinedProb": 0.55,
+    "minConfidence": 75
   },
   "predictions": [
     {
-      "id": "401908947",
+      "id": "401898389",
       "lgKey": "basketball/nba",
       "lgName": "NBA",
       "sport": "🏀",
       "type": "us",
-      "home": "Detroit Pistons",
-      "away": "Phoenix Suns",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/det.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/phx.png",
-      "time": "02:00 МСК",
-      "matchDate": "2026-10-05T23:00Z",
+      "home": "Oklahoma City Thunder",
+      "away": "New Orleans Pelicans",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/okc.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/no.png",
+      "time": "03:00 МСК",
+      "matchDate": "2026-10-07T00:00Z",
       "market": "П1",
-      "confidence": 77,
-      "modelProb": 0.769,
-      "odds": null,
-      "impliedProb": null,
-      "edge": null,
-      "value": false,
+      "confidence": 91,
+      "modelProb": 0.915,
+      "odds": 1.6756756756756757,
+      "impliedProb": 0.572,
+      "edge": 0.599,
+      "value": true,
       "expected": {
-        "home": 125.06,
-        "away": 112.94
+        "home": 129.99,
+        "away": 107.4
       },
       "markets": [
         {
           "market": "П1",
-          "prob": 77,
-          "odds": null,
-          "edge": null
+          "prob": 91,
+          "odds": 1.6756756756756757,
+          "edge": 60
+        },
+        {
+          "market": "ТБ 224.5",
+          "prob": 78,
+          "odds": 1.9090909090909092,
+          "edge": 55
         }
       ],
       "record": "0-0 / 0-0",
-      "note": "Ожидаемые очки: 125,06 : 112,94 (модель таблица лиги). Исходы: П1 77% · П2 23%. Модель даёт 77% на «П1». Травмы: Detroit Pistons — Jalen Duren; Phoenix Suns — Mark Williams (не выйдет).",
+      "note": "Ожидаемые очки: 129,99 : 107,40 (модель таблица лиги). Исходы: П1 91% · П2 9%. Модель даёт 91% на «П1». Линия 1,68 недооценивает исход: перевес модели +60%. Дополнительно модель видит «ТБ 224.5» с вероятностью 78%. Травмы: Oklahoma City Thunder — Thomas Sorber, Nikola Topic, Cason Wallace; New Orleans Pelicans — Bryce McGowens.",
       "tier": "pro"
     },
     {
-      "id": "401898716",
+      "id": "401914128",
       "lgKey": "basketball/nba",
       "lgName": "NBA",
       "sport": "🏀",
       "type": "us",
-      "home": "Sacramento Kings",
-      "away": "Los Angeles Lakers",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/sac.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/lal.png",
-      "time": "05:00 МСК",
-      "matchDate": "2026-10-06T02:00Z",
-      "market": "П1",
-      "confidence": 70,
-      "modelProb": 0.7,
-      "odds": null,
-      "impliedProb": null,
-      "edge": null,
-      "value": false,
+      "home": "Utah Jazz",
+      "away": "Denver Nuggets",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/utah.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/den.png",
+      "time": "04:00 МСК",
+      "matchDate": "2026-10-07T01:00Z",
+      "market": "ТБ 230.5",
+      "confidence": 80,
+      "modelProb": 0.797,
+      "odds": 1.9090909090909092,
+      "impliedProb": 0.5,
+      "edge": 0.594,
+      "value": true,
       "expected": {
-        "home": 122.38,
-        "away": 113.76
+        "home": 122.9,
+        "away": 121.73
       },
       "markets": [
         {
+          "market": "ТБ 230.5",
+          "prob": 80,
+          "odds": 1.9090909090909092,
+          "edge": 59
+        },
+        {
           "market": "П1",
-          "prob": 70,
-          "odds": null,
-          "edge": null
+          "prob": 53,
+          "odds": 1.9523809523809523,
+          "edge": 8
+        },
+        {
+          "market": "П2",
+          "prob": 47,
+          "odds": 1.8695652173913042,
+          "edge": -8
         }
       ],
-      "record": "0-0 / 0-0",
-      "note": "Ожидаемые очки: 122,38 : 113,76 (модель таблица лиги). Исходы: П1 70% · П2 30%. Модель даёт 70% на «П1».",
+      "record": "1-0 / 0-1",
+      "note": "Ожидаемые очки: 122,90 : 121,73 (модель таблица лиги). Исходы: П1 53% · П2 47%. Модель даёт 80% на «ТБ 230.5». Линия 1,91 недооценивает исход: перевес модели +59%. Дополнительно модель видит «П1» с вероятностью 53%. Травмы: Utah Jazz — Josh Green, Brice Sensabaugh, Kyle Filipowski; Denver Nuggets — Spencer Jones, Jamal Murray.",
       "tier": "pro"
     },
     {
@@ -121,208 +150,68 @@
       "awayLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/bkn.png",
       "time": "02:00 МСК",
       "matchDate": "2026-10-06T23:00Z",
-      "market": "П1",
-      "confidence": 68,
-      "modelProb": 0.676,
-      "odds": null,
-      "impliedProb": null,
-      "edge": null,
-      "value": false,
+      "market": "ТБ 212.5",
+      "confidence": 75,
+      "modelProb": 0.754,
+      "odds": 1.9090909090909092,
+      "impliedProb": 0.5,
+      "edge": 0.508,
+      "value": true,
       "expected": {
         "home": 115.84,
         "away": 108.34
       },
       "markets": [
         {
-          "market": "П1",
-          "prob": 68,
-          "odds": null,
-          "edge": null
-        }
-      ],
-      "record": "0-0 / 0-0",
-      "note": "Ожидаемые очки: 115,84 : 108,34 (модель таблица лиги). Исходы: П1 68% · П2 32%. Модель даёт 68% на «П1». Травмы: Charlotte Hornets — Kon Knueppel, Grant Williams, PJ Hall; Brooklyn Nets — Mikel Brown Jr..",
-      "tier": "free"
-    },
-    {
-      "id": "401914102",
-      "lgKey": "basketball/nba",
-      "lgName": "NBA",
-      "sport": "🏀",
-      "type": "us",
-      "home": "Milwaukee Bucks",
-      "away": "Minnesota Timberwolves",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/mil.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/min.png",
-      "time": "03:00 МСК",
-      "matchDate": "2026-10-06T00:00Z",
-      "market": "П1",
-      "confidence": 67,
-      "modelProb": 0.674,
-      "odds": null,
-      "impliedProb": null,
-      "edge": null,
-      "value": false,
-      "expected": {
-        "home": 120.42,
-        "away": 113
-      },
-      "markets": [
-        {
-          "market": "П1",
-          "prob": 67,
-          "odds": null,
-          "edge": null
-        }
-      ],
-      "record": "0-0 / 0-0",
-      "note": "Ожидаемые очки: 120,42 : 113,00 (модель таблица лиги). Исходы: П1 67% · П2 33%. Модель даёт 67% на «П1». Травмы: Minnesota Timberwolves — Donte DiVincenzo (не выйдет).",
-      "tier": "free"
-    },
-    {
-      "id": "401892448",
-      "lgKey": "hockey/nhl",
-      "lgName": "NHL",
-      "sport": "🏒",
-      "type": "us",
-      "home": "Dallas Stars",
-      "away": "San Jose Sharks",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/dal.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/sj.png",
-      "time": "03:00 МСК",
-      "matchDate": "2026-10-06T00:00Z",
-      "market": "П1",
-      "confidence": 66,
-      "modelProb": 0.662,
-      "odds": 1.5714285714285714,
-      "impliedProb": 0.609,
-      "edge": 0.087,
-      "value": true,
-      "expected": {
-        "home": 3.85,
-        "away": 2.69
-      },
-      "markets": [
-        {
-          "market": "П1",
-          "prob": 66,
-          "odds": 1.5714285714285714,
-          "edge": 9
-        }
-      ],
-      "record": "0-2-0 / 2-0-0",
-      "note": "Ожидаемые шайбы: 3,85 : 2,69 (модель таблица лиги). Исходы: П1 66% · П2 32%. Модель даёт 66% на «П1». Линия 1,57 недооценивает исход: перевес модели +9%. Травмы: Dallas Stars — Matt Duchene, Harrison Scott, Luke Krys; San Jose Sharks — Adam Gaudette, Alex Barre-Boulet, Quentin Musty.",
-      "tier": "pro"
-    },
-    {
-      "id": "401841590",
-      "lgKey": "soccer/arg.1",
-      "lgName": "Аргентина",
-      "sport": "⚽",
-      "type": "soccer",
-      "home": "Estudiantes de La Plata",
-      "away": "Gimnasia (Mendoza)",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/8.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/11972.png",
-      "time": "01:00 МСК",
-      "matchDate": "2026-10-05T22:00Z",
-      "market": "Х2",
-      "confidence": 64,
-      "modelProb": 0.645,
-      "odds": 2.170391061452514,
-      "impliedProb": 0.434,
-      "edge": 0.484,
-      "value": true,
-      "expected": {
-        "home": 1.19,
-        "away": 1.21
-      },
-      "markets": [
-        {
-          "market": "Х2",
-          "prob": 64,
-          "odds": 2.170391061452514,
-          "edge": 48
+          "market": "ТБ 212.5",
+          "prob": 75,
+          "odds": 1.9090909090909092,
+          "edge": 51
         },
         {
-          "market": "ТМ 2.5",
-          "prob": 57,
-          "odds": 1.6451612903225805,
-          "edge": 0
+          "market": "П1",
+          "prob": 68,
+          "odds": 1.5555555555555556,
+          "edge": 10
         }
       ],
-      "record": "3-1-6 / 5-2-3",
-      "note": "Ожидаемые голы: 1,19 : 1,21 (модель таблица лиги). Исходы: П1 36% · Х 28% · П2 37%. Модель даёт 64% на «Х2». Линия 2,17 недооценивает исход: перевес модели +48%. Дополнительно модель видит «ТМ 2.5» с вероятностью 57%.",
+      "record": "0-0 / 0-0",
+      "note": "Ожидаемые очки: 115,84 : 108,34 (модель таблица лиги). Исходы: П1 68% · П2 32%. Модель даёт 75% на «ТБ 212.5». Линия 1,91 недооценивает исход: перевес модели +51%. Дополнительно модель видит «П1» с вероятностью 68%. Травмы: Charlotte Hornets — Kylan Boswell, Coby White, Kon Knueppel; Brooklyn Nets — Joshua Jefferson, Mikel Brown Jr..",
       "tier": "pro"
     },
     {
-      "id": "401898388",
+      "id": "401898390",
       "lgKey": "basketball/nba",
       "lgName": "NBA",
       "sport": "🏀",
       "type": "us",
-      "home": "Atlanta Hawks",
-      "away": "Memphis Grizzlies",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/atl.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/mem.png",
-      "time": "02:00 МСК",
-      "matchDate": "2026-10-05T23:00Z",
+      "home": "Golden State Warriors",
+      "away": "Los Angeles Lakers",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/gs.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/lal.png",
+      "time": "05:00 МСК",
+      "matchDate": "2026-10-07T02:00Z",
       "market": "П1",
-      "confidence": 64,
-      "modelProb": 0.638,
+      "confidence": 73,
+      "modelProb": 0.732,
       "odds": null,
       "impliedProb": null,
       "edge": null,
       "value": false,
       "expected": {
-        "home": 126.93,
-        "away": 121.13
+        "home": 121.19,
+        "away": 111.01
       },
       "markets": [
         {
           "market": "П1",
-          "prob": 64,
+          "prob": 73,
           "odds": null,
           "edge": null
         }
       ],
-      "record": "0-0 / 0-0",
-      "note": "Ожидаемые очки: 126,93 : 121,13 (модель таблица лиги). Исходы: П1 64% · П2 36%. Модель даёт 64% на «П1». Травмы: Atlanta Hawks — Henri Veesaar (не выйдет), Mouhamed Gueye, Keshon Gilbert; Memphis Grizzlies — Zach Edey, Micah Peavy, Karim Lopez.",
-      "tier": "free"
-    },
-    {
-      "id": "401892445",
-      "lgKey": "hockey/nhl",
-      "lgName": "NHL",
-      "sport": "🏒",
-      "type": "us",
-      "home": "Tampa Bay Lightning",
-      "away": "Philadelphia Flyers",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/tb.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/phi.png",
-      "time": "02:00 МСК",
-      "matchDate": "2026-10-05T23:00Z",
-      "market": "П1",
-      "confidence": 64,
-      "modelProb": 0.638,
-      "odds": 1.4587155963302751,
-      "impliedProb": 0.657,
-      "edge": -0.03,
-      "value": false,
-      "expected": {
-        "home": 3.77,
-        "away": 2.8
-      },
-      "markets": [
-        {
-          "market": "П1",
-          "prob": 64,
-          "odds": 1.4587155963302751,
-          "edge": -3
-        }
-      ],
-      "record": "1-1-0 / 0-1-2",
-      "note": "Ожидаемые шайбы: 3,77 : 2,80 (модель таблица лиги). Исходы: П1 64% · П2 34%. Модель даёт 64% на «П1». Линия 1,46 примерно совпадает с моделью. Травмы: Tampa Bay Lightning — Emil Lilleberg, Yanni Gourde, Dominic James; Philadelphia Flyers — Nikita Grebenkin, Rasmus Ristolainen, Helge Grans.",
+      "record": "0-1 / 0-0",
+      "note": "Ожидаемые очки: 121,19 : 111,01 (модель таблица лиги). Исходы: П1 73% · П2 27%. Модель даёт 73% на «П1». Травмы: Golden State Warriors — Jimmy Butler III (не выйдет), Kristaps Porzingis, Moses Moody (не выйдет).",
       "tier": "free"
     },
     {
@@ -340,9 +229,9 @@
       "market": "ТБ 2.5",
       "confidence": 63,
       "modelProb": 0.629,
-      "odds": 2.1,
-      "impliedProb": 0.449,
-      "edge": 0.399,
+      "odds": 2.15,
+      "impliedProb": 0.44,
+      "edge": 0.429,
       "value": true,
       "expected": {
         "home": 1.53,
@@ -352,18 +241,18 @@
         {
           "market": "Х2",
           "prob": 66,
-          "odds": 1.413223140495868,
-          "edge": 1
+          "odds": 1.4062500000000002,
+          "edge": -1
         },
         {
           "market": "ТБ 2.5",
           "prob": 63,
-          "odds": 2.1,
-          "edge": 40
+          "odds": 2.15,
+          "edge": 43
         }
       ],
       "record": "12-6-8 / 15-5-6",
-      "note": "Ожидаемые голы: 1,53 : 1,72 (модель таблица лиги). Исходы: П1 34% · Х 23% · П2 42%. Модель даёт 63% на «ТБ 2.5». Линия 2,10 недооценивает исход: перевес модели +40%. Дополнительно модель видит «Х2» с вероятностью 66%.",
+      "note": "Ожидаемые голы: 1,53 : 1,72 (модель таблица лиги). Исходы: П1 34% · Х 23% · П2 42%. Модель даёт 63% на «ТБ 2.5». Линия 2,15 недооценивает исход: перевес модели +43%. Дополнительно модель видит «Х2» с вероятностью 66%.",
       "tier": "pro"
     },
     {
@@ -381,10 +270,10 @@
       "market": "П1",
       "confidence": 62,
       "modelProb": 0.618,
-      "odds": null,
-      "impliedProb": null,
-      "edge": null,
-      "value": false,
+      "odds": 1.6451612903225805,
+      "impliedProb": 0.583,
+      "edge": 0.061,
+      "value": true,
       "expected": {
         "home": 3.53,
         "away": 2.74
@@ -393,123 +282,217 @@
         {
           "market": "П1",
           "prob": 62,
-          "odds": null,
-          "edge": null
+          "odds": 1.6451612903225805,
+          "edge": 6
         }
       ],
       "record": "1-2-0 / 1-1-0",
-      "note": "Ожидаемые шайбы: 3,53 : 2,74 (модель таблица лиги). Исходы: П1 62% · П2 37%. Модель даёт 62% на «П1». Травмы: Toronto Maple Leafs — Dakota Joshua, Max Domi, Cade Webber; Nashville Predators — Justus Annunen.",
+      "note": "Ожидаемые шайбы: 3,53 : 2,74 (модель таблица лиги). Исходы: П1 62% · П2 37%. Модель даёт 62% на «П1». Линия 1,65 недооценивает исход: перевес модели +6%. Травмы: Toronto Maple Leafs — Dakota Joshua, Max Domi, Cade Webber; Nashville Predators — Justus Annunen.",
       "tier": "free"
     },
     {
-      "id": "401914101",
-      "lgKey": "basketball/nba",
-      "lgName": "NBA",
-      "sport": "🏀",
-      "type": "us",
-      "home": "Philadelphia 76ers",
-      "away": "New York Knicks",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/phi.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/ny.png",
-      "time": "02:00 МСК",
-      "matchDate": "2026-10-05T23:00Z",
-      "market": "П1",
-      "confidence": 57,
-      "modelProb": 0.567,
-      "odds": null,
-      "impliedProb": null,
-      "edge": null,
+      "id": "401841252",
+      "lgKey": "soccer/bra.1",
+      "lgName": "Бразилия · Серия A",
+      "sport": "⚽",
+      "type": "soccer",
+      "home": "Remo",
+      "away": "Grêmio",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/4936.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/6273.png",
+      "time": "01:30 МСК",
+      "matchDate": "2026-10-07T22:30Z",
+      "market": "Х2",
+      "confidence": 61,
+      "modelProb": 0.605,
+      "odds": 1.5795275590551179,
+      "impliedProb": 0.593,
+      "edge": 0.021,
       "value": false,
       "expected": {
-        "home": 118.31,
-        "away": 115.51
+        "home": 1.41,
+        "away": 1.3
+      },
+      "markets": [
+        {
+          "market": "Х2",
+          "prob": 61,
+          "odds": 1.5795275590551179,
+          "edge": 2
+        },
+        {
+          "market": "ТБ 2.5",
+          "prob": 51,
+          "odds": 1.8333333333333335,
+          "edge": 1
+        },
+        {
+          "market": "ТМ 2.5",
+          "prob": 49,
+          "odds": 1.8695652173913042,
+          "edge": -1
+        }
+      ],
+      "record": "5-8-15 / 7-8-13",
+      "note": "Ожидаемые голы: 1,41 : 1,30 (модель таблица лиги). Исходы: П1 39% · Х 26% · П2 35%. Модель даёт 61% на «Х2». Линия 1,58 недооценивает исход: перевес модели +2%. Дополнительно модель видит «ТБ 2.5» с вероятностью 51%.",
+      "tier": "free"
+    },
+    {
+      "id": "401841255",
+      "lgKey": "soccer/bra.1",
+      "lgName": "Бразилия · Серия A",
+      "sport": "⚽",
+      "type": "soccer",
+      "home": "Internacional",
+      "away": "Corinthians",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/1936.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/874.png",
+      "time": "01:30 МСК",
+      "matchDate": "2026-10-07T22:30Z",
+      "market": "Х2",
+      "confidence": 60,
+      "modelProb": 0.605,
+      "odds": 1.6374045801526718,
+      "impliedProb": 0.568,
+      "edge": 0.065,
+      "value": true,
+      "expected": {
+        "home": 1.29,
+        "away": 1.15
+      },
+      "markets": [
+        {
+          "market": "Х2",
+          "prob": 60,
+          "odds": 1.6374045801526718,
+          "edge": 7
+        },
+        {
+          "market": "ТМ 2.5",
+          "prob": 56,
+          "odds": 1.6666666666666665,
+          "edge": 1
+        }
+      ],
+      "record": "6-10-12 / 8-8-12",
+      "note": "Ожидаемые голы: 1,29 : 1,15 (модель таблица лиги). Исходы: П1 40% · Х 27% · П2 33%. Модель даёт 60% на «Х2». Линия 1,64 недооценивает исход: перевес модели +7%. Дополнительно модель видит «ТМ 2.5» с вероятностью 56%.",
+      "tier": "free"
+    },
+    {
+      "id": "401892452",
+      "lgKey": "hockey/nhl",
+      "lgName": "NHL",
+      "sport": "🏒",
+      "type": "us",
+      "home": "New York Rangers",
+      "away": "New York Islanders",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/nyr.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/nyi.png",
+      "time": "02:30 МСК",
+      "matchDate": "2026-10-06T23:30Z",
+      "market": "П1",
+      "confidence": 57,
+      "modelProb": 0.571,
+      "odds": 1.6756756756756757,
+      "impliedProb": 0.572,
+      "edge": -0.002,
+      "value": false,
+      "expected": {
+        "home": 3.37,
+        "away": 2.91
       },
       "markets": [
         {
           "market": "П1",
           "prob": 57,
-          "odds": null,
-          "edge": null
+          "odds": 1.6756756756756757,
+          "edge": 0
         }
       ],
-      "record": "0-0 / 0-0",
-      "note": "Ожидаемые очки: 118,31 : 115,51 (модель таблица лиги). Исходы: П1 57% · П2 43%. Модель даёт 57% на «П1». Травмы: Philadelphia 76ers — Tacko Fall, Adem Bona; New York Knicks — Drew Eubanks.",
+      "record": "3-1-0 / 1-1-0",
+      "note": "Ожидаемые шайбы: 3,37 : 2,91 (модель таблица лиги). Исходы: П1 57% · П2 42%. Модель даёт 57% на «П1». Линия 1,68 примерно совпадает с моделью. Травмы: New York Rangers — Joe Veleno (не выйдет), Joonas Korpisalo, Aidan Thompson; New York Islanders — Mathew Barzal.",
       "tier": "free"
     },
     {
-      "id": "401892447",
+      "id": "401892451",
       "lgKey": "hockey/nhl",
       "lgName": "NHL",
       "sport": "🏒",
       "type": "us",
-      "home": "Pittsburgh Penguins",
-      "away": "Winnipeg Jets",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/pit.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/wpg.png",
-      "time": "02:30 МСК",
-      "matchDate": "2026-10-05T23:30Z",
-      "market": "П2",
-      "confidence": 57,
-      "modelProb": 0.567,
-      "odds": 2.5,
-      "impliedProb": 0.384,
-      "edge": 0.478,
-      "value": true,
+      "home": "New Jersey Devils",
+      "away": "Utah Mammoth",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/nj.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/uta.png",
+      "time": "02:00 МСК",
+      "matchDate": "2026-10-06T23:00Z",
+      "market": "П1",
+      "confidence": 56,
+      "modelProb": 0.565,
+      "odds": 1.7692307692307692,
+      "impliedProb": 0.543,
+      "edge": 0.041,
+      "value": false,
       "expected": {
-        "home": 2.89,
-        "away": 3.43
+        "home": 3.23,
+        "away": 2.83
       },
       "markets": [
         {
-          "market": "П2",
-          "prob": 57,
-          "odds": 2.5,
-          "edge": 48
+          "market": "П1",
+          "prob": 56,
+          "odds": 1.7692307692307692,
+          "edge": 4
         }
       ],
-      "record": "2-0-0 / 1-0-1",
-      "note": "Ожидаемые шайбы: 2,89 : 3,43 (модель таблица лиги). Исходы: П1 42% · П2 57%. Модель даёт 57% на «П2». Линия 2,50 недооценивает исход: перевес модели +48%. Травмы: Pittsburgh Penguins — Bryan Rust, Justin Brazeau, Ryan Graves; Winnipeg Jets — Connor Hellebuyck, Garrett Brown, Walker Duehr.",
+      "record": "1-1-0 / 2-1-0",
+      "note": "Ожидаемые шайбы: 3,23 : 2,83 (модель таблица лиги). Исходы: П1 56% · П2 43%. Модель даёт 56% на «П1». Линия 1,77 недооценивает исход: перевес модели +4%. Травмы: New Jersey Devils — Connor Brown (не выйдет), Seamus Casey, Johnathan Kovacevic; Utah Mammoth — Maveric Lamoureux.",
       "tier": "free"
     },
     {
-      "id": "401841595",
-      "lgKey": "soccer/arg.1",
-      "lgName": "Аргентина",
+      "id": "401841253",
+      "lgKey": "soccer/bra.1",
+      "lgName": "Бразилия · Серия A",
       "sport": "⚽",
       "type": "soccer",
-      "home": "Banfield",
-      "away": "Rosario Central",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/235.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/17.png",
-      "time": "03:15 МСК",
-      "matchDate": "2026-10-06T00:15Z",
-      "market": "ТМ 2.5",
+      "home": "Red Bull Bragantino",
+      "away": "Mirassol",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/6079.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/9169.png",
+      "time": "01:30 МСК",
+      "matchDate": "2026-10-07T22:30Z",
+      "market": "Х2",
       "confidence": 55,
-      "modelProb": 0.554,
-      "odds": 1.606060606060606,
-      "impliedProb": 0.578,
-      "edge": -0.042,
-      "value": false,
+      "modelProb": 0.553,
+      "odds": 1.9585987261146496,
+      "impliedProb": 0.475,
+      "edge": 0.165,
+      "value": true,
       "expected": {
-        "home": 1.18,
-        "away": 1.28
+        "home": 1.48,
+        "away": 1.16
       },
       "markets": [
         {
           "market": "Х2",
-          "prob": 66,
-          "odds": 1.2226027397260275,
-          "edge": -15
+          "prob": 55,
+          "odds": 1.9585987261146496,
+          "edge": 17
         },
         {
           "market": "ТМ 2.5",
-          "prob": 55,
-          "odds": 1.606060606060606,
-          "edge": -4
+          "prob": 51,
+          "odds": 2,
+          "edge": 10
+        },
+        {
+          "market": "ТБ 2.5",
+          "prob": 49,
+          "odds": 1.7142857142857144,
+          "edge": -9
         }
       ],
-      "record": "2-3-5 / 5-3-2",
-      "note": "Ожидаемые голы: 1,18 : 1,28 (модель таблица лиги). Исходы: П1 34% · Х 27% · П2 39%. Модель даёт 55% на «ТМ 2.5». Линия 1,61 примерно совпадает с моделью. Дополнительно модель видит «Х2» с вероятностью 66%.",
+      "record": "10-6-12 / 8-8-12",
+      "note": "Ожидаемые голы: 1,48 : 1,16 (модель таблица лиги). Исходы: П1 45% · Х 26% · П2 30%. Модель даёт 55% на «Х2». Линия 1,96 недооценивает исход: перевес модели +17%. Дополнительно модель видит «ТМ 2.5» с вероятностью 51%.",
       "tier": "free"
     }
   ]
