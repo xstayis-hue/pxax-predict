@@ -256,6 +256,58 @@
   .res-chip.miss { color:var(--warn); background:rgba(255,82,82,.1); border:1px solid rgba(255,82,82,.4); }
   .res-chip.push { color:var(--gold); background:rgba(255,201,60,.1); border:1px solid rgba(255,201,60,.4); }
 
+  /* ---------- «Поставил» — личный трекер ставок (localStorage) ---------- */
+  .mybet-btn {
+    display:inline-block; margin:2px 4px 12px; padding:7px 12px;
+    border:1px dashed rgba(0,229,255,.35); border-radius:12px; background:transparent;
+    color:var(--muted); font-size:11.5px; font-weight:700; cursor:pointer; transition:all .2s;
+  }
+  .mybet-btn:active { transform:scale(.96); }
+  .mybet-btn.on { border-style:solid; border-color:var(--ok); color:var(--ok); background:rgba(0,230,118,.08); }
+  /* ---------- «собираем данные» ---------- */
+  .collect-chip {
+    margin:8px 16px 0; padding:7px 12px; border-radius:11px;
+    background:rgba(255,201,60,.06); border:1px solid rgba(255,201,60,.22);
+    font-size:11px; color:var(--muted); display:flex; align-items:center; gap:8px;
+  }
+  .collect-chip b { color:var(--gold); font-weight:800; }
+  .collect-chip .pulse {
+    width:7px; height:7px; border-radius:50%; background:var(--gold);
+    box-shadow:0 0 8px rgba(255,201,60,.7); animation:dot 1.6s infinite; flex:none;
+  }
+  /* ---------- «Ставка дня» (PRO) ---------- */
+  .botd-card {
+    margin:10px 16px 0; padding:14px; border-radius:14px; position:relative; overflow:hidden;
+    background:linear-gradient(135deg, rgba(255,201,60,.10), rgba(157,107,255,.08));
+    border:1px solid rgba(255,201,60,.35);
+  }
+  .botd-card .botd-h { font-size:12px; font-weight:900; letter-spacing:.06em; color:var(--gold); display:flex; align-items:center; gap:6px; }
+  .botd-legs { margin-top:9px; display:flex; flex-direction:column; gap:6px; }
+  .botd-leg {
+    display:flex; align-items:center; gap:8px; padding:7px 10px; border-radius:10px;
+    background:rgba(10,13,22,.55); border:1px solid rgba(255,201,60,.16); font-size:11.5px;
+  }
+  .botd-leg .lg-m { color:var(--text); font-weight:800; flex:1; }
+  .botd-leg .lg-o { color:var(--gold); font-weight:800; }
+  .botd-leg .lg-p { color:var(--muted); font-size:10.5px; }
+  .botd-sum { margin-top:9px; display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; }
+  .botd-sum .o { font-size:20px; font-weight:900; color:var(--gold); }
+  .botd-sum .d { font-size:11px; color:var(--muted); }
+  .botd-lock { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; gap:6px;
+    background:rgba(10,13,22,.72); backdrop-filter:blur(3px); color:var(--gold); font-size:12px; font-weight:800; z-index:2; }
+  /* ---------- мои ставки: профиль ---------- */
+  .bet-stake-row {
+    margin:8px 16px 0; padding:9px 12px; border-radius:11px;
+    background:rgba(139,163,199,.07); border:1px solid rgba(139,163,199,.16);
+    font-size:11.5px; color:var(--muted); display:flex; align-items:center; gap:8px;
+  }
+  .bet-stake-row input {
+    width:74px; padding:5px 8px; border-radius:8px; border:1px solid rgba(0,229,255,.3);
+    background:rgba(10,13,22,.6); color:var(--text); font-size:12.5px; font-weight:800; text-align:center;
+  }
+  .bStreak { margin:6px 16px 0; font-size:11.5px; color:var(--muted); }
+  .bStreak b { color:var(--neon); }
+
   /* ---------- fresh chip: таймер до следующего обновления ---------- */
   .fresh-chip {
     margin: 10px 16px 0; padding: 7px 12px;
@@ -795,6 +847,8 @@
     <div class="stat"><div class="v" style="color:var(--gold)" id="statProCnt">5</div><div class="l">в PRO</div></div>
   </div>
 
+  <div class="collect-chip" id="collectChip" hidden><span class="pulse"></span><span id="collectTxt"></span></div>
+
   <div class="fresh-chip" id="freshChip" hidden>
     <span class="pulse"></span><span id="freshTxt"></span>
   </div>
@@ -867,6 +921,19 @@
     <div class="orb a"></div><div class="orb b"></div>
     <h3><span class="crown">💎</span> Pro-ИИ · value-ставки</h3>
     <p>Отдельный отбор: модель сравнивает свои вероятности с коэффициентами букмекеров и берёт рынки с перевесом. <b id="proCnt">…</b></p>
+  </div>
+
+  <div class="botd-card" id="botdWrap" hidden>
+    <div class="botd-h">💎 СТАВКА ДНЯ · ЭКСПРЕСС · ТОЛЬКО PRO</div>
+    <div class="botd-legs" id="botdLegs"></div>
+    <div class="botd-sum">
+      <span class="o" id="botdOdds">—</span>
+      <span class="d" id="botdDetail"></span>
+    </div>
+    <div style="margin-top:10px;text-align:center">
+      <a class="bet-btn" id="botdLink" style="color:var(--gold);border-color:rgba(255,201,60,.4)" href="https://r1wjvzfr.life/?p=gfuv&sub1=botd&sub2=pro" rel="noopener">🎲 Составить экспресс в БК</a>
+    </div>
+    <div class="botd-lock" id="botdLock" style="display:none">🔒 Экспресс открывается с PRO</div>
   </div>
 
   <div class="deck-wrap">
@@ -1012,6 +1079,19 @@
     <div class="sg"><div class="v c-gold" id="pRate">—</div><div class="l">проходимость</div></div>
   </div>
 
+  <div class="section-title">Мои ставки · личный ROI</div>
+  <div class="stat-grid">
+    <div class="sg"><div class="v c-neon" id="bTotal">0</div><div class="l">отмечено ставок</div></div>
+    <div class="sg"><div class="v c-ok" id="bWins">0</div><div class="l">зашло ✅</div></div>
+    <div class="sg"><div class="v c-warn" id="bLoss">0</div><div class="l">не зашло ❌</div></div>
+    <div class="sg"><div class="v c-gold" id="bRate">—</div><div class="l">проходимость</div></div>
+    <div class="sg"><div class="v" id="bPnl">—</div><div class="l">P/L (усл. ед.)</div></div>
+    <div class="sg"><div class="v" id="bRoi">—</div><div class="l">ROI</div></div>
+  </div>
+  <div class="bet-stake-row">Размер ставки: <input id="stakeInput" type="number" min="1" step="1" inputmode="numeric"> усл. ед. за ставку</div>
+  <div class="bStreak" id="bStreak"></div>
+  <div class="h-list" id="myBetList" style="margin-top:8px"></div>
+
   <div class="section-title">Бонус партнёра</div>
   <div class="promo-box">
     <div class="lbl">Промокод для 1win</div>
@@ -1089,7 +1169,7 @@ if (tg) { try { tg.expand(); tg.disableVerticalSwipes?.(); } catch(e) {} }
 const user = tg?.initDataUnsafe?.user;
 
 /* ================= реальные данные (GitHub Actions -> data/*.json) ================= */
-const REAL = { loaded: false, date: null, free: [], pro: [], results: null, backtest: null, lastUpdate: null };
+const REAL = { loaded: false, date: null, free: [], pro: [], results: null, backtest: null, botd: null, lastUpdate: null };
 async function loadReal() {
   try {
     const r = await fetch('data/predictions.json?v=' + Date.now(), { cache: 'no-store' });
@@ -1101,6 +1181,7 @@ async function loadReal() {
         REAL.date = d.date;
         REAL.free = d.predictions.filter(p => p.tier === 'free');
         REAL.pro = d.predictions.filter(p => p.tier === 'pro');
+        REAL.botd = (d.botd && Array.isArray(d.botd.legs) && d.botd.legs.length >= 2) ? d.botd : null;
       }
     }
   } catch (e) { console.warn('Failed to load predictions:', e); }
@@ -1116,7 +1197,7 @@ async function loadReal() {
 
 /* ================= settings ================= */
 const CONFIG = {
-  VERSION: '0.6.0', // версия приложения для отслеживания обновлений
+  VERSION: '0.7.0', // версия приложения для отслеживания обновлений
   SUBSCRIBE_URL: 'https://t.me/pxaxbetai_bot',
   API_BASE: 'https://site-technician-lee-aerial.trycloudflare.com', // адрес бэкенда (cloudflared tunnel), обновляется при перезапуске туннеля
   FREE_DAILY: 5,   // бесплатных прогнозов в день
@@ -1142,6 +1223,13 @@ function betLink(p) {
 function betBtn(p) {
   return `<a class="bet-btn" data-plink="${betLink(p)}" href="${betLink(p)}" rel="noopener">🎲 Сделать ставку в БК</a>`;
 }
+// «Я поставил» — личная отметка в трекере ставок (localStorage, без сервера)
+function myBetBtn(p, isHistory) {
+  if (!p || !p.id || !p.kind || isHistory) return '';
+  const on = !!loadBets()[String(p.id)];
+  return `<button class="mybet-btn${on ? ' on' : ''}" data-bid="${p.id}">${on ? '✅ Ставка отмечена' : '🧾 Я поставил'}</button>`;
+}
+
 
 /* ================= мок-движок ИИ ================= */
 function seedRand(seed) {
@@ -1222,7 +1310,7 @@ function generateDay(dateStr, kind) {
     used.add(key);
     const hour = 14 + Math.floor(rand() * 9);
     const conf = Math.round(kind === 'pro' ? 62 + rand() * 26 : 58 + rand() * 22);
-    // демо-линия и value: в проде эти поля приходят из data/predictions.json (модель poisson-v2)
+    // демо-линия и value: в проде эти поля приходят из data/predictions.json (модель v2)
     const odds = +(1.4 + rand() * 1.4).toFixed(2);
     const implied = +(1 / odds * 0.94).toFixed(3);
     const edge = +(conf / 100 / implied - 1);
@@ -1236,7 +1324,7 @@ function generateDay(dateStr, kind) {
       confidence: conf,
       modelProb: +(conf / 100).toFixed(3),
       odds, impliedProb: implied, edge: +edge.toFixed(3),
-      value: edge > 0.03,
+      value: edge > 0.05,
       markets: [
         { market, prob: conf, odds, edge: Math.round(edge * 100) },
         { market: market === 'П1' ? 'ТБ 2.5' : 'П2', prob: 44 + Math.round(rand() * 14), odds: +(1.7 + rand() * 0.6).toFixed(2), edge: null },
@@ -1309,6 +1397,96 @@ const store = {
   get pro() { return localStorage.getItem('pxax_pro') === '1'; },
   set pro(v) { localStorage.setItem('pxax_pro', v ? '1' : '0'); },
 };
+/* ================= личный трекер ставок (только localStorage) =================
+   Пользователь отмечает «Я поставил» на карточке. П/Л считается после того,
+   как матч появится в data/results.json: win = (kэф-1)·stake, miss = -stake, push = 0.
+   Коэффициент — из results.json (храним и свой на момент отметки — запасной). */
+const BETS_KEY = 'pxax_bets_v2';
+const STAKE_KEY = 'pxax_stake';
+function loadBets() {
+  try { const j = JSON.parse(localStorage.getItem(BETS_KEY)); return (j && typeof j === 'object') ? j : {}; }
+  catch (e) { return {}; }
+}
+function saveBets(b) { try { localStorage.setItem(BETS_KEY, JSON.stringify(b)); } catch (e) {} }
+function currentStake() {
+  const s = Math.round(+localStorage.getItem(STAKE_KEY));
+  return Number.isFinite(s) && s >= 1 ? s : 100;
+}
+// отметить/снять отметку; id = id прогноза (id события ESPN)
+function toggleBet(p) {
+  if (!p || !p.id || !p.kind) return;
+  const b = loadBets();
+  const key = String(p.id);
+  if (b[key]) {
+    delete b[key];
+    saveBets(b);
+    toast('Ставка снята с отслеживания');
+  } else {
+    b[key] = {
+      date: p.matchDate ? String(p.matchDate).slice(0, 10) : today, kind: p.kind, market: p.market,
+      odds: p.odds || null, confidence: p.confidence,
+      home: p.home, away: p.away, league: p.league, sport: p.sport,
+      at: new Date().toISOString(),
+    };
+    saveBets(b);
+    toast('🧾 Отметили: ' + p.market + ' · ' + (p.home || '') + ' — ' + (p.away || ''));
+  }
+  render();
+}
+// сводка: P/L, ROI, стрики — только по завершённым матчам (results.json)
+function myBetStats() {
+  const bets = loadBets();
+  const ids = Object.keys(bets);
+  const resById = new Map();
+  for (const r of (REAL.results || [])) if (r.id != null) resById.set(String(r.id), r);
+  const stake = currentStake();
+  const rows = [];
+  for (const id of ids) {
+    const b = bets[id];
+    const r = resById.get(id) || null;
+    const odds = Number(r && r.odds) || Number(b.odds) || 0;
+    rows.push({ id, b, r, odds, done: !!(r && r.result) });
+  }
+  const done = rows.filter(x => x.done).sort((a, b2) =>
+    (a.r.date || '').localeCompare(b2.r.date || '') || (a.b.at || '').localeCompare(b2.b.at || ''));
+  let wins = 0, losses = 0, pushes = 0, pnl = 0, staked = 0, noOdds = 0;
+  for (const x of done) {
+    const res = x.r.result;
+    if (res === 'hit') {
+      wins++;
+      if (x.odds > 1) { pnl += stake * (x.odds - 1); staked += stake; } else noOdds++;
+    } else if (res === 'miss') {
+      losses++;
+      if (x.odds > 1) { pnl -= stake; staked += stake; } else noOdds++;
+    } else pushes++;
+  }
+  // текущий стрик — с самого последнего результата назад
+  let wStreak = 0, lStreak = 0;
+  for (let i = done.length - 1; i >= 0; i--) {
+    const res = done[i].r.result;
+    if (res === 'hit') { wStreak++; if (lStreak) break; }
+    else if (res === 'miss') { lStreak++; if (wStreak) break; }
+  }
+  const decided = wins + losses;
+  return {
+    total: ids.length, decided, wins, losses, pushes, noOdds,
+    rate: decided ? Math.round(wins / decided * 100) : null,
+    pnl: +pnl.toFixed(2), staked,
+    roi: staked ? +((pnl / staked) * 100).toFixed(1) : null,
+    wStreak, lStreak,
+    rows: done.slice(-12).reverse(),
+  };
+}
+// кнопка «Я поставил» на карточках — делегирование (колонда пересобирается)
+document.addEventListener('click', (e) => {
+  const el = e.target.closest('.mybet-btn');
+  if (!el || el.disabled) return;
+  e.preventDefault(); e.stopPropagation();
+  const id = el.dataset.bid;
+  const all = freeToday.concat(proToday);
+  const p = all.find(x => String(x.id) === id);
+  if (p) toggleBet(p);
+}, true);
 const today = dayKey();
 let visits = +(localStorage.getItem('pxax_visits') || 0);
 let streak = +(localStorage.getItem('pxax_streak') || 0);
@@ -1428,7 +1606,7 @@ function slideHTML(p, unlocked, isPro, isHistory) {
       : `<span class="rel-tag">завтра</span>`;
   }
   // value-бейдж: модельная вероятность заметно выше честной вероятности линии
-  const valBadge = (!isHistory && p.value && p.edge != null && p.edge > 0.03) ? `<span class="value-badge">⚡ VALUE</span>` : '';
+  const valBadge = (!isHistory && p.value && p.edge != null && p.edge > 0.05) ? `<span class="value-badge">⚡ VALUE</span>` : '';
   // строка линии: коэффициент, вероятность линии и перевес модели
   let lineChip = '';
   if (!isHistory && p.odds) {
@@ -1485,7 +1663,7 @@ function slideHTML(p, unlocked, isPro, isHistory) {
           </div>
           ${extraMarkets}
           ${lineChip}
-          <div class="bet-wrap">${unlocked ? betBtn(p) : ''}</div>
+          <div class="bet-wrap">${unlocked ? betBtn(p) + myBetBtn(p, isHistory) : ''}</div>
           <div class="conf">
             <div class="lbl"><span>уверенность ИИ</span><b>${p.confidence}%</b></div>
             <div class="bar"><i data-w="${p.confidence}"></i></div>
@@ -1526,20 +1704,38 @@ function render() {
   const hasReal = !!(REAL.results && REAL.results.length);
   const statsAll = hasReal ? collectStats(CONFIG.STAT_DAYS) : null;
   const statsView = hasReal ? collectStats(CONFIG.STAT_DAYS, statFilter) : null;
-  // честная статистика: живая история — когда её уже достаточно (>= 20), иначе — бэктест модели (явно подписан)
+  // честная статистика: живая история считается надёжной, когда её >= 20;
+  // меньше — честно пишем «собираем данные» и (если есть) даём бэктест модели
   const liveN = hasReal ? REAL.results.length : 0;
   const bt = REAL.backtest && REAL.backtest.signals >= 30 && REAL.backtest.hitRate != null ? REAL.backtest : null;
   const rateEl = document.getElementById('statRate');
   const rateLbl = document.querySelector('#view-home .stats .stat .l');
-  if (hasReal && (liveN >= 20 || !bt)) {
+  if (hasReal && liveN >= 20) {
     rateEl.textContent = statsAll.rate + '%';
     if (rateLbl) rateLbl.textContent = 'заходов 14д';
+  } else if (hasReal && liveN > 0) {
+    rateEl.textContent = statsAll.rate + '%';
+    if (rateLbl) rateLbl.textContent = 'заходов · ' + liveN + ' рез.';
   } else if (bt) {
     rateEl.textContent = Math.round(bt.hitRate * 100) + '%';
     if (rateLbl) rateLbl.textContent = 'бэктест · ' + bt.windowDays + 'д';
   } else {
     rateEl.textContent = '—';
     if (rateLbl) rateLbl.textContent = 'заходов 14д';
+  }
+  // «собираем данные» — честная плашка, пока живой статистики мало
+  const cEl = document.getElementById('collectChip');
+  const cTxt = document.getElementById('collectTxt');
+  if (cEl && cTxt) {
+    if (hasReal && liveN > 0 && liveN < 20) {
+      cEl.hidden = false;
+      cTxt.innerHTML = `Живая статистика ещё <b>собирается</b>: сыграно ${liveN} из 20. Пока это первые результаты — цифры недостоверны, ориентируйся на бэктест модели.`;
+    } else if (!hasReal && bt) {
+      cEl.hidden = false;
+      cTxt.innerHTML = `Модель в режиме <b>сбора данных</b>: завершённых матчей пока нет. Ориентир — бэктест за ${bt.windowDays} дней: ${Math.round(bt.hitRate * 100)}% на ${bt.hits}/${bt.signals} сигналов (без заглядывания в будущее).`;
+    } else {
+      cEl.hidden = true;
+    }
   }
   document.getElementById('statFree').textContent = freeToday.length;
   document.getElementById('statProCnt').textContent = proToday.length;
@@ -1553,6 +1749,7 @@ function render() {
   // динамические счётчики вместо захардкоженных
   document.getElementById('payProTitle').textContent = `💎 Ещё ${proToday.length} ${plural(proToday.length, 'прогноз', 'прогноза', 'прогнозов')} — у Pro-ИИ`;
   document.getElementById('proCnt').textContent = `${proToday.length} ${plural(proToday.length, 'прогноз', 'прогноза', 'прогнозов')} в VIP на сегодня`;
+  renderBetOfTheDay();
 
   // колоды (+ честные пустые состояния, если матчей в окне нет)
   const freeView = applySportFilter(freeToday);
@@ -1626,12 +1823,96 @@ function render() {
     'в приложении с ' + new Date(since + 'T00:00:00').toLocaleDateString('ru-RU', { day:'numeric', month:'short' });
 
   renderProfileExtras(statsAll);
+  renderMyBets();
 
   // полосы уверенности
   requestAnimationFrame(() => requestAnimationFrame(() => {
     document.querySelectorAll('.bar i').forEach(i => i.style.width = i.dataset.w + '%');
   }));
   tickFresh();
+}
+
+/* ================= ставка дня (PRO-экспресс) ================= */
+function renderBetOfTheDay() {
+  const wrap = document.getElementById('botdWrap');
+  if (!wrap) return;
+  const botd = REAL.botd;
+  const valid = botd && Array.isArray(botd.legs) && botd.legs.length >= 2
+    && botd.minConfidence >= 70 && Number.isFinite(Number(botd.combinedOdds));
+  if (!valid) { wrap.hidden = true; return; }
+  wrap.hidden = false;
+  document.getElementById('botdLegs').innerHTML = botd.legs.map(l => `
+    <div class="botd-leg">
+      <span>${l.sport || ''}</span>
+      <span class="lg-m">${l.home} — ${l.away} · ${l.market}</span>
+      <span class="lg-p">${l.confidence}%</span>
+      <span class="lg-o">${Number(l.odds).toFixed(2)}</span>
+    </div>`).join('');
+  document.getElementById('botdOdds').textContent = Number(botd.combinedOdds).toFixed(2);
+  document.getElementById('botdDetail').textContent =
+    `экспресс на ${botd.legs.length} · все ноги ≥ ${botd.minConfidence}% · совм. вероятность модели ${Math.round((botd.combinedProb || 0) * 100)}%`;
+  const pro = store.pro;
+  document.getElementById('botdLock').style.display = pro ? 'none' : 'flex';
+  document.getElementById('botdLink').style.visibility = pro ? 'visible' : 'hidden';
+}
+
+/* ================= мои ставки: профиль ================= */
+function renderMyBets() {
+  const s = myBetStats();
+  const el = (id, v) => { const n = document.getElementById(id); if (n) n.textContent = v; };
+  el('bTotal', s.total);
+  el('bWins', s.wins);
+  el('bLoss', s.losses);
+  el('bRate', s.rate == null ? '—' : s.rate + '%');
+  el('bPnl', s.decided ? (s.pnl > 0 ? '+' : '') + String(s.pnl).replace('.', ',') : '—');
+  el('bRoi', s.roi == null ? '—' : (s.roi > 0 ? '+' : '') + s.roi + '%');
+  const st = document.getElementById('bStreak');
+  if (st) {
+    st.innerHTML = s.decided
+      ? (s.wStreak > 0 ? `🔥 Серия: <b>${s.wStreak}</b> ${s.wStreak === 1 ? 'победа' : 'побед'} подряд`
+        : s.lStreak > 0 ? `🧊 Серия: <b>${s.lStreak}</b> ${s.lStreak === 1 ? 'проигрыш' : 'проигрышей'} подряд`
+        : '—')
+      : (s.total ? 'Поставь матчи доиграют — P/L появится автоматически' : 'Отмечай «Я поставил» на карточках — трекер сам посчитает P/L и ROI');
+  }
+  // размер ставки
+  const inp = document.getElementById('stakeInput');
+  if (inp) {
+    if (document.activeElement !== inp) inp.value = currentStake();
+    if (!inp.dataset.wired) {
+      inp.dataset.wired = '1';
+      inp.addEventListener('change', () => {
+        const v = Math.round(+inp.value);
+        if (Number.isFinite(v) && v >= 1) { localStorage.setItem(STAKE_KEY, String(v)); renderMyBets(); toast('Размер ставки: ' + v + ' усл. ед.'); }
+        else inp.value = currentStake();
+      });
+    }
+  }
+  // последние 12 с результатом
+  const list = document.getElementById('myBetList');
+  if (list) {
+    list.innerHTML = '';
+    if (!s.rows.length) {
+      list.innerHTML = '<div class="empty" style="margin:0">Здесь появятся результаты твоих отмеченных ставок — как только матчи сыграют.</div>';
+    } else {
+      for (const x of s.rows) {
+        const icon = x.r.result === 'hit' ? '✅' : x.r.result === 'miss' ? '❌' : '⏳';
+        let pnlTxt = '';
+        if (x.r.result === 'hit' && x.odds > 1) pnlTxt = `+${(currentStake() * (x.odds - 1)).toFixed(2)}`;
+        else if (x.r.result === 'miss' && x.odds > 1) pnlTxt = `-${currentStake()}`;
+        else if (x.r.result === 'push') pnlTxt = '0 (возврат)';
+        const d = (x.b.date || '').slice(5);
+        const item = document.createElement('div');
+        item.className = 'h-item ' + (x.r.result === 'hit' ? 'hit' : x.r.result === 'miss' ? 'miss' : 'push');
+        item.innerHTML = `
+          <div class="r">${icon} ${pnlTxt ? '<b style="font-size:10px">' + pnlTxt + '</b>' : ''}</div>
+          <div class="m">
+            <div class="t">${x.b.home || ''} — ${x.b.away || ''}</div>
+            <div class="s">${x.b.market}${x.odds > 1 ? ' @' + Number(x.odds).toFixed(2).replace('.', ',') : ''} · ${x.b.league || ''}${d ? ' · ' + d : ''}</div>
+          </div>`;
+        list.appendChild(item);
+      }
+    }
+  }
 }
 
 /* ================= профиль: уровень, ачивки, привычки, сравнение ================= */
@@ -1670,6 +1951,8 @@ function renderProfileExtras(statsAll) {
     { i: '💎', t: 'PRO-игрок', ok: store.pro },
     { i: '📅', t: 'Неделя с нами', ok: daysWith >= 7 },
     { i: '🧠', t: '100 прогнозов', ok: viewed >= 100 },
+    { i: '🧾', t: 'Первая ставка', ok: Object.keys(loadBets()).length >= 1 },
+    { i: '💹', t: 'ROI +10%', ok: (myBetStats().roi || 0) >= 10 },
   ];
   document.getElementById('achGrid').innerHTML =
     achs.map(a => `<div class="ach ${a.ok ? 'on' : ''}"><div class="i">${a.i}</div><div class="t">${a.t}</div></div>`).join('');

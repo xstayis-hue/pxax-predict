@@ -6,7 +6,7 @@
 // что в production-модели) + Brier (1X2) по всем проанализированным матчам.
 // Запуск: ежедневно, .github/workflows/backtest.yml (ESPN отдаёт scoreboard по дням).
 import { writeFileSync, mkdirSync } from 'node:fs';
-import { poissonMatrix, outcomesFromMatrix } from './model.mjs';
+import { scoreMatrix, outcomesFromMatrix } from './model.mjs';
 
 const LEAGUES = [
   { key: 'soccer/eng.1', name: 'АПЛ' },
@@ -124,7 +124,7 @@ for (const lg of LEAGUES) {
     lh += (anchor - lh) * 0.5;
     la += (anchor - la) * 0.5;
 
-    const oc = outcomesFromMatrix(poissonMatrix(lh, la));
+    const oc = outcomesFromMatrix(scoreMatrix(lh, la));
     // кандидаты — тот же набор рынков, что у production-модели без линий: максимум вероятности (>= 50%)
     const pool = [
       { m: 'П1', p: oc.p1 },
