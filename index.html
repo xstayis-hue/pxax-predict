@@ -3,15 +3,55 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0d16">
+<meta name="color-scheme" content="dark">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <title>PXAXBET2016 AI — Прогнозы</title>
 <style>
   :root {
     --bg: #0a0d16; --card: #121728; --card2: #171d33;
-    --neon: #00e5ff; --neon2: #ff2bd6; --gold: #ffc93c; --violet: #9d6bff;
+    /* Цвет несёт смысл, а не украшает: cyan — единственный акцент приложения,
+       gold — только PRO, подписка и партнёрский бонус, ok/warn — только результат.
+       Прежние magenta и violet убраны: четыре акцента на одном экране не давали иерархии. */
+    --neon: #00e5ff; --gold: #ffc93c;
     --text: #e6f1ff; --muted: #8ba3c7; --ok: #00e676; --warn: #ff5252;
     --radius: 18px;
   }
+  /* ---------- иконки ----------
+     Одна штриховая система вместо эмодзи: эмодзи рендерятся по-разному в iOS и
+     Android и читаются как «наклейка». Инлайновый спрайт (#icon-sprite) масштабируется
+     от font-size и наследует currentColor, поэтому ведёт себя как обычный глиф и
+     работает в существующих font-size-хуках. */
+  .ic {
+    width:1em; height:1em; flex:none; display:inline-block; vertical-align:-.14em;
+    fill:none; stroke:currentColor; stroke-width:2;
+    stroke-linecap:round; stroke-linejoin:round;
+  }
+  /* У части иконок есть залитые точки (центр мишени, кнопки геймпада): у SVG
+     атрибут fill слабее любого CSS-правила, поэтому .ic{fill:none} стирал их.
+     Возвращаем заливку точечно по атрибуту. */
+  .ic [fill="currentColor"] { fill: currentColor; }
+  /* У иконок своя нижняя граница размера — 14px. Текст может быть 11px, но
+     штриховая иконка на 11–12px превращается в серое пятно: проверено по
+     пикселям кадра, а не на глаз. Здесь иконка наследует кегль мелкой подписи,
+     поэтому размер задаём явно; заодно чуть плотнее обводка в этих контекстах. */
+  .stat .l .ic, .sg .l .ic, .h-item .o .ic, .ecosystem h4 .ic,
+  .streak .l .ic, .section-title .ic, .verdict .ic,
+  .p-top .sport .ic, .ai-tag .ic, .value-badge .ic, .soon-tag .ic,
+  .time-chip .ic, .mybet-btn .ic, .bet-btn .ic, .swipe-hint .ic,
+  .h-item .m .s .ic, .f-btn .ic, .sf-btn .ic, .cmp .t .ic,
+  .botd-h .ic, .botd-lock .ic, .botd-leg > span:first-child .ic {
+    font-size:14px;
+    stroke-width:2.4;
+  }
+  /* Числа — главный герой продукта: табличные цифры, чтобы коэффициенты и проценты
+     не «прыгали» при обновлении значений. */
+  .stat .v, .sg .v, .pick .v, .cmp .r, .streak .v, .h-item .o, .botd-sum .o,
+  .botd-leg .lg-o, .promo-box .code b, .line-chip b {
+    font-variant-numeric: tabular-nums; font-feature-settings:"tnum" 1;
+  }
+  /* Кегль: 11px — нижняя граница, мельче на телефоне не читается. Все значения
+     ниже подняты до неё по всему интерфейсу (было 8–10.5px). */
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   html, body { height:100%; }
   /* [hidden] должен побеждать авторские display:flex — иначе пустые плашки
@@ -34,23 +74,20 @@
   .logo {
     width:38px; height:38px; border-radius:12px; flex:none;
     background: linear-gradient(135deg, #0e2a3a, #0a0d16);
-    border:1px solid rgba(0,229,255,.5);
+    border:1px solid rgba(0,229,255,.45);
     display:flex; align-items:center; justify-content:center;
     font-weight:900; font-size:13px; color:var(--neon);
-    box-shadow: 0 0 14px rgba(0,229,255,.35), inset 0 0 8px rgba(0,229,255,.25);
-    animation: logoGlow 3s ease-in-out infinite;
+    box-shadow: 0 0 14px rgba(0,229,255,.22);
   }
-  @keyframes logoGlow { 50% { box-shadow: 0 0 22px rgba(0,229,255,.6), inset 0 0 12px rgba(0,229,255,.4); } }
   .brand h1 { font-size:14.5px; letter-spacing:.03em; white-space:nowrap; }
   .brand h1 b { color: var(--neon); }
   .brand small { display:block; font-size:11px; color:var(--muted); font-weight:400; }
   .sub-badge {
-    margin-left:auto; font-size:10px; font-weight:700; letter-spacing:.08em;
+    margin-left:auto; font-size:11px; font-weight:700; letter-spacing:.08em;
     padding:5px 10px; border-radius:20px; text-transform:uppercase;
   }
   .sub-badge.free { color:#9fb3d4; background:rgba(139,163,199,.12); border:1px solid rgba(139,163,199,.3); }
-  .sub-badge.pro  { color:#0a0d16; background:linear-gradient(135deg,var(--gold),#ffb01f); box-shadow:0 0 12px rgba(255,201,60,.4); animation:proPulse 2s infinite; }
-  @keyframes proPulse { 50% { box-shadow:0 0 20px rgba(255,201,60,.65); } }
+  .sub-badge.pro  { color:#0a0d16; background:linear-gradient(135deg,var(--gold),#ffb01f); }
 
   /* ---------- AI disclaimer ---------- */
   .ai-disclaimer {
@@ -70,8 +107,7 @@
     border: 1px solid rgba(0,229,255,.15);
     display:flex; align-items:center; gap:12px;
   }
-  .ai-loading .bot { font-size:26px; animation: bob 1s ease-in-out infinite; }
-  @keyframes bob { 50% { transform: translateY(-5px) rotate(-6deg); } }
+  .ai-loading .bot { font-size:26px; color:var(--neon); display:flex; }
   .ai-loading .txt { font-size:13px; color:var(--muted); }
   .ai-loading .txt b { color:var(--neon); }
   .dots span {
@@ -89,7 +125,7 @@
     border:1px solid rgba(0,229,255,.12); text-align:center;
   }
   .stat .v { font-size:18px; font-weight:800; color:var(--neon); }
-  .stat .l { font-size:9.5px; color:var(--muted); margin-top:2px; letter-spacing:.03em; }
+  .stat .l { font-size:11px; color:var(--muted); margin-top:2px; letter-spacing:.03em; }
 
   /* ---------- swipe deck (app-like) ---------- */
   .deck-wrap { padding: 12px 16px 0; }
@@ -117,46 +153,41 @@
     background: linear-gradient(90deg, var(--neon), rgba(0,229,255,0) 70%);
     opacity:.9;
   }
-  .pro-card::before {
-    background: linear-gradient(90deg, var(--gold), var(--neon2), rgba(255,43,214,0) 80%);
-    background-size: 200% 100%;
-    animation: topLine 3.2s linear infinite;
-  }
-  @keyframes topLine { from { background-position: 0 0; } to { background-position: 200% 0; } }
+  .pro-card::before { background: linear-gradient(90deg, var(--gold), rgba(255,201,60,0) 70%); }
   /* водяной знак вида спорта */
   .wm {
     position:absolute; right:-14px; bottom:-24px; font-size:110px;
     opacity:.05; pointer-events:none; user-select:none; z-index:0;
   }
+  .wm .ic { stroke-width:1.1; }
   .p-top {
     display:flex; align-items:center; gap:8px;
     padding:11px 14px; font-size:11px; color:var(--muted);
     background: rgba(0,229,255,.05); border-bottom:1px solid rgba(0,229,255,.08);
   }
-  .pro-card .p-top { background: rgba(255,201,60,.06); border-bottom-color: rgba(255,201,60,.14); }
-  .p-top .sport { font-weight:700; color:var(--neon); }
+  .pro-card .p-top { background: rgba(255,255,255,.025); border-bottom-color: rgba(255,201,60,.16); }
+  .p-top .sport { display:inline-flex; color:var(--neon); }
   .pro-card .p-top .sport { color:var(--gold); }
   .ai-tag {
     margin-left:auto; display:flex; align-items:center; gap:5px;
-    font-size:10px; font-weight:800; letter-spacing:.1em;
-    color:var(--violet); background:rgba(157,107,255,.12);
-    padding:3px 8px; border-radius:12px; border:1px solid rgba(157,107,255,.3);
+    font-size:11px; font-weight:700; letter-spacing:.08em;
+    color:#9fb3d4; background:rgba(139,163,199,.1);
+    padding:3px 8px; border-radius:12px; border:1px solid rgba(139,163,199,.28);
   }
-  .ai-tag.pro { color:var(--gold); background:rgba(255,201,60,.1); border-color:rgba(255,201,60,.4); animation:proPulse 2.4s infinite; }
+  .ai-tag.pro { color:var(--gold); background:rgba(255,201,60,.09); border-color:rgba(255,201,60,.38); }
   .soon-tag {
-    font-size:10px; font-weight:800; color:#ff6b6b;
-    background:rgba(255,82,82,.12); border:1px solid rgba(255,82,82,.45);
+    display:inline-flex; align-items:center; gap:4px;
+    font-size:11px; font-weight:700; color:#ff8d8d;
+    background:rgba(255,82,82,.1); border:1px solid rgba(255,82,82,.4);
     padding:3px 8px; border-radius:12px; white-space:nowrap;
-    animation: soonPulse 1.4s ease-in-out infinite;
   }
-  @keyframes soonPulse { 50% { box-shadow:0 0 12px rgba(255,82,82,.55); } }
   .rel-tag {
-    font-size:10px; font-weight:700; color:var(--muted);
+    font-size:11px; font-weight:700; color:var(--muted);
     background:rgba(139,163,199,.1); border:1px solid rgba(139,163,199,.28);
     padding:3px 8px; border-radius:12px; white-space:nowrap;
   }
   .p-body { padding: 16px 14px 4px; text-align:center; position:relative; z-index:1; }
-  .league-line { display:flex; align-items:center; justify-content:center; gap:7px; font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); }
+  .league-line { display:flex; align-items:center; justify-content:center; gap:7px; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); }
   .lg-dot { width:6px; height:6px; border-radius:50%; background:var(--neon); box-shadow:0 0 8px var(--neon); flex:none; }
   .pro-card .lg-dot { background:var(--gold); box-shadow:0 0 8px var(--gold); }
   .teams { display:flex; align-items:center; justify-content:center; gap:12px; margin-top:13px; }
@@ -193,19 +224,18 @@
     flex:1; background:var(--card2); border-radius:13px; padding:12px;
     border:1px solid rgba(0,229,255,.2); text-align:center;
   }
-  .pick .m { font-size:10px; color:var(--muted); letter-spacing:.06em; text-transform:uppercase; }
-  .pick .v { font-size:19px; font-weight:800; color:var(--neon); margin-top:3px;
-             text-shadow: 0 0 14px rgba(0,229,255,.5); }
+  .pick .m { font-size:11px; color:var(--muted); letter-spacing:.06em; text-transform:uppercase; }
+  .pick .v { font-size:19px; font-weight:800; color:var(--neon); margin-top:3px; }
   .pick.gold { border-color:rgba(255,201,60,.4); background:rgba(255,201,60,.07); }
-  .pick.gold .v { color:var(--gold); text-shadow:0 0 14px rgba(255,201,60,.5); }
-  .pick.gold .v.unavailable { color:var(--muted); font-size:12px; text-shadow:none; }
+  .pick.gold .v { color:var(--gold); }
+  .pick.gold .v.unavailable { color:var(--muted); font-size:12px; }
   .pick .sub { font-size:11px; color:var(--muted); margin-top:3px; }
   /* value-бейдж: модельная вероятность заметно выше линии */
   .value-badge {
     display:inline-flex; align-items:center; gap:4px; margin-left:auto;
-    font-size:10px; font-weight:800; letter-spacing:.05em;
+    font-size:11px; font-weight:800; letter-spacing:.05em;
     color:#0a0d16; background:linear-gradient(135deg,#7bffb0,#00e676);
-    padding:3px 8px; border-radius:10px; box-shadow:0 0 12px rgba(0,230,118,.45);
+    padding:3px 8px; border-radius:10px;
   }
   .line-chip {
     display:flex; align-items:center; gap:8px; justify-content:space-between;
@@ -220,39 +250,33 @@
   .sport-filter { display:flex; gap:7px; overflow-x:auto; padding:10px 16px 2px; scrollbar-width:none; }
   .sport-filter::-webkit-scrollbar { display:none; }
   .sf-btn {
-    flex:none; padding:6px 13px; border-radius:20px; cursor:pointer;
+    flex:none; display:inline-flex; align-items:center; gap:5px;
+    padding:6px 13px; border-radius:20px; cursor:pointer;
     background:rgba(139,163,199,.1); border:1px solid rgba(139,163,199,.2);
-    color:var(--muted); font-size:11.5px; font-weight:700; white-space:nowrap;
+    color:var(--muted); font-size:11px; font-weight:700; white-space:nowrap;
   }
   .sf-btn.on { border-color:var(--neon); color:var(--neon); background:rgba(0,229,255,.1); }
   .conf { padding: 10px 18px 8px; }
-  .conf .lbl { display:flex; justify-content:space-between; font-size:10.5px; color:var(--muted); margin-bottom:6px; }
+  .conf .lbl { display:flex; justify-content:space-between; font-size:11px; color:var(--muted); margin-bottom:6px; }
   .conf .lbl b { color:var(--text); }
   .bar { position:relative; height:7px; border-radius:6px; background:rgba(139,163,199,.15); overflow:hidden; }
-  .bar i::after {
-    content:''; position:absolute; top:0; bottom:0; width:40%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,.5), transparent);
-    animation: barShine 2.4s linear infinite;
-  }
-  @keyframes barShine { from { left:-40%; } to { left:110%; } }
   .bar i {
     display:block; height:100%; width:0; border-radius:6px;
-    background: linear-gradient(90deg, var(--neon), #7bffb0);
-    box-shadow: 0 0 10px rgba(0,229,255,.6);
+    background: linear-gradient(90deg, #0090b3, var(--neon));
     transition: width 1.1s cubic-bezier(.22,1,.36,1);
   }
   .pro-card .bar i { background:linear-gradient(90deg,var(--gold),#ffe08a); box-shadow:0 0 10px rgba(255,201,60,.6); }
   .ai-note {
     margin: 4px 14px 14px; padding: 10px 12px;
-    background: rgba(157,107,255,.07); border-radius:11px;
-    border-left: 3px solid var(--violet);
+    background: rgba(139,163,199,.06); border-radius:11px;
+    border-left: 2px solid rgba(0,229,255,.45);
     font-size:12px; line-height:1.5; color:#cfd8f5; text-align:left;
   }
-  .pro-card .ai-note { border-left-color:var(--gold); background:rgba(255,201,60,.06); }
-  .ai-note b { color:#b79aff; }
+  .pro-card .ai-note { border-left-color:rgba(255,201,60,.55); background:rgba(255,201,60,.05); }
+  .ai-note b { color:var(--text); font-weight:800; }
   .pro-card .ai-note b { color:var(--gold); }
   .res-chip {
-    position:absolute; top:44px; right:12px; font-size:10px; font-weight:800;
+    position:absolute; top:44px; right:12px; font-size:11px; font-weight:800;
     padding:4px 9px; border-radius:12px; letter-spacing:.05em; z-index:3;
   }
   .res-chip.hit  { color:var(--ok); background:rgba(0,230,118,.12); border:1px solid rgba(0,230,118,.4); }
@@ -276,13 +300,13 @@
   .collect-chip b { color:var(--gold); font-weight:800; }
   .collect-chip .pulse {
     width:7px; height:7px; border-radius:50%; background:var(--gold);
-    box-shadow:0 0 8px rgba(255,201,60,.7); animation:dot 1.6s infinite; flex:none;
+    box-shadow:0 0 8px rgba(255,201,60,.7); flex:none;
   }
   /* ---------- «Ставка дня» (PRO) ---------- */
   .botd-card {
     margin:10px 16px 0; padding:14px; border-radius:14px; position:relative; overflow:hidden;
-    background:linear-gradient(135deg, rgba(255,201,60,.10), rgba(157,107,255,.08));
-    border:1px solid rgba(255,201,60,.35);
+    background:linear-gradient(135deg, rgba(255,201,60,.09), rgba(255,201,60,.03));
+    border:1px solid rgba(255,201,60,.3);
   }
   .botd-card .botd-h { font-size:12px; font-weight:900; letter-spacing:.06em; color:var(--gold); display:flex; align-items:center; gap:6px; }
   .botd-legs { margin-top:9px; display:flex; flex-direction:column; gap:6px; }
@@ -290,9 +314,11 @@
     display:flex; align-items:center; gap:8px; padding:7px 10px; border-radius:10px;
     background:rgba(10,13,22,.55); border:1px solid rgba(255,201,60,.16); font-size:11.5px;
   }
+  .botd-leg > span:first-child { display:flex; color:var(--muted); }
+
   .botd-leg .lg-m { color:var(--text); font-weight:800; flex:1; }
   .botd-leg .lg-o { color:var(--gold); font-weight:800; }
-  .botd-leg .lg-p { color:var(--muted); font-size:10.5px; }
+  .botd-leg .lg-p { color:var(--muted); font-size:11px; }
   .botd-sum { margin-top:9px; display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; }
   .botd-sum .o { font-size:20px; font-weight:900; color:var(--gold); }
   .botd-sum .d { font-size:11px; color:var(--muted); }
@@ -327,7 +353,7 @@
   .fresh-chip b { color: var(--neon); font-weight: 800; }
   .fresh-chip .pulse {
     width: 7px; height: 7px; border-radius: 50%; background: var(--neon);
-    box-shadow: 0 0 8px rgba(0,229,255,.7); animation: dot 1.6s infinite; flex: none;
+    box-shadow: 0 0 8px rgba(0,229,255,.7); flex: none;
   }
 
   /* ---------- скелетоны карточек при загрузке ---------- */
@@ -354,7 +380,7 @@
   /* (конфетти убрано) */
 
   /* ---------- онбординг ---------- */
-  .ob-icon { text-align:center; font-size:44px; margin: 4px 0 10px; animation: bob 2s ease-in-out infinite; }
+  .ob-icon { text-align:center; font-size:44px; margin: 4px 0 10px; color:var(--neon); }
   .ob-title { font-size:16px; text-align:center; font-weight:800; margin-bottom:7px; }
   .ob-txt { font-size:12.5px; color:var(--muted); line-height:1.55; text-align:center; min-height: 58px; }
   .ob-dots { display:flex; gap:6px; justify-content:center; margin: 14px 0 14px; }
@@ -374,11 +400,10 @@
   .dn.on { width:22px; background:var(--neon); box-shadow:0 0 10px rgba(0,229,255,.6); }
   .deck-nav.pro .dn.on { background:var(--gold); box-shadow:0 0 10px rgba(255,201,60,.6); }
   .swipe-hint {
-    text-align:center; font-size:10.5px; color:var(--muted); letter-spacing:.08em;
+    text-align:center; font-size:11px; color:var(--muted); letter-spacing:.06em;
     padding: 2px 0 0;
   }
-  .swipe-hint .ar { display:inline-block; animation: arw 1.6s ease-in-out infinite; }
-  @keyframes arw { 50% { transform: translateX(5px); opacity:.4; } }
+  .swipe-hint .ar { display:inline-flex; color:var(--muted); }
 
   /* locked slide */
   .slide.locked .blur { filter: blur(7px) saturate(.6); pointer-events:none; }
@@ -387,20 +412,14 @@
     display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;
     background: rgba(10,13,22,.55); backdrop-filter: blur(1px); overflow:hidden; border-radius:var(--radius);
   }
-  .lock-overlay::after {
-    content:''; position:absolute; top:0; bottom:0; width:60px;
-    background: linear-gradient(105deg, transparent, rgba(255,201,60,.09), transparent);
-    animation: sweep 2.6s linear infinite;
-  }
-  @keyframes sweep { from { left:-80px; } to { left:110%; } }
-  .lock-overlay .ico { font-size:26px; }
+  .lock-overlay .ico { display:flex; color:var(--gold); }
+  .lock-overlay .ico .ic { font-size:26px; }
   .lock-overlay span { font-size:12px; color:var(--muted); letter-spacing:.05em; }
   .lock-overlay button {
     margin-top:4px; border:none; cursor:pointer; position:relative; z-index:2;
     background: linear-gradient(135deg, var(--gold), #ffb01f);
     color:#0a0d16; font-weight:800; font-size:12.5px; letter-spacing:.06em;
     padding: 10px 20px; border-radius: 24px;
-    box-shadow: 0 0 18px rgba(255,201,60,.45);
   }
 
   /* ---------- partner (аккуратно) ---------- */
@@ -418,7 +437,7 @@
     background: linear-gradient(135deg, rgba(0,229,255,.07), rgba(255,201,60,.07));
     border: 1px solid rgba(0,229,255,.25);
   }
-  .promo-box .lbl { font-size: 10.5px; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
+  .promo-box .lbl { font-size:11px; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
   .promo-box .code {
     display: flex; align-items: center; justify-content: space-between; gap: 10px;
     margin-top: 8px; padding: 10px 12px;
@@ -430,7 +449,7 @@
     background: rgba(0,229,255,.12); color: var(--neon); font-weight: 700; font-size: 11px;
   }
   .promo-box .desc { font-size: 11.5px; color: var(--muted); margin-top: 8px; line-height: 1.45; }
-  .promo-box .adv { font-size: 9px; color: #5f7396; margin-top: 8px; letter-spacing: .08em; text-transform: uppercase; }
+  .promo-box .adv { font-size:11px; color: #5f7396; margin-top: 8px; letter-spacing: .08em; text-transform: uppercase; }
 
   /* ---------- partner ad banner ---------- */
   .ad-banner {
@@ -463,33 +482,29 @@
   .ad-banner:active { transform: scale(.985); }
   .ad-mark {
     position: absolute; top: 5px; right: 8px;
-    font-size: 8px; letter-spacing: .12em; color: rgba(255,255,255,.35);
+    font-size:11px; letter-spacing: .1em; color: rgba(255,255,255,.45);
     text-transform: uppercase;
   }
 
   /* ---------- PRO view ---------- */
+  /* Премиальность читается сдержанностью: тот же карт + тонкая золотая рамка.
+     Пульсирующие рамки и цветные блики читаются как «акция», а не как PRO. */
   .pro-hero {
     margin: 12px 16px 0; padding: 15px 16px;
     border-radius: var(--radius); position:relative; overflow:hidden;
-    background: linear-gradient(135deg, rgba(255,201,60,.14), rgba(255,43,214,.1), rgba(157,107,255,.12));
-    background-size: 200% 200%;
-    animation: proShift 6s ease-in-out infinite;
-    border: 1px solid rgba(255,201,60,.4);
+    background: rgba(255,201,60,.06);
+    border: 1px solid rgba(255,201,60,.3);
   }
-  @keyframes proShift { 0%,100% { background-position:0% 0%; } 50% { background-position:100% 100%; } }
   .pro-hero h3 { font-size:16px; color:var(--gold); display:flex; align-items:center; gap:8px; }
-  .pro-hero h3 .crown { animation: bob 2s ease-in-out infinite; display:inline-block; }
+  .pro-hero h3 .crown { display:inline-flex; }
+  .pro-hero h3 .crown .ic { font-size:17px; }
   .pro-hero p { font-size:12px; color:#d8c9a8; line-height:1.5; margin-top:6px; }
-  .orb { position:absolute; border-radius:50%; filter:blur(26px); opacity:.5; pointer-events:none; }
-  .orb.a { width:90px; height:90px; background:#ffc93c; top:-30px; right:-20px; animation: floatOrb 5s ease-in-out infinite; }
-  .orb.b { width:70px; height:70px; background:#ff2bd6; bottom:-24px; left:-14px; animation: floatOrb 6.5s ease-in-out infinite reverse; }
-  @keyframes floatOrb { 50% { transform: translateY(14px) scale(1.15); } }
 
   /* ---------- paywall ---------- */
   .paywall-cta {
     margin: 16px 16px 8px; padding: 16px;
-    background: linear-gradient(135deg, rgba(255,201,60,.10), rgba(255,43,214,.08));
-    border: 1px solid rgba(255,201,60,.4); border-radius: var(--radius);
+    background: rgba(255,201,60,.06);
+    border: 1px solid rgba(255,201,60,.32); border-radius: var(--radius);
     text-align:center;
   }
   .paywall-cta h3 { font-size:15px; margin-bottom:5px; color:var(--gold); }
@@ -513,11 +528,11 @@
     animation: cardIn .4s cubic-bezier(.22,1,.36,1) both;
     animation-delay: var(--d, 0s);
   }
-  .h-item .r { font-size:18px; }
+  .h-item .r { font-size:18px; display:flex; align-items:center; gap:5px; flex:none; }
   .h-item .m { flex:1; min-width:0; }
   .h-item .m .t { font-size:13px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .h-item .m .s { font-size:10.5px; color:var(--muted); margin-top:2px; }
-  .h-item .m .s .ai { color:var(--violet); font-weight:700; }
+  .h-item .m .s { font-size:11px; color:var(--muted); margin-top:2px; }
+  .h-item .m .s .ai { color:#9fb3d4; font-weight:700; }
   .h-item .m .s .pro { color:var(--gold); font-weight:700; }
   .h-item .o { font-size:12px; font-weight:800; color:var(--gold); }
   .h-item.hit  { border-left:3px solid var(--ok); }
@@ -531,30 +546,31 @@
     color:var(--muted); font-weight:700; font-size:11.5px; letter-spacing:.03em;
     padding:9px 4px; border-radius:11px; cursor:pointer; transition: all .2s;
   }
-  .f-btn.on { border-color: var(--neon); color: var(--neon); background: rgba(0,229,255,.08); box-shadow: 0 0 12px rgba(0,229,255,.15); }
-  .f-btn.vip.on { border-color: var(--gold); color: var(--gold); background: rgba(255,201,60,.08); box-shadow: 0 0 12px rgba(255,201,60,.2); }
+  .f-btn.on { border-color: var(--neon); color: var(--neon); background: rgba(0,229,255,.08); }
+  .f-btn.vip.on { border-color: var(--gold); color: var(--gold); background: rgba(255,201,60,.08); }
+  .f-btn .ic, .sf-btn .ic { vertical-align:-.18em; }
 
   /* ---------- level & achievements ---------- */
   .lvl-card { margin:12px 16px 0; padding:14px; background:var(--card); border-radius:var(--radius); border:1px solid rgba(0,229,255,.16); }
   .lvl-top { display:flex; align-items:center; gap:12px; }
-  .lvl-badge { width:52px; height:52px; border-radius:16px; background:linear-gradient(135deg,#1a2f4d,#0a0d16); border:1.5px solid rgba(0,229,255,.5); display:flex; align-items:center; justify-content:center; font-size:22px; box-shadow:0 0 16px rgba(0,229,255,.25); animation:logoGlow 3s ease-in-out infinite; }
+  .lvl-badge { width:52px; height:52px; border-radius:16px; background:linear-gradient(135deg,#1a2f4d,#0a0d16); border:1.5px solid rgba(0,229,255,.4); display:flex; align-items:center; justify-content:center; font-size:22px; color:var(--neon); box-shadow:0 0 16px rgba(0,229,255,.16); }
   .lvl-name { font-size:15px; font-weight:800; }
   .lvl-sub { font-size:11px; color:var(--muted); margin-top:2px; }
   .xp-bar { height:8px; border-radius:8px; background:rgba(139,163,199,.15); overflow:hidden; margin-top:12px; }
-  .xp-bar i { display:block; height:100%; width:0; border-radius:8px; background:linear-gradient(90deg,var(--neon),var(--violet)); box-shadow:0 0 10px rgba(0,229,255,.5); transition: width 1.2s cubic-bezier(.22,1,.36,1); }
-  .xp-lbl { display:flex; justify-content:space-between; font-size:10px; color:var(--muted); margin-top:5px; }
+  .xp-bar i { display:block; height:100%; width:0; border-radius:8px; background:linear-gradient(90deg,#0090b3,var(--neon)); transition: width 1.2s cubic-bezier(.22,1,.36,1); }
+  .xp-lbl { display:flex; justify-content:space-between; font-size:11px; color:var(--muted); margin-top:5px; }
   .ach-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:9px; padding: 2px 16px 0; }
   .ach { background:var(--card); border-radius:13px; padding:11px 6px; text-align:center; border:1px solid rgba(139,163,199,.14); opacity:.4; filter:grayscale(.8); }
-  .ach.on { opacity:1; filter:none; border-color:rgba(255,201,60,.4); background:linear-gradient(160deg, rgba(255,201,60,.09), var(--card)); animation:achPop .5s cubic-bezier(.34,1.56,.64,1) both; }
+  .ach.on { opacity:1; filter:none; border-color:rgba(0,229,255,.4); background:rgba(0,229,255,.07); animation:achPop .5s cubic-bezier(.34,1.56,.64,1) both; }
   @keyframes achPop { from { transform:scale(.6); opacity:0; } }
   .ach .i { font-size:22px; }
-  .ach .t { font-size:9.5px; color:var(--muted); margin-top:4px; line-height:1.25; }
-  .ach.on .t { color:#d9c68f; }
+  .ach .t { font-size:11px; color:var(--muted); margin-top:4px; line-height:1.25; }
+  .ach.on .t { color:var(--text); }
   .fun-row { display:flex; gap:9px; padding:2px 16px 0; }
   .fun { flex:1; background:var(--card); border-radius:13px; padding:11px 6px; border:1px solid rgba(139,163,199,.14); text-align:center; }
   .fun .i { font-size:18px; }
   .fun .v { font-size:12px; font-weight:700; margin-top:3px; }
-  .fun .l { font-size:9px; color:var(--muted); margin-top:2px; }
+  .fun .l { font-size:11px; color:var(--muted); margin-top:2px; }
 
   /* ---------- compare VIP vs free ---------- */
   .cmp-wrap { display:flex; gap:10px; padding: 2px 16px 0; }
@@ -562,7 +578,7 @@
   .cmp.vip { border-color:rgba(255,201,60,.35); }
   .cmp .t { font-size:11px; font-weight:800; }
   .cmp .r { font-size:24px; font-weight:800; margin-top:4px; }
-  .cmp .d { font-size:9.5px; color:var(--muted); margin-top:2px; }
+  .cmp .d { font-size:11px; color:var(--muted); margin-top:2px; }
   .verdict { margin:10px 16px 0; padding:10px 12px; border-radius:12px; font-size:12px; line-height:1.5; }
   .verdict.good { background:rgba(0,230,118,.08); border:1px solid rgba(0,230,118,.35); color:#9fe8c4; }
   .verdict.neutral { background:rgba(139,163,199,.07); border:1px solid rgba(139,163,199,.25); color:#9fb3d4; }
@@ -583,10 +599,11 @@
   .prof-head .since { font-size:11px; color:var(--muted); margin-top:3px; }
   .streak {
     margin-left:auto; text-align:center; padding:8px 12px;
-    background:rgba(255,201,60,.08); border:1px solid rgba(255,201,60,.35); border-radius:14px;
+    background:rgba(0,229,255,.06); border:1px solid rgba(0,229,255,.25); border-radius:14px;
   }
-  .streak .v { font-size:19px; font-weight:800; color:var(--gold); }
-  .streak .l { font-size:9px; color:var(--muted); letter-spacing:.05em; }
+  .streak .v { font-size:19px; font-weight:800; color:var(--neon); }
+  .streak .l { font-size:11px; color:var(--muted); display:flex; align-items:center; gap:4px; justify-content:center; }
+  .streak .l .ic { color:var(--warn); }
   .stat-grid { display:grid; grid-template-columns:1fr 1fr; gap:9px; padding: 2px 16px 0; }
   .sg {
     background:var(--card); border-radius:13px; padding:12px;
@@ -595,7 +612,7 @@
   .sg .v { font-size:20px; font-weight:800; }
   .sg .v.c-neon { color:var(--neon); } .sg .v.c-ok { color:var(--ok); }
   .sg .v.c-warn { color:var(--warn); } .sg .v.c-gold { color:var(--gold); }
-  .sg .l { font-size:10px; color:var(--muted); margin-top:3px; letter-spacing:.04em; }
+  .sg .l { font-size:11px; color:var(--muted); margin-top:3px; letter-spacing:.04em; }
   .prof-actions { padding: 13px 16px 0; display:flex; flex-direction:column; gap:9px; }
   .btn-ghost {
     width:100%; border:1px dashed rgba(0,229,255,.4); background:none;
@@ -607,10 +624,10 @@
   .footer {
     margin: 18px 16px 10px; padding: 11px 14px;
     background: rgba(139,163,199,.06); border-radius: 12px;
-    font-size: 10.5px; line-height: 1.55; color: #7d92b5; text-align:center;
+    font-size:11px; line-height: 1.55; color: #7d92b5; text-align:center;
   }
   .footer b { color:#9fb3d4; }
-  .age { display:inline-block; margin-top:6px; padding:2px 8px; border:1px solid #7d92b5; border-radius:8px; font-weight:800; font-size:10px; letter-spacing:.1em; }
+  .age { display:inline-block; margin-top:6px; padding:2px 8px; border:1px solid #7d92b5; border-radius:8px; font-weight:800; font-size:11px; letter-spacing:.1em; }
 
   /* ---------- tabbar ---------- */
   .tabbar {
@@ -620,14 +637,14 @@
   }
   .tab {
     flex:1; border:none; background:none; cursor:pointer;
-    display:flex; flex-direction:column; align-items:center; gap:3px;
-    color:#5f7396; font-size:9.5px; font-weight:700; letter-spacing:.05em;
+    display:flex; flex-direction:column; align-items:center; gap:4px;
+    color:#6a7fa4; font-size:11px; font-weight:600; letter-spacing:.02em;
     padding:6px 0; border-radius:12px; transition: color .2s;
   }
-  .tab .i { font-size:19px; transition: transform .25s cubic-bezier(.34,1.56,.64,1); }
-  .tab.active { color: var(--neon); text-shadow: 0 0 10px rgba(0,229,255,.6); }
-  .tab.active .i { transform: translateY(-3px) scale(1.15); }
-  .tab.pro-tab.active { color: var(--gold); text-shadow: 0 0 10px rgba(255,201,60,.6); }
+  .tab .i { font-size:21px; display:flex; }
+  .tab.active { color: var(--neon); }
+  .tab.active .i { transform: translateY(-2px); }
+  .tab.pro-tab.active { color: var(--gold); }
 
   /* ---------- view transitions ---------- */
   .view { display:none; }
@@ -641,8 +658,6 @@
     display:flex; align-items:center; gap:8px;
   }
   .section-title::after { content:''; flex:1; height:1px; background:rgba(139,163,199,.15); }
-  .live-dot { width:7px; height:7px; border-radius:50%; background:var(--ok); box-shadow:0 0 8px var(--ok); animation:pulse 1.6s infinite; }
-  @keyframes pulse { 50% { opacity:.3; } }
 
   .toast {
     position:fixed; left:50%; bottom:96px; transform:translateX(-50%) translateY(20px);
@@ -704,13 +719,13 @@
   .m-status .d { font-size:12px; color:var(--muted); margin-top:4px; }
   .m-status .d b { color:var(--text); }
   .m-hist { margin-bottom:14px; }
-  .m-hist .t { font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-bottom:7px; }
+  .m-hist .t { font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-bottom:7px; }
   .m-hist .row {
     display:flex; justify-content:space-between; font-size:12.5px;
     padding:8px 11px; border-radius:10px; background:rgba(139,163,199,.06); margin-bottom:5px;
   }
   .m-hist .row b { color:var(--gold); }
-  .m-note { font-size:10.5px; color:#7d92b5; line-height:1.5; margin:10px 0 14px; }
+  .m-note { font-size:11px; color:#7d92b5; line-height:1.5; margin:10px 0 14px; }
   .m-close {
     width:100%; border:1px dashed rgba(139,163,199,.35); background:none;
     color:var(--muted); font-weight:700; padding:11px; border-radius:12px;
@@ -774,12 +789,12 @@
   .eco-item:hover::before { opacity:.3; }
   .eco-item .icon {
     width:34px; height:34px; border-radius:11px; flex:none;
-    display:flex; align-items:center; justify-content:center; font-size:17px;
+    display:flex; align-items:center; justify-content:center; font-size:18px;
     background:rgba(139,163,199,.09); border:1px solid rgba(139,163,199,.2);
     box-shadow: inset 0 0 14px rgba(139,163,199,.06);
   }
   .eco-item .name { display:flex; align-items:center; gap:5px; font-size:11.5px; font-weight:800; color:var(--text); letter-spacing:.02em; }
-  .eco-item .desc { font-size:9px; color:var(--muted); line-height:1.3; letter-spacing:.03em; }
+  .eco-item .desc { font-size:11px; color:var(--muted); line-height:1.3; letter-spacing:.03em; }
   /* фирменные акценты сервисов */
   .eco-item.ai      { --accent:#9d6bff; }
   .eco-item.ai .icon      { background:rgba(157,107,255,.14); border-color:rgba(157,107,255,.32); }
@@ -790,28 +805,59 @@
   .eco-item.coin .name    { color:var(--gold); }
   .eco-item.vpn     { --accent:#41e6c8; }
   .eco-item.vpn .icon     { background:rgba(65,230,200,.13); border-color:rgba(65,230,200,.3); }
-  /* блеск по «вайбкойну», чтобы карточка смотрелась живее остальных */
-  .eco-item.coin::after {
-    content:''; position:absolute; inset:0; pointer-events:none;
-    background:linear-gradient(115deg, transparent 30%, rgba(255,201,60,.14) 48%, transparent 66%);
-    background-size:250% 100%; background-position:120% 0;
-    animation: ecoSheen 3.6s ease-in-out infinite;
-  }
-  @keyframes ecoSheen { 0%,55% { background-position:120% 0; } 85%,100% { background-position:-40% 0; } }
+
   .eco-pill {
-    font-size:8px; font-weight:800; letter-spacing:.08em; text-transform:uppercase;
+    font-size:11px; font-weight:800; letter-spacing:.06em; text-transform:uppercase;
     color:#0a0d16; background:linear-gradient(135deg,var(--gold),#ffe08a);
     padding:2px 6px; border-radius:8px;
   }
   .eco-badge {
     display:inline-block; margin-top:10px; padding:4px 11px; position:relative;
     background:rgba(255,201,60,.1); border:1px solid rgba(255,201,60,.28);
-    border-radius:20px; font-size:9px; color:var(--gold); font-weight:700;
+    border-radius:20px; font-size:11px; color:var(--gold); font-weight:700;
     letter-spacing:.06em;
   }
 </style>
 </head>
 <body>
+
+<!-- Инлайновый спрайт иконок — одна штриховая система вместо эмодзи (см. .ic).
+     Инлайним, а не грузим файлом: приложение остаётся одним файлом без сборки. -->
+<svg id="icon-sprite" width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+<symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.6"/><circle cx="12" cy="12" r="1.1" fill="currentColor" stroke="none"/></symbol>
+<symbol id="i-diamond" viewBox="0 0 24 24"><path d="M12 2.8 21.2 12 12 21.2 2.8 12Z"/><path d="M4.6 12h14.8"/></symbol>
+<symbol id="i-chart" viewBox="0 0 24 24"><path d="M3.5 20.5h17"/><path d="M5.5 15.5 10 10.5l3.5 3.5 6-7.5"/><path d="M15.5 6.5h4v4"/></symbol>
+<symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.8"/><path d="M4.5 20.5a7.5 7.5 0 0 1 15 0"/></symbol>
+<symbol id="i-cpu" viewBox="0 0 24 24"><rect x="6.5" y="6.5" width="11" height="11" rx="2.5"/><rect x="10" y="10" width="4" height="4"/><path d="M12 3.2v3.3M12 17.5v3.3M2.9 12h3.6M17.5 12h3.6"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><rect x="4.5" y="10.5" width="15" height="9.5" rx="2.5"/><path d="M8.2 10.5V7.8a3.8 3.8 0 0 1 7.6 0v2.7"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.8 4.7L19 7.4"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="m6.5 6.5 11 11M17.5 6.5l-11 11"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v4.7l3.6 2"/></symbol>
+<symbol id="i-gift" viewBox="0 0 24 24"><rect x="3.5" y="8.6" width="17" height="12" rx="2.2"/><path d="M3.5 13.4h17M12 8.6v12"/><path d="M12 8.6C10.4 5.6 6.2 5.3 6.2 7.5c0 1.8 3.4 1.8 5.8 1.1Z"/><path d="M12 8.6c1.6-3 5.8-3.3 5.8-1.1 0 1.8-3.4 1.8-5.8 1.1Z"/></symbol>
+<symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 3c2.6 3.4 5 5.9 5 9.2a5 5 0 0 1-10 0c0-2.4 1.3-4.2 3.2-6.1.1 1.6.6 2.6 1.4 3.3C11.3 7 11.5 5 12 3Z"/></symbol>
+<symbol id="i-trenddown" viewBox="0 0 24 24"><path d="M3.5 7 9.5 13l3.5-3.5 7.5 7.5"/><path d="M15.5 17h5v-5"/></symbol>
+<symbol id="i-trendup" viewBox="0 0 24 24"><path d="M3.5 17 9.5 11l3.5 3.5 7.5-7.5"/><path d="M15.5 7h5v5"/></symbol>
+<symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17"/><path d="M12 3.5c2.4 2.6 3.6 5.4 3.6 8.5s-1.2 5.9-3.6 8.5c-2.4-2.6-3.6-5.4-3.6-8.5S9.6 6.1 12 3.5Z"/></symbol>
+<symbol id="i-coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.6"/></symbol>
+<symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 19 5.9v5.6c0 4.4-2.9 7.9-7 9.5-4.1-1.6-7-5.1-7-9.5V5.9Z"/></symbol>
+<symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3.6" y="5" width="16.8" height="15.4" rx="2.4"/><path d="M3.6 10.2h16.8M8.2 3.4v3.4M15.8 3.4v3.4"/></symbol>
+<symbol id="i-external" viewBox="0 0 24 24"><path d="M13.8 4.2h6v6M19.8 4.2 11 13"/><path d="M17.5 14.2v4.3a2.2 2.2 0 0 1-2.2 2.2H5.9a2.2 2.2 0 0 1-2.2-2.2V8.7a2.2 2.2 0 0 1 2.2-2.2h4.3"/></symbol>
+<symbol id="i-receipt" viewBox="0 0 24 24"><path d="M6.2 3.2h11.6v17.6l-2.9-1.9-2.9 1.9-2.9-1.9-2.9 1.9Z"/><path d="M9.4 8.4h5.2M9.4 12.4h5.2"/></symbol>
+<symbol id="i-play" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M10.2 8.6 16 12l-5.8 3.4Z"/></symbol>
+<symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13.2 2.6 4.6 13.5h6.1l-1 7.9 8.7-11h-6.2Z"/></symbol>
+<symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.8 12S6.2 5.8 12 5.8 21.2 12 21.2 12 17.8 18.2 12 18.2 2.8 12 2.8 12Z"/><circle cx="12" cy="12" r="3.1"/></symbol>
+<symbol id="i-sprout" viewBox="0 0 24 24"><path d="M12 21v-7.4"/><path d="M12 13.6c0-3.7-2.8-6-6.6-6 0 3.7 2.8 6 6.6 6Z"/><path d="M12 13.6c0-3.7 2.8-6 6.6-6 0 3.7-2.8 6-6.6 6Z"/></symbol>
+<symbol id="i-crown" viewBox="0 0 24 24"><path d="M4.2 18.4h15.6"/><path d="M5.4 18.4 3.4 8.6l4.9 3.3L12 6.2l3.7 5.7 4.9-3.3-2 9.8"/></symbol>
+<symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3.4 14.6 9l6 .8-4.4 4.2 1.1 6-5.3-2.9-5.3 2.9 1.1-6L3.4 9.8l6-.8Z"/></symbol>
+<symbol id="i-refresh" viewBox="0 0 24 24"><path d="M4.6 12A7.4 7.4 0 0 1 17.2 6.8"/><path d="M17.6 3.4v3.9h-3.9"/><path d="M19.4 12a7.4 7.4 0 0 1-12.6 5.2"/><path d="M6.4 20.6v-3.9h3.9"/></symbol>
+<symbol id="i-arrowright" viewBox="0 0 24 24"><path d="M4.5 12h14"/><path d="m13 6.5 5.5 5.5L13 17.5"/></symbol>
+<symbol id="i-swipe" viewBox="0 0 24 24"><path d="M3.6 12h16.8"/><path d="m7 8.4-3.4 3.6L7 15.6"/><path d="m17 8.4 3.4 3.6L17 15.6"/></symbol>
+<symbol id="i-soccer" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.8l3.2 2.3-1.2 3.8H10L8.8 10.1Z"/></symbol>
+<symbol id="i-basketball" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17"/><path d="M8.4 4.3c2.3 4.5 2.3 10.9 0 15.4"/></symbol>
+<symbol id="i-hockey" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M8.4 7.5v5.9a3.3 3.3 0 0 0 3.3 3.3h4.6"/></symbol>
+<symbol id="i-cyber" viewBox="0 0 24 24"><rect x="3" y="7.8" width="18" height="8.8" rx="4"/><path d="M7.4 11.1v2.9M5.9 12.6h2.9"/></symbol>
+<symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 4h8v4.6a4 4 0 0 1-8 0Z"/><path d="M8 5.4H5.6v1.8A3 3 0 0 0 8 10M16 5.4h2.4v1.8A3 3 0 0 1 16 10"/><path d="M12 12.6V15M8.8 20.4h6.4M10 20.4c0-2.1.9-3.5 2-3.5s2 1.4 2 3.5"/></symbol>
+</defs></svg>
 
 <div class="ptr" id="pullToRefresh">
   <div class="ptr-content">
@@ -832,14 +878,14 @@
 </header>
 
 <div class="ai-disclaimer">
-  <div class="ico">🤖</div>
+  <div class="ico"><svg class="ic"><use href="#i-cpu"/></svg></div>
   <div><b>Прогнозы анализирует ИИ.</b> Это аналитика, а не гарантия: <b>вероятность не 100%</b>. Ставьте только то, что готовы потерять.</div>
 </div>
 
 <!-- ================= HOME ================= -->
 <main id="view-home" class="view active">
   <div class="ai-loading" id="aiLoading">
-    <div class="bot">🤖</div>
+    <div class="bot"><svg class="ic"><use href="#i-cpu"/></svg></div>
     <div class="txt"><b>Базовый ИИ</b> анализирует матчи<span class="dots"><span></span><span></span><span></span></span></div>
   </div>
 
@@ -862,7 +908,7 @@
       <div class="deck-track" id="freeTrack"></div>
     </div>
     <div class="deck-nav" id="freeNav"></div>
-    <div class="swipe-hint">свайп, чтобы листать <span class="ar">↔</span></div>
+    <div class="swipe-hint">свайп, чтобы листать <span class="ar"><svg class="ic"><use href="#i-swipe"/></svg></span></div>
   </div>
 
   <a class="ad-banner" data-plink="https://r1wjvzfr.life/?p=gfuv&sub1=home_banner&sub2=ad" href="https://r1wjvzfr.life/?p=gfuv&sub1=home_banner&sub2=ad" rel="noopener nofollow">
@@ -872,43 +918,42 @@
       <div class="t">Бонус на первый депозит</div>
       <div class="d">Промокод PXAXBET2026 при регистрации</div>
     </div>
-    <div class="go">→</div>
+    <div class="go"><svg class="ic"><use href="#i-arrowright"/></svg></div>
   </a>
 
   <div class="paywall-cta" id="paywallCta">
-    <h3 id="payProTitle">💎 Ещё 5 прогнозов — у Pro-ИИ</h3>
+    <h3 id="payProTitle"><svg class="ic"><use href="#i-diamond"/></svg> Ещё 5 прогнозов — у Pro-ИИ</h3>
     <p>Модель сравнивает вероятности с линией букмекера и берёт рынки с перевесом (value). Плюс история без замков</p>
-    <button class="btn-trial" id="btnTrialHome" style="display:none" onclick="startTrial()">🎁 Попробовать бесплатно · 3 дня</button>
-    <button class="btn-sub" onclick="goSubscribe()">Открыть PRO · 3 ⭐/мес</button>
+    <button class="btn-trial" id="btnTrialHome" style="display:none" onclick="startTrial()"><svg class="ic"><use href="#i-gift"/></svg> Попробовать бесплатно · 3 дня</button>
+    <button class="btn-sub" data-price="3" onclick="goSubscribe()">Открыть PRO · 3 <svg class="ic"><use href="#i-star"/></svg>/мес</button>
   </div>
 
   
   <div class="footer">
     <b>18+</b> · Играйте ответственно. Ставки — это риск. Валюта личного трекера — условная единица, не деньги и не имеет реальной ценности.<br>
     Реклама букмекера-партнёра · есть риск проигрыша
-    <br><span class="age">18+</span> · v <span class="ver">0.6.0</span> · Экосистема PXAX
+    <br><span class="age">18+</span> · v <span class="vsn">0.8.0</span> · Экосистема PXAX
   </div>
 </main>
 
 <!-- ================= PRO ================= -->
 <main id="view-pro" class="view">
   <div class="pro-hero">
-    <div class="orb a"></div><div class="orb b"></div>
-    <h3><span class="crown">💎</span> Pro-ИИ · value-ставки</h3>
+    <h3><span class="crown"><svg class="ic"><use href="#i-diamond"/></svg></span> Pro-ИИ · value-ставки</h3>
     <p>Отдельный отбор: модель сравнивает свои вероятности с коэффициентами букмекеров и берёт рынки с перевесом. <b id="proCnt">…</b></p>
   </div>
 
   <div class="botd-card" id="botdWrap" hidden>
-    <div class="botd-h">💎 СТАВКА ДНЯ · ЭКСПРЕСС · ТОЛЬКО PRO</div>
+    <div class="botd-h"><svg class="ic"><use href="#i-diamond"/></svg> СТАВКА ДНЯ · ЭКСПРЕСС · ТОЛЬКО PRO</div>
     <div class="botd-legs" id="botdLegs"></div>
     <div class="botd-sum">
       <span class="o" id="botdOdds">—</span>
       <span class="d" id="botdDetail"></span>
     </div>
     <div style="margin-top:10px;text-align:center">
-      <a class="bet-btn" id="botdLink" style="color:var(--gold);border-color:rgba(255,201,60,.4)" href="https://r1wjvzfr.life/?p=gfuv&sub1=botd&sub2=pro" rel="noopener">🎲 Составить экспресс в БК</a>
+      <a class="bet-btn" id="botdLink" style="color:var(--gold);border-color:rgba(255,201,60,.4)" href="https://r1wjvzfr.life/?p=gfuv&sub1=botd&sub2=pro" rel="noopener"><svg class="ic"><use href="#i-external"/></svg> Составить экспресс в БК</a>
     </div>
-    <div class="botd-lock" id="botdLock" style="display:none">🔒 Экспресс открывается с PRO</div>
+    <div class="botd-lock" id="botdLock" style="display:none"><svg class="ic"><use href="#i-lock"/></svg> Экспресс открывается с PRO</div>
   </div>
 
   <div class="deck-wrap">
@@ -916,40 +961,40 @@
       <div class="deck-track" id="proTrack"></div>
     </div>
     <div class="deck-nav pro" id="proNav"></div>
-    <div class="swipe-hint">свайп, чтобы листать <span class="ar">↔</span></div>
+    <div class="swipe-hint">свайп, чтобы листать <span class="ar"><svg class="ic"><use href="#i-swipe"/></svg></span></div>
   </div>
 
   <div class="paywall-cta" id="proPaywall">
-    <h3>💎 Станьте PRO</h3>
+    <h3><svg class="ic"><use href="#i-diamond"/></svg> Станьте PRO</h3>
     <p>Value-ставки Pro-ИИ каждый день: модель находит рынки, где линия букмекера занижает вероятность. Плюс история без замков</p>
-    <button class="btn-trial" id="btnTrialPro" style="display:none" onclick="startTrial()">🎁 Попробовать бесплатно · 3 дня</button>
-    <button class="btn-sub" onclick="goSubscribe()">Оформить PRO · 3 ⭐/мес</button>
+    <button class="btn-trial" id="btnTrialPro" style="display:none" onclick="startTrial()"><svg class="ic"><use href="#i-gift"/></svg> Попробовать бесплатно · 3 дня</button>
+    <button class="btn-sub" data-price="3" onclick="goSubscribe()">Оформить PRO · 3 <svg class="ic"><use href="#i-star"/></svg>/мес</button>
   </div>
 
   
   <div class="footer">
-    Pro-ИИ тоже ошибается: <b>вероятность не 100%</b>. Играйте ответственно, <b>18+</b>. · v <span class="ver">0.6.0</span> · Экосистема PXAX
+    Pro-ИИ тоже ошибается: <b>вероятность не 100%</b>. Играйте ответственно, <b>18+</b>. · v <span class="vsn">0.8.0</span> · Экосистема PXAX
   </div>
 </main>
 
 <!-- ================= HISTORY ================= -->
 <main id="view-history" class="view">
   <div class="stats">
-    <div class="stat"><div class="v" style="color:var(--ok)" id="hHits">0</div><div class="l">зашло ✅</div></div>
-    <div class="stat"><div class="v" style="color:var(--warn)" id="hMiss">0</div><div class="l">не зашло ❌</div></div>
+    <div class="stat"><div class="v" style="color:var(--ok)" id="hHits">0</div><div class="l">зашло <svg class="ic"><use href="#i-check"/></svg></div></div>
+    <div class="stat"><div class="v" style="color:var(--warn)" id="hMiss">0</div><div class="l">не зашло <svg class="ic"><use href="#i-x"/></svg></div></div>
     <div class="stat"><div class="v" style="color:var(--gold)" id="hRate">—</div><div class="l">проходимость</div></div>
   </div>
 
   <div class="section-title">Прошедшие прогнозы ИИ · 7 дней</div>
   <div class="filter-row">
     <button class="f-btn on" data-f="all">Все</button>
-    <button class="f-btn" data-f="free">🤖 Базовый ИИ</button>
-    <button class="f-btn vip" data-f="pro">💎 VIP (Pro)</button>
+    <button class="f-btn" data-f="free"><svg class="ic"><use href="#i-cpu"/></svg> Базовый ИИ</button>
+    <button class="f-btn vip" data-f="pro"><svg class="ic"><use href="#i-diamond"/></svg> VIP (Pro)</button>
   </div>
-  <div class="section-title" style="padding-top:10px">🤖 против 💎 — что заходит лучше?</div>
+  <div class="section-title" style="padding-top:10px"><svg class="ic"><use href="#i-cpu"/></svg> против <svg class="ic"><use href="#i-diamond"/></svg> — что заходит лучше?</div>
   <div class="cmp-wrap">
-    <div class="cmp"><div class="t">🤖 Базовый ИИ</div><div class="r" style="color:var(--neon)" id="cmpFree">—</div><div class="d" id="cmpFreeD">—</div></div>
-    <div class="cmp vip"><div class="t">💎 VIP</div><div class="r" style="color:var(--gold)" id="cmpPro">—</div><div class="d" id="cmpProD">—</div></div>
+    <div class="cmp"><div class="t"><svg class="ic"><use href="#i-cpu"/></svg> Базовый ИИ</div><div class="r" style="color:var(--neon)" id="cmpFree">—</div><div class="d" id="cmpFreeD">—</div></div>
+    <div class="cmp vip"><div class="t"><svg class="ic"><use href="#i-diamond"/></svg> VIP</div><div class="r" style="color:var(--gold)" id="cmpPro">—</div><div class="d" id="cmpProD">—</div></div>
   </div>
   <div class="verdict neutral" id="verdict"></div>
 
@@ -957,25 +1002,25 @@
 
   
 <div class="ecosystem">
-    <h4>🌐 Экосистема PXAX</h4>
+    <h4><svg class="ic"><use href="#i-globe"/></svg> Экосистема PXAX</h4>
     <div class="eco-grid">
       <a class="eco-item ai" href="https://t.me/PxAxAi_bot" target="_blank" rel="noopener">
-        <span class="icon">🤖</span>
+        <span class="icon"><svg class="ic"><use href="#i-cpu"/></svg></span>
         <span class="name">PxAxAi</span>
         <span class="desc">3D AI-компаньон</span>
       </a>
       <a class="eco-item predict" href="https://t.me/pxaxbetai_bot" target="_blank" rel="noopener">
-        <span class="icon">🎯</span>
+        <span class="icon"><svg class="ic"><use href="#i-target"/></svg></span>
         <span class="name">Прогнозы</span>
         <span class="desc">AI-прогнозы на спорт</span>
       </a>
       <a class="eco-item coin" href="https://t.me/phxcryptocoin_bot" target="_blank" rel="noopener">
-        <span class="icon">🪙</span>
+        <span class="icon"><svg class="ic"><use href="#i-coin"/></svg></span>
         <span class="name">VibeCoin <span class="eco-pill">VPHX</span></span>
         <span class="desc">Мем-токен TON · pre-launch</span>
       </a>
       <a class="eco-item vpn" href="https://t.me/Vphoenixx_bot" target="_blank" rel="noopener">
-        <span class="icon">🛡️</span>
+        <span class="icon"><svg class="ic"><use href="#i-shield"/></svg></span>
         <span class="name">Vph</span>
         <span class="desc">VPN-подписка</span>
       </a>
@@ -996,15 +1041,15 @@
       <h2 id="profName">Гость</h2>
       <div class="since" id="profSince">в приложении с сегодня</div>
     </div>
-    <div class="streak"><div class="v" id="streakV">1</div><div class="l">дней 🔥</div></div>
+    <div class="streak"><div class="v" id="streakV">1</div><div class="l">дней <svg class="ic"><use href="#i-flame"/></svg></div></div>
   </div>
 
   <div class="lvl-card">
     <div class="lvl-top">
-      <div class="lvl-badge" id="lvlIcon">🌱</div>
+      <div class="lvl-badge" id="lvlIcon"></div>
       <div>
         <div class="lvl-name" id="lvlName">Новичок</div>
-        <div class="lvl-sub" id="lvlSub">начни свой путь 🚀</div>
+        <div class="lvl-sub" id="lvlSub">начни свой путь</div>
       </div>
     </div>
     <div class="xp-bar"><i id="xpFill"></i></div>
@@ -1016,24 +1061,24 @@
 
   <div class="section-title">Твои привычки</div>
   <div class="fun-row">
-    <div class="fun"><div class="i" id="favSportI">⚽</div><div class="v" id="favSportV">—</div><div class="l">любимый спорт</div></div>
-    <div class="fun"><div class="i">📅</div><div class="v" id="daysWith">1</div><div class="l">дней с нами</div></div>
-    <div class="fun"><div class="i">🤝</div><div class="v" id="betClicks">0</div><div class="l">переходов к партнёру</div></div>
+    <div class="fun"><div class="i" id="favSportI"><svg class="ic"><use href="#i-soccer"/></svg></div><div class="v" id="favSportV">—</div><div class="l">любимый спорт</div></div>
+    <div class="fun"><div class="i"><svg class="ic"><use href="#i-calendar"/></svg></div><div class="v" id="daysWith">1</div><div class="l">дней с нами</div></div>
+    <div class="fun"><div class="i"><svg class="ic"><use href="#i-external"/></svg></div><div class="v" id="betClicks">0</div><div class="l">переходов к партнёру</div></div>
   </div>
 
   <div class="section-title">Статистика</div>
   <div class="stat-grid">
     <div class="sg"><div class="v c-neon" id="pTotal">0</div><div class="l">прогнозов за 14д</div></div>
-    <div class="sg"><div class="v c-ok" id="pHits">0</div><div class="l">зашло ✅</div></div>
-    <div class="sg"><div class="v c-warn" id="pMiss">0</div><div class="l">не зашло ❌</div></div>
+    <div class="sg"><div class="v c-ok" id="pHits">0</div><div class="l">зашло <svg class="ic"><use href="#i-check"/></svg></div></div>
+    <div class="sg"><div class="v c-warn" id="pMiss">0</div><div class="l">не зашло <svg class="ic"><use href="#i-x"/></svg></div></div>
     <div class="sg"><div class="v c-gold" id="pRate">—</div><div class="l">проходимость</div></div>
   </div>
 
   <div class="section-title">Мои ставки · личный ROI</div>
   <div class="stat-grid">
     <div class="sg"><div class="v c-neon" id="bTotal">0</div><div class="l">отмечено ставок</div></div>
-    <div class="sg"><div class="v c-ok" id="bWins">0</div><div class="l">зашло ✅</div></div>
-    <div class="sg"><div class="v c-warn" id="bLoss">0</div><div class="l">не зашло ❌</div></div>
+    <div class="sg"><div class="v c-ok" id="bWins">0</div><div class="l">зашло <svg class="ic"><use href="#i-check"/></svg></div></div>
+    <div class="sg"><div class="v c-warn" id="bLoss">0</div><div class="l">не зашло <svg class="ic"><use href="#i-x"/></svg></div></div>
     <div class="sg"><div class="v c-gold" id="bRate">—</div><div class="l">проходимость</div></div>
     <div class="sg"><div class="v" id="bPnl">—</div><div class="l">P/L (усл. ед.)</div></div>
     <div class="sg"><div class="v" id="bRoi">—</div><div class="l">ROI</div></div>
@@ -1051,7 +1096,7 @@
       <button class="copy" onclick="copyPromo()">копировать</button>
     </div>
     <div class="desc">Активируй при регистрации и получи бонус на первый депозит.</div>
-    <a class="btn-sub" style="display:block;margin-top:10px;text-decoration:none;text-align:center;font-size:13.5px;padding:11px" data-plink="https://r1wjvzfr.life/?p=gfuv&sub1=profile&sub2=promo" href="https://r1wjvzfr.life/?p=gfuv&sub1=profile&sub2=promo" rel="noopener">Перейти к партнёру ↗</a>
+    <a class="btn-sub" style="display:block;margin-top:10px;text-decoration:none;text-align:center;font-size:13.5px;padding:11px" data-plink="https://r1wjvzfr.life/?p=gfuv&sub1=profile&sub2=promo" href="https://r1wjvzfr.life/?p=gfuv&sub1=profile&sub2=promo" rel="noopener">Перейти к партнёру <svg class="ic"><use href="#i-external"/></svg></a>
     <div class="adv">реклама · 18+</div>
   </div>
 
@@ -1073,15 +1118,15 @@
     PXAXBET2016 AI · прогнозы на спорт<br>
     Прогнозы анализирует ИИ. Прошлые результаты не гарантируют будущих.<br>
     Валюта личного трекера ставок — условная единица: не деньги и не имеет реальной ценности.<br>
-    Версия <span id="footerVer">0.5.0</span>
+    Версия <span class="vsn">0.8.0</span>
   </div>
 </main>
 
 <nav class="tabbar">
-  <button class="tab active" data-view="home"><span class="i">🎯</span>Прогнозы</button>
-  <button class="tab pro-tab" data-view="pro"><span class="i">💎</span>PRO</button>
-  <button class="tab" data-view="history"><span class="i">📈</span>Статистика</button>
-  <button class="tab" data-view="profile"><span class="i">👤</span>Профиль</button>
+  <button class="tab active" data-view="home"><span class="i"><svg class="ic"><use href="#i-target"/></svg></span>Прогнозы</button>
+  <button class="tab pro-tab" data-view="pro"><span class="i"><svg class="ic"><use href="#i-diamond"/></svg></span>PRO</button>
+  <button class="tab" data-view="history"><span class="i"><svg class="ic"><use href="#i-chart"/></svg></span>Статистика</button>
+  <button class="tab" data-view="profile"><span class="i"><svg class="ic"><use href="#i-user"/></svg></span>Профиль</button>
 </nav>
 
 <div class="toast" id="toast"></div>
@@ -1090,8 +1135,35 @@
 /* ================= Telegram SDK ================= */
 const tg = window.Telegram?.WebApp;
 const isTg = !!tg;
-if (tg) { try { tg.expand(); tg.disableVerticalSwipes?.(); } catch(e) {} }
+if (tg) { try { tg.expand(); tg.disableVerticalSwipes?.(); tg.setHeaderColor?.('#0a0d16'); tg.setBackgroundColor?.('#0a0d16'); } catch(e) {} }
 const user = tg?.initDataUnsafe?.user;
+
+/* Иконки: эмодзи убраны из интерфейса — они рендерятся по-разному в iOS и Android
+   и читаются как «наклейка». Спрайт (#icon-sprite) масштабируется от font-size и
+   наследует currentColor, поэтому ведёт себя как обычный глиф. */
+function ic(name, cls) {
+  return `<svg class="ic${cls ? ' ' + cls : ''}" aria-hidden="true"><use href="#i-${name}"/></svg>`;
+}
+/* Вид спорта приходит из data/*.json эмодзи — сопоставляем с иконкой и русским именем */
+const SPORTS = {
+  '⚽': ['soccer', 'Футбол'], '🏀': ['basketball', 'Баскетбол'],
+  '🏒': ['hockey', 'Хоккей'], '🎮': ['cyber', 'Киберспорт'],
+};
+function sportIcon(s) { return ic(SPORTS[s] ? SPORTS[s][0] : 'trophy'); }
+function sportName(s) { return SPORTS[s] ? SPORTS[s][1] : 'Спорт'; }
+
+/* Тактильный отклик: на ощупь Mini App отличается от веб-страницы не меньше, чем
+   визуально. На старых клиентах HapticFeedback отсутствует — глушим. */
+function haptic(kind) {
+  try {
+    const h = tg && tg.HapticFeedback; if (!h) return;
+    if (kind === 'impact') h.impactOccurred('light');
+    else if (kind === 'medium') h.impactOccurred('medium');
+    else if (kind === 'success') h.notificationOccurred('success');
+    else if (kind === 'error') h.notificationOccurred('error');
+    else h.selectionChanged();
+  } catch (e) {}
+}
 
 /* ================= реальные данные (GitHub Actions -> data/*.json) ================= */
 const REAL = { loaded: false, date: null, free: [], pro: [], results: null, backtest: null, botd: null, lastUpdate: null };
@@ -1132,7 +1204,7 @@ async function loadReal() {
 
 /* ================= settings ================= */
 const CONFIG = {
-  VERSION: '0.7.2', // версия приложения для отслеживания обновлений
+  VERSION: '0.8.0', // версия приложения для отслеживания обновлений
   SUBSCRIBE_URL: 'https://t.me/pxaxbetai_bot',
   API_BASE: 'https://site-technician-lee-aerial.trycloudflare.com', // адрес бэкенда (cloudflared tunnel), обновляется при перезапуске туннеля
   FREE_DAILY: 5,   // бесплатных прогнозов в день
@@ -1156,13 +1228,13 @@ function betLink(p) {
          '&sub2=' + (p.kind === 'pro' ? 'pro' : 'free');
 }
 function betBtn(p) {
-  return `<a class="bet-btn" data-plink="${betLink(p)}" href="${betLink(p)}" rel="noopener">🎲 Сделать ставку в БК</a>`;
+  return `<a class="bet-btn" data-plink="${betLink(p)}" href="${betLink(p)}" rel="noopener">${ic('external')} Сделать ставку в БК</a>`;
 }
 // «Я поставил» — личная отметка в трекере ставок (localStorage, без сервера)
 function myBetBtn(p, isHistory) {
   if (!p || !p.id || !p.kind || isHistory) return '';
   const on = !!loadBets()[String(p.id)];
-  return `<button class="mybet-btn${on ? ' on' : ''}" data-bid="${p.id}">${on ? '✅ Ставка отмечена' : '🧾 Я поставил'}</button>`;
+  return `<button class="mybet-btn${on ? ' on' : ''}" data-bid="${p.id}">${on ? ic('check') + ' Ставка отмечена' : ic('receipt') + ' Я поставил'}</button>`;
 }
 
 /* ================= мок-движок ИИ ================= */
@@ -1271,9 +1343,9 @@ function generateDay(dateStr, kind) {
 
 function resultOf(p) {
   const r = seedRand(hashStr('res-' + p.id))();
-  if (r < .55) return { label:'✅', cls:'hit', full:'Зашёл' };
-  if (r < .90) return { label:'❌', cls:'miss', full:'Не зашёл' };
-  return { label:'⏳', cls:'push', full:'Возврат' };
+  if (r < .55) return { label:'check', cls:'hit', full:'Зашёл' };
+  if (r < .90) return { label:'x', cls:'miss', full:'Не зашёл' };
+  return { label:'clock', cls:'push', full:'Возврат' };
 }
 
 function collectStats(days, onlyKind) {
@@ -1306,7 +1378,7 @@ function collectStats(days, onlyKind) {
 
 /* ================= user state ================= */
 let statFilter = 'all'; // all | free | pro
-let sportFilter = 'all'; // all | ⚽ | 🏀 | 🏒
+let sportFilter = 'all'; // all | вид спорта из данных
 function applySportFilter(list) {
   if (sportFilter === 'all') return list;
   return list.filter(p => p.sport === sportFilter);
@@ -1319,12 +1391,13 @@ function renderSportFilter() {
   const sports = [...new Set(all.map(p => p.sport))];
   if (sports.length < 2) { el.innerHTML = ''; el.style.display = 'none'; return; }
   el.style.display = 'flex';
-  const items = [{ k: 'all', t: 'Все' }, ...sports.map(s => ({ k: s, t: s }))];
+  const items = [{ k: 'all', t: 'Все', icon: '' },
+    ...sports.map(s => ({ k: s, t: sportName(s), icon: sportIcon(s) }))];
   if (!items.some(i => i.k === sportFilter)) sportFilter = 'all';
   el.innerHTML = items.map(i =>
-    `<button class="sf-btn ${i.k === sportFilter ? 'on' : ''}" data-sf="${i.k}">${i.t}</button>`).join('');
+    `<button class="sf-btn ${i.k === sportFilter ? 'on' : ''}" data-sf="${i.k}">${i.icon}${i.t}</button>`).join('');
   el.querySelectorAll('.sf-btn').forEach(b => {
-    b.onclick = () => { sportFilter = b.dataset.sf; render(); };
+    b.onclick = () => { sportFilter = b.dataset.sf; haptic(); render(); };
   });
 }
 const store = {
@@ -1354,6 +1427,7 @@ function toggleBet(p) {
   if (b[key]) {
     delete b[key];
     saveBets(b);
+    haptic();
     toast('Ставка снята с отслеживания');
   } else {
     b[key] = {
@@ -1363,7 +1437,8 @@ function toggleBet(p) {
       at: new Date().toISOString(),
     };
     saveBets(b);
-    toast('🧾 Отметили: ' + p.market + ' · ' + (p.home || '') + ' — ' + (p.away || ''));
+    haptic('medium');
+    toast('Отметили: ' + p.market + ' · ' + (p.home || '') + ' — ' + (p.away || ''));
   }
   render();
 }
@@ -1441,8 +1516,9 @@ if (lastVersion !== CONFIG.VERSION) {
   if (lastVersion) {
     // версия изменилась - покажем уведомление при первом рендере
     setTimeout(() => {
-      toast(`🚀 Обновлено до v${CONFIG.VERSION}`);
-      setTimeout(() => toast('📈 Без плашек «недостоверно»: живой % + бэктест модели за 90 дней'), 2500);
+      haptic('success');
+      toast(`Обновлено до v${CONFIG.VERSION}`);
+      setTimeout(() => toast('Новый интерфейс: свои иконки вместо эмодзи, спокойные цвета и анимации'), 2500);
     }, 2000);
   }
 }
@@ -1488,7 +1564,7 @@ function makeDeck(trackEl, navEl, count, deckId) {
     if (Math.abs(left - lastLeft) > 8) moved = true;
     lastLeft = left;
     const i = Math.round(left / (trackEl.clientWidth || 1));
-    if (i !== index) { index = i; setDots(); markViewed(deckId, i); }
+    if (i !== index) { index = i; setDots(); markViewed(deckId, i); haptic('impact'); }
     clearTimeout(trackEl._movedT);
     trackEl._movedT = setTimeout(() => moved = false, 250);
   }, { passive: true });
@@ -1522,7 +1598,7 @@ function makeDeck(trackEl, navEl, count, deckId) {
 /* ================= cards ================= */
 function teamBadge(logo, sport) {
   const safeLogo = typeof logo === 'string' && /^https:\/\/a\.espncdn\.com\//.test(logo) ? logo : '';
-  const fallback = `<span${safeLogo ? ' hidden' : ''}>${sport || '🏟️'}</span>`;
+  const fallback = `<span${safeLogo ? ' hidden' : ''}>${sportIcon(sport)}</span>`;
   const image = safeLogo
     ? `<img src="${safeLogo}" alt="" loading="lazy" decoding="async" onerror="this.hidden=true;this.nextElementSibling.hidden=false">`
     : '';
@@ -1530,17 +1606,17 @@ function teamBadge(logo, sport) {
 }
 
 function slideHTML(p, unlocked, isPro, isHistory) {
-  const res = isHistory && p.result ? `<div class="res-chip ${p.result.cls}">${p.result.label}</div>` : '';
+  const res = isHistory && p.result ? `<div class="res-chip ${p.result.cls}">${ic(p.result.label)}</div>` : '';
   const mdi = matchDateInfo(p.matchDate);
   // тег срочности: <24ч — красный пульсирующий «через N ч», иначе нейтральное «завтра»
   let statusTag = '';
   if (!isHistory && mdi.hours !== null) {
     statusTag = mdi.hours < 24
-      ? `<span class="soon-tag">⚡ через ${Math.max(1, Math.round(mdi.hours))} ч</span>`
+      ? `<span class="soon-tag">${ic('bolt')} через ${Math.max(1, Math.round(mdi.hours))} ч</span>`
       : `<span class="rel-tag">завтра</span>`;
   }
   // value-бейдж: модельная вероятность заметно выше честной вероятности линии
-  const valBadge = (!isHistory && p.value && p.edge != null && p.edge > 0.05) ? `<span class="value-badge">⚡ VALUE</span>` : '';
+  const valBadge = (!isHistory && p.value && p.edge != null && p.edge > 0.05) ? `<span class="value-badge">${ic('bolt')} VALUE</span>` : '';
   // строка линии: коэффициент, вероятность линии и перевес модели
   let lineChip = '';
   if (!isHistory && p.odds) {
@@ -1566,11 +1642,11 @@ function slideHTML(p, unlocked, isPro, isHistory) {
     <div class="slide ${unlocked ? '' : 'locked'}">
       <div class="p-card ${isPro ? 'pro-card' : ''}">
         ${res}
-        <div class="wm">${p.sport}</div>
+        <div class="wm">${sportIcon(p.sport)}</div>
         <div class="blur">
           <div class="p-top">
-            <span class="sport">${p.sport}</span><span>${p.league}</span>
-            <span class="ai-tag ${isPro ? 'pro' : ''}">${isPro ? '💎 Pro AI' : '🤖 AI'}</span>
+            <span class="sport">${sportIcon(p.sport)}</span><span>${p.league}</span>
+            <span class="ai-tag ${isPro ? 'pro' : ''}">${isPro ? ic('diamond') + ' Pro AI' : ic('cpu') + ' AI'}</span>
             ${statusTag}
             ${valBadge}
           </div>
@@ -1587,7 +1663,7 @@ function slideHTML(p, unlocked, isPro, isHistory) {
                 <div class="tname">${p.away}</div>
               </div>
             </div>
-            <div class="time-chip">🕐 ${isHistory ? 'вчера · ' : ''}${mdi.chip}${p.time}</div>
+            <div class="time-chip">${ic('clock')} ${isHistory ? 'вчера · ' : ''}${mdi.chip}${p.time}</div>
           </div>
           <div class="p-picks">
             <div class="pick">
@@ -1606,7 +1682,7 @@ function slideHTML(p, unlocked, isPro, isHistory) {
         </div>
         ${unlocked ? '' : `
         <div class="lock-overlay">
-          <div class="ico">🔒</div>
+          <div class="ico">${ic('lock')}</div>
           <span>Только для PRO</span>
           <button onclick="goSubscribe()">Открыть доступ</button>
         </div>`}
@@ -1630,7 +1706,8 @@ function render() {
   const pro = store.pro;
   document.getElementById('subBadge').className = 'sub-badge ' + (pro ? 'pro' : 'free');
   document.getElementById('subBadge').textContent = pro ? 'pro' : 'free';
-  document.getElementById('profSub').textContent = pro ? 'PRO активна ✨' : 'нет';
+  document.getElementById('profSub').textContent = pro ? 'PRO активна' : 'нет';
+  document.querySelectorAll('.vsn').forEach(e => e.textContent = CONFIG.VERSION);
   document.getElementById('profVisits').textContent = visits;
   document.getElementById('streakV').textContent = streak;
 
@@ -1673,7 +1750,7 @@ function render() {
   document.getElementById('pMiss').textContent = hasReal ? statsAll.miss : '—';
   document.getElementById('pRate').textContent = hasReal ? statsAll.rate + '%' : '—';
   // динамические счётчики вместо захардкоженных
-  document.getElementById('payProTitle').textContent = `💎 Ещё ${proToday.length} ${plural(proToday.length, 'прогноз', 'прогноза', 'прогнозов')} — у Pro-ИИ`;
+  document.getElementById('payProTitle').innerHTML = `${ic('diamond')} Ещё ${proToday.length} ${plural(proToday.length, 'прогноз', 'прогноза', 'прогнозов')} — у Pro-ИИ`;
   document.getElementById('proCnt').textContent = `${proToday.length} ${plural(proToday.length, 'прогноз', 'прогноза', 'прогнозов')} в VIP на сегодня`;
   renderBetOfTheDay();
 
@@ -1681,7 +1758,7 @@ function render() {
   const freeView = applySportFilter(freeToday);
   const proView = applySportFilter(proToday);
   renderSportFilter();
-  const EMPTY_DECK = `<div class="empty" style="margin:0">🕐 В окне 6–48 часов подходящих матчей нет — прогнозы появятся в ближайшем обновлении.</div>`;
+  const EMPTY_DECK = `<div class="empty" style="margin:0">${ic('clock')} В окне 6–48 часов подходящих матчей нет — прогнозы появятся в ближайшем обновлении.</div>`;
   const ft = document.getElementById('freeTrack');
   const pt = document.getElementById('proTrack');
   if (freeView.length) {
@@ -1695,7 +1772,7 @@ function render() {
     pt.innerHTML = proView.map(p => slideHTML(p, pro, true, false)).join('');
     proDeckObj = makeDeck(pt, document.getElementById('proNav'), proView.length, 'pro');
   } else {
-    pt.innerHTML = `<div class="empty" style="margin:0">💎 Сигналы Pro-ИИ появятся перед ближайшими матчами.</div>`;
+    pt.innerHTML = `<div class="empty" style="margin:0">${ic('diamond')} Сигналы Pro-ИИ появятся перед ближайшими матчами.</div>`;
     document.getElementById('proNav').innerHTML = '';
   }
   document.getElementById('paywallCta').style.display = (pro || !proToday.length) ? 'none' : 'block';
@@ -1716,7 +1793,7 @@ function render() {
         <div class="t">${home} — ${away}</div>
         <div class="s">${sub}</div>
       </div>
-      <div class="o">${unlocked ? '' : '🔒'}</div>`;
+      <div class="o">${unlocked ? '' : ic('lock')}</div>`;
     hEl.appendChild(el);
   };
   if (REAL.results) {
@@ -1726,14 +1803,14 @@ function render() {
       .sort((a, b) => b.date.localeCompare(a.date));
     for (const r of rows) {
       const cls = r.result === 'hit' ? 'hit' : r.result === 'miss' ? 'miss' : 'push';
-      const label = r.result === 'hit' ? '✅' : r.result === 'miss' ? '❌' : '⏳';
+      const label = ic(r.result === 'hit' ? 'check' : r.result === 'miss' ? 'x' : 'clock');
       addH(r.home, r.away,
-        `${r.sport} ${r.league} · <span class="${r.kind === 'pro' ? 'pro' : 'ai'}">${r.kind === 'pro' ? 'Pro AI' : 'AI'}</span> · ${r.market} · счёт ${r.score}`,
+        `${sportIcon(r.sport)} ${r.league} · <span class="${r.kind === 'pro' ? 'pro' : 'ai'}">${r.kind === 'pro' ? 'Pro AI' : 'AI'}</span> · ${r.market} · счёт ${r.score}`,
         cls, label, pro || r.kind === 'free');
     }
   }
   if (!dIdx) {
-    hEl.innerHTML = `<div class="empty"><span class="i">📈</span>Здесь появится статистика прошедших прогнозов.<br>Первые результаты — как только сыграют первые матчи.</div>`;
+    hEl.innerHTML = `<div class="empty"><span class="i">${ic('chart')}</span>Здесь появится статистика прошедших прогнозов.<br>Первые результаты — как только сыграют первые матчи.</div>`;
   }
 
   // профиль
@@ -1769,7 +1846,7 @@ function renderBetOfTheDay() {
   wrap.hidden = false;
   document.getElementById('botdLegs').innerHTML = botd.legs.map(l => `
     <div class="botd-leg">
-      <span>${l.sport || ''}</span>
+      <span>${sportIcon(l.sport)}</span>
       <span class="lg-m">${l.home} — ${l.away} · ${l.market}</span>
       <span class="lg-p">${l.confidence}%</span>
       <span class="lg-o">${Number(l.odds).toFixed(2)}</span>
@@ -1795,8 +1872,8 @@ function renderMyBets() {
   const st = document.getElementById('bStreak');
   if (st) {
     st.innerHTML = s.decided
-      ? (s.wStreak > 0 ? `🔥 Серия: <b>${s.wStreak}</b> ${s.wStreak === 1 ? 'победа' : 'побед'} подряд`
-        : s.lStreak > 0 ? `🧊 Серия: <b>${s.lStreak}</b> ${s.lStreak === 1 ? 'проигрыш' : 'проигрышей'} подряд`
+      ? (s.wStreak > 0 ? `${ic('flame')} Серия: <b>${s.wStreak}</b> ${s.wStreak === 1 ? 'победа' : 'побед'} подряд`
+        : s.lStreak > 0 ? `${ic('trenddown')} Серия: <b>${s.lStreak}</b> ${s.lStreak === 1 ? 'проигрыш' : 'проигрышей'} подряд`
         : '—')
       : (s.total ? 'Поставь матчи доиграют — P/L появится автоматически' : 'Отмечай «Я поставил» на карточках — трекер сам посчитает P/L и ROI');
   }
@@ -1821,7 +1898,7 @@ function renderMyBets() {
       list.innerHTML = '<div class="empty" style="margin:0">Здесь появятся результаты твоих отмеченных ставок — как только матчи сыграют.</div>';
     } else {
       for (const x of s.rows) {
-        const icon = x.r.result === 'hit' ? '✅' : x.r.result === 'miss' ? '❌' : '⏳';
+        const icon = ic(x.r.result === 'hit' ? 'check' : x.r.result === 'miss' ? 'x' : 'clock');
         let pnlTxt = '';
         if (x.r.result === 'hit' && x.odds > 1) pnlTxt = `+${(currentStake() * (x.odds - 1)).toFixed(2)}`;
         else if (x.r.result === 'miss' && x.odds > 1) pnlTxt = `-${currentStake()}`;
@@ -1830,7 +1907,7 @@ function renderMyBets() {
         const item = document.createElement('div');
         item.className = 'h-item ' + (x.r.result === 'hit' ? 'hit' : x.r.result === 'miss' ? 'miss' : 'push');
         item.innerHTML = `
-          <div class="r">${icon} ${pnlTxt ? '<b style="font-size:10px">' + pnlTxt + '</b>' : ''}</div>
+          <div class="r">${icon} ${pnlTxt ? '<b style="font-size:11px">' + pnlTxt + '</b>' : ''}</div>
           <div class="m">
             <div class="t">${x.b.home || ''} — ${x.b.away || ''}</div>
             <div class="s">${x.b.market}${x.odds > 1 ? ' @' + Number(x.odds).toFixed(2).replace('.', ',') : ''} · ${x.b.league || ''}${d ? ' · ' + d : ''}</div>
@@ -1843,11 +1920,11 @@ function renderMyBets() {
 
 /* ================= профиль: уровень, ачивки, привычки, сравнение ================= */
 const LEVELS = [
-  { xp: 0,   icon: '🌱', name: 'Новичок' },
-  { xp: 60,  icon: '🎯', name: 'Игрок' },
-  { xp: 160, icon: '📊', name: 'Аналитик' },
-  { xp: 320, icon: '💎', name: 'Профи' },
-  { xp: 600, icon: '👑', name: 'Легенда' },
+  { xp: 0,   icon: 'sprout', name: 'Новичок' },
+  { xp: 60,  icon: 'target', name: 'Игрок' },
+  { xp: 160, icon: 'chart', name: 'Аналитик' },
+  { xp: 320, icon: 'diamond', name: 'Профи' },
+  { xp: 600, icon: 'crown', name: 'Легенда' },
 ];
 
 function renderProfileExtras(statsAll) {
@@ -1858,9 +1935,9 @@ function renderProfileExtras(statsAll) {
   for (let i = 0; i < LEVELS.length; i++) if (xp >= LEVELS[i].xp) li = i;
   const cur = LEVELS[li];
   const next = LEVELS[li + 1];
-  document.getElementById('lvlIcon').textContent = cur.icon;
+  document.getElementById('lvlIcon').innerHTML = ic(cur.icon);
   document.getElementById('lvlName').textContent = cur.name;
-  document.getElementById('lvlSub').textContent = next ? `до «${next.name}» осталось ${next.xp - xp} XP` : 'максимальный уровень 🎉';
+  document.getElementById('lvlSub').textContent = next ? `до «${next.name}» осталось ${next.xp - xp} XP` : 'максимальный уровень';
   document.getElementById('xpNow').textContent = xp + ' XP';
   document.getElementById('xpNext').textContent = next ? next.xp + ' XP' : 'MAX';
 
@@ -1871,17 +1948,17 @@ function renderProfileExtras(statsAll) {
   const bets = +(localStorage.getItem('pxax_bets') || 0);
   document.getElementById('betClicks').textContent = bets;
   const achs = [
-    { i: '🚀', t: 'Первый запуск', ok: visits >= 1 },
-    { i: '🔥', t: '3 дня подряд', ok: streak >= 3 },
-    { i: '⚡', t: '7 дней подряд', ok: streak >= 7 },
-    { i: '💎', t: 'PRO-игрок', ok: store.pro },
-    { i: '📅', t: 'Неделя с нами', ok: daysWith >= 7 },
-    { i: '🧠', t: '100 прогнозов', ok: viewed >= 100 },
-    { i: '🧾', t: 'Первая ставка', ok: Object.keys(loadBets()).length >= 1 },
-    { i: '💹', t: 'ROI +10%', ok: (myBetStats().roi || 0) >= 10 },
+    { i: 'play', t: 'Первый запуск', ok: visits >= 1 },
+    { i: 'flame', t: '3 дня подряд', ok: streak >= 3 },
+    { i: 'bolt', t: '7 дней подряд', ok: streak >= 7 },
+    { i: 'diamond', t: 'PRO-игрок', ok: store.pro },
+    { i: 'calendar', t: 'Неделя с нами', ok: daysWith >= 7 },
+    { i: 'eye', t: '100 прогнозов', ok: viewed >= 100 },
+    { i: 'receipt', t: 'Первая ставка', ok: Object.keys(loadBets()).length >= 1 },
+    { i: 'trendup', t: 'ROI +10%', ok: (myBetStats().roi || 0) >= 10 },
   ];
   document.getElementById('achGrid').innerHTML =
-    achs.map(a => `<div class="ach ${a.ok ? 'on' : ''}"><div class="i">${a.i}</div><div class="t">${a.t}</div></div>`).join('');
+    achs.map(a => `<div class="ach ${a.ok ? 'on' : ''}"><div class="i">${ic(a.i)}</div><div class="t">${a.t}</div></div>`).join('');
 
   // любимый спорт (по реальным результатам за 14 дней; мок — только пока нет данных)
   const sportCnt = {};
@@ -1899,8 +1976,8 @@ function renderProfileExtras(statsAll) {
   }
   const fav = Object.entries(sportCnt).sort((a, b) => b[1] - a[1])[0];
   if (fav) {
-    document.getElementById('favSportI').textContent = fav[0];
-    document.getElementById('favSportV').textContent = fav[0].split(' ')[1] || 'Спорт';
+    document.getElementById('favSportI').innerHTML = sportIcon(fav[0]);
+    document.getElementById('favSportV').textContent = sportName(fav[0]);
   }
 
   // XP-бар — анимируем после вставки
@@ -1920,8 +1997,8 @@ function renderProfileExtras(statsAll) {
     v.className = 'verdict neutral';
     const bt = REAL.backtest && REAL.backtest.signals >= 30 && REAL.backtest.hitRate != null ? REAL.backtest : null;
     v.innerHTML = bt
-      ? `👀 Живая статистика накапливается. Бэктест модели за ${bt.windowDays} дней: ${Math.round(bt.hitRate * 100)}% на ${bt.hits}/${bt.signals} сигналах по ${bt.matches} матчам — честно, без заглядывания в будущее.`
-      : '👀 Статистика появится после первых сыгранных матчей — пока сравнивать нечего.';
+      ? `${ic('eye')} Живая статистика накапливается. Бэктест модели за ${bt.windowDays} дней: ${Math.round(bt.hitRate * 100)}% на ${bt.hits}/${bt.signals} сигналах по ${bt.matches} матчам — честно, без заглядывания в будущее.`
+      : `${ic('eye')} Статистика появится после первых сыгранных матчей — пока сравнивать нечего.`;
     return;
   }
   const sf = collectStats(CONFIG.STAT_DAYS, 'free');
@@ -1933,13 +2010,13 @@ function renderProfileExtras(statsAll) {
   const diff = sp.rate - sf.rate;
   if (diff >= 5) {
     v.className = 'verdict good';
-    v.innerHTML = `💎 VIP-прогнозы заходят чаще на <b>${diff} п.п.</b> — подписка может окупиться. Но помни: <b>вероятность не 100%</b>.`;
+    v.innerHTML = `${ic('diamond')} VIP-прогнозы заходят чаще на <b>${diff} п.п.</b> — подписка может окупиться. Но помни: <b>вероятность не 100%</b>.`;
   } else if (diff <= -5) {
     v.className = 'verdict neutral';
-    v.innerHTML = `👀 Сейчас VIP заходит <b>реже</b> базового (${Math.abs(diff)} п.п.) — платить не обязательно. Следи за статистикой.`;
+    v.innerHTML = `${ic('eye')} Сейчас VIP заходит <b>реже</b> базового (${Math.abs(diff)} п.п.) — платить не обязательно. Следи за статистикой.`;
   } else {
     v.className = 'verdict neutral';
-    v.innerHTML = `👀 Разница пока небольшая (${Math.abs(diff)} п.п.) — ясности нет, стоит ли платить. Решение за тобой · 18+.`;
+    v.innerHTML = `${ic('eye')} Разница пока небольшая (${Math.abs(diff)} п.п.) — ясности нет, стоит ли платить. Решение за тобой · 18+.`;
   }
 }
 
@@ -1954,24 +2031,27 @@ async function goSubscribe() {
   // реальная оплата через Telegram Stars
   if (isTg && tg?.initData && CONFIG.API_BASE && !CONFIG.API_BASE.startsWith('__')) {
     try {
-      toast('Выставляю счёт… ⏳');
+      haptic('impact');
+      toast('Выставляю счёт…');
       const r = await fetch(CONFIG.API_BASE + '/pay', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ initData: tg.initData }),
       });
       const j = await r.json();
       if (j.ok && j.sent) {
-        toast('💸 Счёт отправлен в чат бота — оплати там!');
+        haptic('success');
+        toast('Счёт отправлен в чат бота — оплати там!');
         tg.openTelegramLink(CONFIG.SUBSCRIBE_URL);
       } else if (j.needs_start) {
-        toast('Сначала нажми START в чате бота 🤖');
+        toast('Сначала нажми START в чате бота');
         tg.openTelegramLink(CONFIG.SUBSCRIBE_URL);
       } else {
         toast('Не удалось выставить счёт, попробуй позже');
       }
     } catch (e) {
     console.warn('Payment error:', e);
-    toast('Сервер оплаты недоступен 😔');
+    haptic('error');
+    toast('Сервер оплаты недоступен');
   }
     return;
   }
@@ -1984,8 +2064,9 @@ let TRIAL = { available: null };
 // (временно снижена с 777, пока оплата может отваливаться из-за туннельного API_BASE)
 let PRICE = 3;
 function syncPriceLabels() {
-  document.querySelectorAll('button.btn-sub[onclick="goSubscribe()"]').forEach(b => {
-    b.textContent = b.textContent.replace(/\d+(?=\s*⭐)/, PRICE);
+  // innerHTML, а не textContent: внутри кнопки SVG-иконка звезды Telegram Stars
+  document.querySelectorAll('button.btn-sub[data-price]').forEach(b => {
+    b.innerHTML = b.innerHTML.replace(/\d+(?=\s*<svg)/, PRICE);
   });
 }
 async function loadServerPro() {
@@ -2009,7 +2090,7 @@ async function loadServerPro() {
 }
 // активация бесплатного пробного периода (3 дня)
 async function startTrial() {
-  if (!isTg || !user || !CONFIG.API_BASE || CONFIG.API_BASE.startsWith('__')) { toast('Доступно в Telegram 📱'); return; }
+  if (!isTg || !user || !CONFIG.API_BASE || CONFIG.API_BASE.startsWith('__')) { toast('Доступно в Telegram'); return; }
   try {
     const r = await fetch(CONFIG.API_BASE + '/trial', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -2018,18 +2099,19 @@ async function startTrial() {
     const j = await r.json();
     if (j.ok) {
       TRIAL.available = false;
-      toast('🎁 Пробный период активирован — 3 дня PRO!');
+      haptic('success');
+      toast('Пробный период активирован — 3 дня PRO');
       await loadServerPro();
       render();
     } else if (j.reason === 'used') { toast('Пробный период уже был использован'); }
-    else if (j.reason === 'active') { toast('У тебя уже активна PRO 💎'); }
+    else if (j.reason === 'active') { toast('У тебя уже активна PRO'); }
     else { toast('Не удалось активировать, попробуй позже'); }
-  } catch (e) { toast('Сервер недоступен 😔'); }
+  } catch (e) { haptic('error'); toast('Сервер недоступен'); }
 }
 
 // копирование промокода
 function copyPromo() {
-  const done = () => toast('Промокод скопирован ✅');
+  const done = () => { haptic('success'); toast('Промокод скопирован'); };
   if (navigator.clipboard?.writeText) {
     navigator.clipboard.writeText(CONFIG.PROMO).then(done).catch(() => fallbackCopy(done));
   } else fallbackCopy(done);
@@ -2046,6 +2128,7 @@ document.addEventListener('click', e => {
   if (!a) return;
   // счётчик переходов к партнёру — для профиля
   localStorage.setItem('pxax_bets', +(localStorage.getItem('pxax_bets') || 0) + 1);
+  haptic('impact');
   if (tg?.openLink) { e.preventDefault(); tg.openLink(a.dataset.plink); }
 });
 // ---- управление подпиской (bottom-sheet) ----
@@ -2066,18 +2149,18 @@ async function openManage() {
   const daysLeft = st.until ? Math.max(0, Math.ceil((new Date(st.until) - Date.now()) / 864e5)) : 0;
   const fmt = d => d ? new Date(d).toLocaleDateString('ru-RU', { day:'numeric', month:'long', year:'numeric' }) : '—';
   const hist = (st.payments || []).slice(-5).reverse()
-    .map(p => `<div class="row"><span>${new Date(p.d).toLocaleDateString('ru-RU')}</span><b>✦ ${p.stars} ⭐</b></div>`).join('');
+    .map(p => `<div class="row"><span>${new Date(p.d).toLocaleDateString('ru-RU')}</span><b>${p.stars} ${ic('star')}</b></div>`).join('');
   ov.innerHTML = `
     <div class="modal">
-      <h3>${st.pro ? '💎' : '👤'} Управление подпиской</h3>
+      <h3>${ic(st.pro ? 'diamond' : 'user')} Управление подпиской</h3>
       <div class="m-status ${st.pro ? 'on' : 'off'}">
-        <div class="s">${st.pro ? 'PRO активна ✨' : 'Подписки нет'}</div>
+        <div class="s">${st.pro ? 'PRO активна' : 'Подписки нет'}</div>
         ${st.pro ? `<div class="d">действует до <b>${fmt(st.until)}</b> · осталось <b>${daysLeft} дн.</b></div>` : ''}
         ${st.demo ? '<div class="d">демо-режим (браузер без Telegram)</div>' : ''}
       </div>
       ${hist ? `<div class="m-hist"><div class="t">История платежей</div>${hist}</div>` : ''}
-      ${!st.pro && st.trialUsed === false ? `<button class="btn-trial" id="mTrial">🎁 Попробовать бесплатно · 3 дня</button>` : ''}
-      <button class="btn-sub" id="mAction">${st.pro ? `Продлить на +${st.days || 30} дней · ${st.price || 777} ⭐` : `Оформить PRO · ${st.price || 777} ⭐`}</button>
+      ${!st.pro && st.trialUsed === false ? `<button class="btn-trial" id="mTrial">${ic('gift')} Попробовать бесплатно · 3 дня</button>` : ''}
+      <button class="btn-sub" id="mAction">${st.pro ? `Продлить на +${st.days || 30} дней · ${st.price || 777} ${ic('star')}` : `Оформить PRO · ${st.price || 777} ${ic('star')}`}</button>
       <div class="m-note">Оплата разовая в Telegram Stars. Продление суммируется с текущим сроком. Stars не возвращаются. Прогнозы не гарантируют результат, 18+.</div>
       <button class="m-close" id="mClose">Закрыть</button>
     </div>`;
@@ -2099,6 +2182,7 @@ const showTrial = TRIAL.available === true && !store.pro;
 document.querySelectorAll('.f-btn').forEach(b => {
   b.onclick = () => {
     statFilter = b.dataset.f;
+    haptic();
     document.querySelectorAll('.f-btn').forEach(x => x.classList.toggle('on', x === b));
     render();
   };
@@ -2111,6 +2195,7 @@ document.querySelectorAll('.tab').forEach(btn => {
     btn.classList.add('active');
     document.getElementById('view-' + btn.dataset.view).classList.add('active');
     localStorage.setItem('pxax_last_tab', btn.dataset.view);
+    haptic();
     window.scrollTo(0, 0);
     /* maybeCelebrate убрано */
   };
@@ -2168,7 +2253,8 @@ document.addEventListener('touchend', async () => {
   ptrActive = false;
   if (ptrY > 60) {
     ptrEl.classList.add('show');
-    toast('🔄 Обновление данных...');
+    haptic('impact');
+    toast('Обновление данных...');
     await loadReal();
     await loadServerPro();
     render();
@@ -2212,7 +2298,7 @@ function tickFresh() {
   const up = String(d.getUTCHours()).padStart(2, '0') + ':' + String(d.getUTCMinutes()).padStart(2, '0');
   const t = document.getElementById('freshTxt');
   if (!t) return;
-  if (left <= 0) t.innerHTML = 'обновление витрины… <b>⏳</b> <span>· чек каждые 5 мин</span>';
+  if (left <= 0) t.innerHTML = `обновление витрины… <b>${ic('clock')}</b> <span>· чек каждые 5 мин</span>`;
   else {
     const m = Math.round(left / 60000);
     const h = Math.floor(m / 60), mm = String(m % 60).padStart(2, '0');
@@ -2282,9 +2368,9 @@ setInterval(autoRefresh, 5 * 60 * 1000); // чек каждые 5 минут
 function showOnboarding() {
   if (localStorage.getItem('pxax_onboarded') === '1') return;
   const steps = [
-    { i: '🎯', t: 'Привет! Это PXAX AI', d: 'Каждый день — свежие прогнозы на спорт от ИИ: 5 бесплатных прогнозов и отбор Pro-ИИ с value-ставками.' },
-    { i: '💎', t: 'PRO — value-ставки', d: 'Модель сравнивает свои вероятности с линией букмекера и берёт рынки с перевесом. 3 ⭐/мес, плюс бесплатная проба 3 дня.' },
-    { i: '🛡️', t: 'Честные правила', d: 'Прогнозы — аналитика ИИ, а не гарантия: вероятность не 100%. Ставьте только то, что готовы потерять. 18+.' },
+    { i: 'target', t: 'Привет! Это PXAX AI', d: 'Каждый день — свежие прогнозы на спорт от ИИ: 5 бесплатных прогнозов и отбор Pro-ИИ с value-ставками.' },
+    { i: 'diamond', t: 'PRO — value-ставки', d: 'Модель сравнивает свои вероятности с линией букмекера и берёт рынки с перевесом. 3 Telegram Stars в месяц, плюс бесплатная проба 3 дня.' },
+    { i: 'shield', t: 'Честные правила', d: 'Прогнозы — аналитика ИИ, а не гарантия: вероятность не 100%. Ставьте только то, что готовы потерять. 18+.' },
   ];
   let cur = 0;
   const ov = document.createElement('div');
@@ -2301,14 +2387,14 @@ function showOnboarding() {
   const close = () => { localStorage.setItem('pxax_onboarded', '1'); ov.remove(); };
   const paint = () => {
     const s = steps[cur];
-    document.getElementById('obIcon').textContent = s.i;
+    document.getElementById('obIcon').innerHTML = ic(s.i);
     document.getElementById('obTitle').textContent = s.t;
     document.getElementById('obTxt').textContent = s.d;
     ov.querySelectorAll('.ob-dot').forEach((d, j) => d.classList.toggle('on', j === cur));
     document.getElementById('obNext').textContent = cur === steps.length - 1 ? 'Начать' : 'Дальше';
   };
   ov.querySelector('#obNext').onclick = () => {
-    try { tg && tg.HapticFeedback && tg.HapticFeedback.selectionChanged(); } catch (e) {}
+    haptic();
     if (cur < steps.length - 1) { cur++; paint(); } else close();
   };
   ov.querySelector('#obSkip').onclick = close;
@@ -2326,7 +2412,7 @@ function showOnboarding() {
     proToday = REAL.pro.slice(0, 5).map(p => ({ ...p, kind: 'pro', league: p.lgName }));
   }
   render();
-  if (serverPro) toast('💎 PRO активна — спасибо за поддержку!');
+  if (serverPro) toast('PRO активна — спасибо за поддержку!');
   setTimeout(showOnboarding, 600);
 })();
 </script>
