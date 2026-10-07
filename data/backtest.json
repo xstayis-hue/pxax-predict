@@ -1,6 +1,6 @@
 {
-  "generated": "2026-10-05T07:02:10.474Z",
-  "windowDays": 42,
+  "generated": "2026-10-07T07:15:49.268Z",
+  "windowDays": 90,
   "leagues": [
     "АПЛ",
     "Ла Лига",
@@ -11,30 +11,30 @@
     "Аргентина",
     "MLS"
   ],
-  "matches": 318,
-  "signals": 315,
-  "hits": 197,
-  "hitRate": 0.625,
-  "brier": 0.6391,
+  "matches": 610,
+  "signals": 589,
+  "hits": 355,
+  "hitRate": 0.603,
+  "brier": 0.6472,
   "signalThreshold": 0.55,
   "byLeague": {
     "АПЛ": {
-      "matches": 30,
-      "signals": 29,
-      "hits": 16,
-      "rate": 0.552
-    },
-    "Ла Лига": {
       "matches": 40,
       "signals": 40,
       "hits": 26,
       "rate": 0.65
     },
+    "Ла Лига": {
+      "matches": 57,
+      "signals": 57,
+      "hits": 38,
+      "rate": 0.667
+    },
     "Серия A": {
-      "matches": 30,
-      "signals": 29,
-      "hits": 15,
-      "rate": 0.517
+      "matches": 40,
+      "signals": 39,
+      "hits": 25,
+      "rate": 0.641
     },
     "Бундеслига": {
       "matches": 27,
@@ -43,28 +43,28 @@
       "rate": 0.741
     },
     "Лига 1": {
-      "matches": 27,
-      "signals": 27,
-      "hits": 13,
-      "rate": 0.481
+      "matches": 36,
+      "signals": 36,
+      "hits": 21,
+      "rate": 0.583
     },
     "Бразилия · Серия A": {
-      "matches": 34,
-      "signals": 34,
-      "hits": 21,
-      "rate": 0.618
+      "matches": 92,
+      "signals": 85,
+      "hits": 45,
+      "rate": 0.529
     },
     "Аргентина": {
-      "matches": 55,
-      "signals": 54,
-      "hits": 31,
-      "rate": 0.574
+      "matches": 149,
+      "signals": 144,
+      "hits": 75,
+      "rate": 0.521
     },
     "MLS": {
-      "matches": 75,
-      "signals": 75,
-      "hits": 55,
-      "rate": 0.733
+      "matches": 169,
+      "signals": 161,
+      "hits": 105,
+      "rate": 0.652
     }
   },
   "note": "Бэктест модели по реальным прошедшим результативам: только форма до матча + средний тотал лиги, без заглядывания в будущее и без линий"
