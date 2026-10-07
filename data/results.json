@@ -202,6 +202,23 @@
   },
   {
     "date": "2026-10-06",
+    "id": "401892449",
+    "kind": "free",
+    "sport": "🏒",
+    "league": "NHL",
+    "home": "Toronto Maple Leafs",
+    "away": "Nashville Predators",
+    "market": "П1",
+    "confidence": 62,
+    "modelProb": 0.618,
+    "odds": null,
+    "edge": null,
+    "value": false,
+    "score": "5:4",
+    "result": "hit"
+  },
+  {
+    "date": "2026-10-06",
     "id": "401898716",
     "kind": "pro",
     "sport": "🏀",
@@ -215,6 +232,23 @@
     "edge": null,
     "value": false,
     "score": "103:127",
+    "result": "miss"
+  },
+  {
+    "date": "2026-10-06",
+    "id": "401901820",
+    "kind": "free",
+    "sport": "🏀",
+    "league": "NBA",
+    "home": "Charlotte Hornets",
+    "away": "Brooklyn Nets",
+    "market": "П1",
+    "confidence": 68,
+    "modelProb": 0.676,
+    "odds": null,
+    "edge": null,
+    "value": false,
+    "score": "90:124",
     "result": "miss"
   },
   {
@@ -233,5 +267,22 @@
     "value": false,
     "score": "97:116",
     "result": "miss"
+  },
+  {
+    "date": "2026-10-07",
+    "id": "761660",
+    "kind": "pro",
+    "sport": "⚽",
+    "league": "MLS",
+    "home": "Chicago Fire FC",
+    "away": "Vancouver Whitecaps",
+    "market": "ТБ 2.5",
+    "confidence": 63,
+    "modelProb": 0.629,
+    "odds": 2.1,
+    "edge": 0.399,
+    "value": true,
+    "score": "3:1",
+    "result": "hit"
   }
 ]
