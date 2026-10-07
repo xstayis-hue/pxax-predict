@@ -1,0 +1,499 @@
+{
+  "date": "2026-10-07",
+  "generated": "2026-10-07T17:23:29.385Z",
+  "model": "pxax-v2 @ ESPN standings + odds",
+  "count": 11,
+  "valueCount": 8,
+  "thresholds": {
+    "freeMin": 55,
+    "proMin": 60,
+    "value": 0.05
+  },
+  "botd": {
+    "legs": [
+      {
+        "id": "401898391",
+        "home": "Memphis Grizzlies",
+        "away": "Orlando Magic",
+        "market": "П1",
+        "odds": 2.14,
+        "confidence": 76,
+        "sport": "🏀",
+        "league": "NBA",
+        "value": true
+      },
+      {
+        "id": "401908620",
+        "home": "Oklahoma City Thunder",
+        "away": "Milwaukee Bucks",
+        "market": "ТБ 218.5",
+        "odds": 1.89,
+        "confidence": 85,
+        "sport": "🏀",
+        "league": "NBA",
+        "value": true
+      },
+      {
+        "id": "401908939",
+        "home": "Chicago Bulls",
+        "away": "Phoenix Suns",
+        "market": "П1",
+        "odds": 2.14,
+        "confidence": 73,
+        "sport": "🏀",
+        "league": "NBA",
+        "value": true
+      }
+    ],
+    "combinedOdds": 8.67,
+    "combinedProb": 0.477,
+    "minConfidence": 73
+  },
+  "predictions": [
+    {
+      "id": "401908620",
+      "lgKey": "basketball/nba",
+      "lgName": "NBA",
+      "sport": "🏀",
+      "type": "us",
+      "home": "Oklahoma City Thunder",
+      "away": "Milwaukee Bucks",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/okc.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/mil.png",
+      "time": "03:00 МСК",
+      "matchDate": "2026-10-08T00:00Z",
+      "market": "ТБ 218.5",
+      "confidence": 85,
+      "modelProb": 0.854,
+      "odds": 1.8928571428571428,
+      "impliedProb": 0.504,
+      "edge": 0.694,
+      "value": true,
+      "expected": {
+        "home": 125.9,
+        "away": 110.53
+      },
+      "markets": [
+        {
+          "market": "ТБ 218.5",
+          "prob": 85,
+          "odds": 1.8928571428571428,
+          "edge": 69
+        },
+        {
+          "market": "П1",
+          "prob": 82,
+          "odds": 1.1481481481481481,
+          "edge": -1
+        }
+      ],
+      "record": "0-1 / 0-1",
+      "note": "Ожидаемые очки: 125,90 : 110,53 (модель таблица лиги). Исходы: П1 82% · П2 18%. Модель даёт 85% на «ТБ 218.5». Линия 1,89 недооценивает исход: перевес модели +69%. Дополнительно модель видит «П1» с вероятностью 82%. Травмы: Oklahoma City Thunder — Jaylin Williams, Thomas Sorber, Nikola Topic.",
+      "tier": "pro"
+    },
+    {
+      "id": "401898393",
+      "lgKey": "basketball/nba",
+      "lgName": "NBA",
+      "sport": "🏀",
+      "type": "us",
+      "home": "Miami Heat",
+      "away": "New Orleans Pelicans",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/mia.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/no.png",
+      "time": "02:30 МСК",
+      "matchDate": "2026-10-08T23:30Z",
+      "market": "П1",
+      "confidence": 82,
+      "modelProb": 0.815,
+      "odds": null,
+      "impliedProb": null,
+      "edge": null,
+      "value": false,
+      "expected": {
+        "home": 123.53,
+        "away": 108.74
+      },
+      "markets": [
+        {
+          "market": "П1",
+          "prob": 82,
+          "odds": null,
+          "edge": null
+        }
+      ],
+      "record": "1-0 / 1-0",
+      "note": "Ожидаемые очки: 123,53 : 108,74 (модель таблица лиги). Исходы: П1 82% · П2 18%. Модель даёт 82% на «П1». Травмы: Miami Heat — Keshad Johnson (не выйдет), Dru Smith.",
+      "tier": "free"
+    },
+    {
+      "id": "401914129",
+      "lgKey": "basketball/nba",
+      "lgName": "NBA",
+      "sport": "🏀",
+      "type": "us",
+      "home": "Portland Trail Blazers",
+      "away": "Golden State Warriors",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/por.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/gs.png",
+      "time": "05:00 МСК",
+      "matchDate": "2026-10-08T02:00Z",
+      "market": "ТБ 216.5",
+      "confidence": 81,
+      "modelProb": 0.812,
+      "odds": 1.9090909090909092,
+      "impliedProb": 0.5,
+      "edge": 0.624,
+      "value": true,
+      "expected": {
+        "home": 118.36,
+        "away": 113.19
+      },
+      "markets": [
+        {
+          "market": "ТБ 216.5",
+          "prob": 81,
+          "odds": 1.9090909090909092,
+          "edge": 62
+        },
+        {
+          "market": "П1",
+          "prob": 62,
+          "odds": 1.1923076923076923,
+          "edge": -23
+        }
+      ],
+      "record": "0-0 / 1-1",
+      "note": "Ожидаемые очки: 118,36 : 113,19 (модель таблица лиги). Исходы: П1 62% · П2 38%. Модель даёт 81% на «ТБ 216.5». Линия 1,91 недооценивает исход: перевес модели +62%. Дополнительно модель видит «П1» с вероятностью 62%. Травмы: Portland Trail Blazers — Shaedon Sharpe (не выйдет); Golden State Warriors — Gui Santos, Brandin Podziemski, Gary Payton II.",
+      "tier": "pro"
+    },
+    {
+      "id": "401898391",
+      "lgKey": "basketball/nba",
+      "lgName": "NBA",
+      "sport": "🏀",
+      "type": "us",
+      "home": "Memphis Grizzlies",
+      "away": "Orlando Magic",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/mem.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/orl.png",
+      "time": "03:00 МСК",
+      "matchDate": "2026-10-08T00:00Z",
+      "market": "П1",
+      "confidence": 76,
+      "modelProb": 0.762,
+      "odds": 2.1399999999999997,
+      "impliedProb": 0.449,
+      "edge": 0.698,
+      "value": true,
+      "expected": {
+        "home": 121.67,
+        "away": 109.96
+      },
+      "markets": [
+        {
+          "market": "П1",
+          "prob": 76,
+          "odds": 2.1399999999999997,
+          "edge": 70
+        },
+        {
+          "market": "ТМ 234.5",
+          "prob": 57,
+          "odds": 1.925925925925926,
+          "edge": 14
+        }
+      ],
+      "record": "1-0 / 0-0",
+      "note": "Ожидаемые очки: 121,67 : 109,96 (модель таблица лиги). Исходы: П1 76% · П2 24%. Модель даёт 76% на «П1». Линия 2,14 недооценивает исход: перевес модели +70%. Дополнительно модель видит «ТМ 234.5» с вероятностью 57%. Травмы: Memphis Grizzlies — Micah Peavy, Isaiah Stewart, Zach Edey; Orlando Magic — Jalen Suggs, Jonathan Isaac, Noah Penda.",
+      "tier": "pro"
+    },
+    {
+      "id": "401908939",
+      "lgKey": "basketball/nba",
+      "lgName": "NBA",
+      "sport": "🏀",
+      "type": "us",
+      "home": "Chicago Bulls",
+      "away": "Phoenix Suns",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/chi.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/phx.png",
+      "time": "03:00 МСК",
+      "matchDate": "2026-10-08T00:00Z",
+      "market": "П1",
+      "confidence": 73,
+      "modelProb": 0.733,
+      "odds": 2.1399999999999997,
+      "impliedProb": 0.449,
+      "edge": 0.635,
+      "value": true,
+      "expected": {
+        "home": 126.54,
+        "away": 116.27
+      },
+      "markets": [
+        {
+          "market": "ТБ 229.5",
+          "prob": 78,
+          "odds": 1.9090909090909092,
+          "edge": 57
+        },
+        {
+          "market": "П1",
+          "prob": 73,
+          "odds": 2.1399999999999997,
+          "edge": 63
+        }
+      ],
+      "record": "0-0 / 0-1",
+      "note": "Ожидаемые очки: 126,54 : 116,27 (модель таблица лиги). Исходы: П1 73% · П2 27%. Модель даёт 73% на «П1». Линия 2,14 недооценивает исход: перевес модели +63%. Дополнительно модель видит «ТБ 229.5» с вероятностью 78%. Травмы: Chicago Bulls — Zach Collins, Nic Claxton; Phoenix Suns — Mark Williams (не выйдет).",
+      "tier": "pro"
+    },
+    {
+      "id": "401898392",
+      "lgKey": "basketball/nba",
+      "lgName": "NBA",
+      "sport": "🏀",
+      "type": "us",
+      "home": "Cleveland Cavaliers",
+      "away": "Boston Celtics",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/cle.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/bos.png",
+      "time": "02:00 МСК",
+      "matchDate": "2026-10-08T23:00Z",
+      "market": "П1",
+      "confidence": 71,
+      "modelProb": 0.71,
+      "odds": null,
+      "impliedProb": null,
+      "edge": null,
+      "value": false,
+      "expected": {
+        "home": 122.88,
+        "away": 113.77
+      },
+      "markets": [
+        {
+          "market": "П1",
+          "prob": 71,
+          "odds": null,
+          "edge": null
+        }
+      ],
+      "record": "0-0 / 0-0",
+      "note": "Ожидаемые очки: 122,88 : 113,77 (модель таблица лиги). Исходы: П1 71% · П2 29%. Модель даёт 71% на «П1». Травмы: Cleveland Cavaliers — Peyton Watson.",
+      "tier": "free"
+    },
+    {
+      "id": "401885094",
+      "lgKey": "soccer/ger.2",
+      "lgName": "2. Бундеслига",
+      "sport": "⚽",
+      "type": "soccer",
+      "home": "TSV Eintracht Braunschweig",
+      "away": "Holstein Kiel",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/3067.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/7884.png",
+      "time": "19:30 МСК",
+      "matchDate": "2026-10-09T16:30Z",
+      "market": "ТБ 2.5",
+      "confidence": 66,
+      "modelProb": 0.655,
+      "odds": 2.2,
+      "impliedProb": 0.422,
+      "edge": 0.552,
+      "value": true,
+      "expected": {
+        "home": 1.86,
+        "away": 1.51
+      },
+      "markets": [
+        {
+          "market": "ТБ 2.5",
+          "prob": 66,
+          "odds": 2.2,
+          "edge": 55
+        },
+        {
+          "market": "Х2",
+          "prob": 54,
+          "odds": 1.455737704918033,
+          "edge": -16
+        },
+        {
+          "market": "П1",
+          "prob": 46,
+          "odds": 2.6,
+          "edge": 28
+        }
+      ],
+      "record": "1-1-4 / 0-4-2",
+      "note": "Ожидаемые голы: 1,86 : 1,51 (модель таблица лиги). Исходы: П1 46% · Х 22% · П2 32%. Модель даёт 66% на «ТБ 2.5». Линия 2,20 недооценивает исход: перевес модели +55%. Дополнительно модель видит «Х2» с вероятностью 54%.",
+      "tier": "free"
+    },
+    {
+      "id": "401891820",
+      "lgKey": "hockey/nhl",
+      "lgName": "NHL",
+      "sport": "🏒",
+      "type": "us",
+      "home": "Ottawa Senators",
+      "away": "Philadelphia Flyers",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/ott.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/phi.png",
+      "time": "02:00 МСК",
+      "matchDate": "2026-10-08T23:00Z",
+      "market": "П1",
+      "confidence": 61,
+      "modelProb": 0.615,
+      "odds": 1.704225352112676,
+      "impliedProb": 0.563,
+      "edge": 0.091,
+      "value": true,
+      "expected": {
+        "home": 3.52,
+        "away": 2.76
+      },
+      "markets": [
+        {
+          "market": "П1",
+          "prob": 61,
+          "odds": 1.704225352112676,
+          "edge": 9
+        }
+      ],
+      "record": "2-1-0 / 0-2-2",
+      "note": "Ожидаемые шайбы: 3,52 : 2,76 (модель таблица лиги). Исходы: П1 61% · П2 37%. Модель даёт 61% на «П1». Линия 1,70 недооценивает исход: перевес модели +9%. Травмы: Ottawa Senators — Linus Ullmark, Jake Sanderson, Andre Burakovsky; Philadelphia Flyers — Rasmus Ristolainen, Nikita Grebenkin, Helge Grans.",
+      "tier": "free"
+    },
+    {
+      "id": "401885100",
+      "lgKey": "soccer/ger.2",
+      "lgName": "2. Бундеслига",
+      "sport": "⚽",
+      "type": "soccer",
+      "home": "1. FC Heidenheim 1846",
+      "away": "Kaiserslautern",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/6418.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/130.png",
+      "time": "19:30 МСК",
+      "matchDate": "2026-10-09T16:30Z",
+      "market": "Х2",
+      "confidence": 58,
+      "modelProb": 0.582,
+      "odds": 1.8523489932885908,
+      "impliedProb": 0.502,
+      "edge": 0.158,
+      "value": true,
+      "expected": {
+        "home": 1.61,
+        "away": 1.43
+      },
+      "markets": [
+        {
+          "market": "ТБ 2.5",
+          "prob": 59,
+          "odds": 1.5555555555555556,
+          "edge": -2
+        },
+        {
+          "market": "Х2",
+          "prob": 58,
+          "odds": 1.8523489932885908,
+          "edge": 16
+        }
+      ],
+      "record": "4-1-1 / 3-2-1",
+      "note": "Ожидаемые голы: 1,61 : 1,43 (модель таблица лиги). Исходы: П1 42% · Х 24% · П2 34%. Модель даёт 58% на «Х2». Линия 1,85 недооценивает исход: перевес модели +16%. Дополнительно модель видит «ТБ 2.5» с вероятностью 59%.",
+      "tier": "free"
+    },
+    {
+      "id": "401841257",
+      "lgKey": "soccer/bra.1",
+      "lgName": "Бразилия · Серия A",
+      "sport": "⚽",
+      "type": "soccer",
+      "home": "Botafogo",
+      "away": "Vasco da Gama",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/6086.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/3454.png",
+      "time": "02:30 МСК",
+      "matchDate": "2026-10-07T23:30Z",
+      "market": "ТБ 2.5",
+      "confidence": 58,
+      "modelProb": 0.579,
+      "odds": 1.625,
+      "impliedProb": 0.575,
+      "edge": 0.007,
+      "value": false,
+      "expected": {
+        "home": 1.64,
+        "away": 1.37
+      },
+      "markets": [
+        {
+          "market": "ТБ 2.5",
+          "prob": 58,
+          "odds": 1.625,
+          "edge": 1
+        },
+        {
+          "market": "Х2",
+          "prob": 56,
+          "odds": 1.391949152542373,
+          "edge": -18
+        }
+      ],
+      "record": "9-8-11 / 8-7-12",
+      "note": "Ожидаемые голы: 1,64 : 1,37 (модель таблица лиги). Исходы: П1 44% · Х 24% · П2 32%. Модель даёт 58% на «ТБ 2.5». Линия 1,63 примерно совпадает с моделью. Дополнительно модель видит «Х2» с вероятностью 56%.",
+      "tier": "free"
+    },
+    {
+      "id": "401841249",
+      "lgKey": "soccer/bra.1",
+      "lgName": "Бразилия · Серия A",
+      "sport": "⚽",
+      "type": "soccer",
+      "home": "Cruzeiro",
+      "away": "São Paulo",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/2022.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/2026.png",
+      "time": "03:30 МСК",
+      "matchDate": "2026-10-08T00:30Z",
+      "market": "Х2",
+      "confidence": 58,
+      "modelProb": 0.581,
+      "odds": 2.0153374233128836,
+      "impliedProb": 0.472,
+      "edge": 0.232,
+      "value": true,
+      "expected": {
+        "home": 1.47,
+        "away": 1.26
+      },
+      "markets": [
+        {
+          "market": "Х2",
+          "prob": 58,
+          "odds": 2.0153374233128836,
+          "edge": 23
+        },
+        {
+          "market": "ТБ 2.5",
+          "prob": 51,
+          "odds": 1.9523809523809523,
+          "edge": 7
+        },
+        {
+          "market": "ТМ 2.5",
+          "prob": 49,
+          "odds": 1.8,
+          "edge": -6
+        }
+      ],
+      "record": "13-6-9 / 10-6-12",
+      "note": "Ожидаемые голы: 1,47 : 1,26 (модель таблица лиги). Исходы: П1 42% · Х 26% · П2 33%. Модель даёт 58% на «Х2». Линия 2,02 недооценивает исход: перевес модели +23%. Дополнительно модель видит «ТБ 2.5» с вероятностью 51%.",
+      "tier": "free"
+    }
+  ]
+}
