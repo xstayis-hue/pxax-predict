@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-07T07:15:49.268Z",
+  "generated": "2026-10-08T07:25:15.233Z",
   "windowDays": 90,
   "leagues": [
     "АПЛ",
@@ -11,11 +11,11 @@
     "Аргентина",
     "MLS"
   ],
-  "matches": 610,
-  "signals": 589,
-  "hits": 355,
+  "matches": 616,
+  "signals": 594,
+  "hits": 358,
   "hitRate": 0.603,
-  "brier": 0.6472,
+  "brier": 0.6473,
   "signalThreshold": 0.55,
   "byLeague": {
     "АПЛ": {
@@ -49,10 +49,10 @@
       "rate": 0.583
     },
     "Бразилия · Серия A": {
-      "matches": 92,
-      "signals": 85,
-      "hits": 45,
-      "rate": 0.529
+      "matches": 98,
+      "signals": 90,
+      "hits": 48,
+      "rate": 0.533
     },
     "Аргентина": {
       "matches": 149,
