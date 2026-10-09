@@ -163,7 +163,11 @@ writeFileSync(file, JSON.stringify(hist, null, 2));
 // preseason-строки в калибровку не идут: модель там не работает, и Brier бы портился
 const scored = hist.filter(x => !x.preseason && (x.result === 'hit' || x.result === 'miss') && Number.isFinite(x.modelProb));
 let summary = null;
-if (scored.length >= 20) {
+// Порог надёжности отделён от факта записи: файл пишем всегда, даже когда данных
+// мало. Раньше при выборке меньше 20 файл не перезаписывался, и в репозитории
+// оставался старый расчёт — уже вместе с preseason — как будто он актуальный.
+const RELIABLE_N = 20;
+if (scored.length) {
   const brier = scored.reduce((a, x) => a + Math.pow(x.modelProb - (x.result === 'hit' ? 1 : 0), 2), 0) / scored.length;
   const buckets = [[0.5, 0.6], [0.6, 0.7], [0.7, 0.8], [0.8, 1.01]].map(([lo, hi]) => {
     const b = scored.filter(x => x.modelProb >= lo && x.modelProb < hi);
@@ -171,7 +175,12 @@ if (scored.length >= 20) {
     return { lo, hi, n: b.length, predicted: (lo + hi) / 2, actual: win };
   });
   summary = { n: scored.length, brier: +brier.toFixed(4), buckets };
-  writeFileSync('data/calibration.json', JSON.stringify({ generated: new Date().toISOString(), ...summary }, null, 2));
+  writeFileSync('data/calibration.json', JSON.stringify({
+    generated: new Date().toISOString(),
+    ...summary,
+    reliable: scored.length >= RELIABLE_N,
+    note: `preseason-матчи исключены; выборка ${scored.length} наблюдений${scored.length >= RELIABLE_N ? '' : ` — меньше ${RELIABLE_N}, цифры ориентировочные`}`,
+  }, null, 2));
 }
 
 const hits = results.filter(x => x.result === 'hit').length;
