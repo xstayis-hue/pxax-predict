@@ -1,0 +1,22 @@
+name = "pxaxbet-payments"
+main = "src/index.js"
+compatibility_date = "2024-11-01"
+
+# Цена и сроки — единственное место, где они задаются для продакшена.
+# Пользовательские значения (ui) приходят из /api/status, поэтому фронтенд
+# ничего не хардкодит: меняешь здесь — меняется везде.
+[vars]
+STARS_PRICE = "777"        # цена PRO в Telegram Stars за период
+PRO_DAYS = "30"            # срок PRO за одну оплату
+TRIAL_DAYS = "3"           # бесплатный пробный период
+MINIAPP_URL = "https://xstayis-hue.github.io/pxax-predict/"
+
+# Хранилище пользователей: u:<telegram_id> -> { until, trial, payments, charges }.
+# Создать: npx wrangler kv namespace create USERS
+# и вписать сюда возвращённый id вместо REPLACE_WITH_KV_ID.
+[[kv_namespaces]]
+binding = "USERS"
+id = "8fe3bbfa99014981a2d57b47360ae847"
+
+[observability]
+enabled = true

@@ -406,11 +406,24 @@
   .swipe-hint .ar { display:inline-flex; color:var(--muted); }
 
   /* locked slide */
-  .slide.locked .blur { filter: blur(7px) saturate(.6); pointer-events:none; }
+  /* Замок — не «размытие контента», а его отсутствие: раньше карточка рендерилась
+     целиком и размывалась filter: blur(7px). Любой кадр, где blur ещё/уже не
+     применился (старт анимации .blur, смена вкладки, отрисовка до layout), показывал
+     VIP-прогноз почти читаемым — это и ловилось скриншотом. Теперь под .blur лежат
+     только скрытые плейсхолдеры, а реальные рынок, кэф, перевес и разбор в DOM
+     заблокированной карточки не попадают вовсе. */
+  .slide.locked .blur { pointer-events:none; }
+  .slide.locked .p-card { background: var(--card2); }
+  .lock-ph { display:block; border-radius:6px; background:rgba(139,163,199,.16); }
+  .blur .lock-ph + .lock-ph { margin-top:8px; }
+  .lp-title { height:13px; width:58%; }
+  .lp-teams { height:36px; width:100%; margin-top:10px; border-radius:10px; }
+  .lp-line { height:30px; width:100%; margin-top:12px; border-radius:10px; }
+  .lp-note { height:44px; width:100%; margin-top:12px; border-radius:10px; }
   .lock-overlay {
     position:absolute; inset:0; z-index:2;
     display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;
-    background: rgba(10,13,22,.55); backdrop-filter: blur(1px); overflow:hidden; border-radius:var(--radius);
+    background: rgba(10,13,22,.82); backdrop-filter: blur(1px); overflow:hidden; border-radius:var(--radius);
   }
   .lock-overlay .ico { display:flex; color:var(--gold); }
   .lock-overlay .ico .ic { font-size:26px; }
@@ -646,10 +659,15 @@
   .tab.active .i { transform: translateY(-2px); }
   .tab.pro-tab.active { color: var(--gold); }
 
-  /* ---------- view transitions ---------- */
+  /* ---------- view transitions ----------
+     Анимация только по положению, без opacity. Старый экран при переключении уже
+     снят (display:none), поэтому полупрозрачный новый экран ~0.35 с оставлял на
+     месте контента пустоту, а липкие шапка и таббар с backdrop-filter в это время
+     подмешивали в свой фон предыдущий кадр — под блюром на миг проявлялись VIP-ставки.
+     Теперь новая вкладка непрозрачна с первого кадра. */
   .view { display:none; }
-  .view.active { display:block; animation: viewIn .35s ease; }
-  @keyframes viewIn { from { opacity:0; transform: translateY(10px); } }
+  .view.active { display:block; animation: viewIn .28s cubic-bezier(.22,1,.36,1); }
+  @keyframes viewIn { from { transform: translateY(6px); } }
   @keyframes cardIn { from { opacity:0; transform: translateY(18px) scale(.98); } }
 
   .section-title {
@@ -925,8 +943,8 @@
   <div class="paywall-cta" id="paywallCta">
     <h3 id="payProTitle"><svg class="ic"><use href="#i-diamond"/></svg> Ещё 5 прогнозов — у Pro-ИИ</h3>
     <p>Модель сравнивает вероятности с линией букмекера и берёт рынки с перевесом (value). Плюс история без замков</p>
-    <button class="btn-trial" id="btnTrialHome" style="display:none" onclick="startTrial()"><svg class="ic"><use href="#i-gift"/></svg> Попробовать бесплатно · 3 дня</button>
-    <button class="btn-sub" data-price="3" onclick="goSubscribe()">Открыть PRO · 3 <svg class="ic"><use href="#i-star"/></svg>/мес</button>
+    <button class="btn-trial" id="btnTrialHome" style="display:none" onclick="startTrial()"><svg class="ic"><use href="#i-gift"/></svg> Попробовать бесплатно · <span class="trial-days">3</span> дн.</button>
+    <button class="btn-sub plan-price" data-open="home" onclick="goSubscribe()">Открыть PRO · 777 <svg class="ic"><use href="#i-star"/></svg> / 30 дней</button>
   </div>
 
   
@@ -968,8 +986,8 @@
   <div class="paywall-cta" id="proPaywall">
     <h3><svg class="ic"><use href="#i-diamond"/></svg> Станьте PRO</h3>
     <p>Value-ставки Pro-ИИ каждый день: модель находит рынки, где линия букмекера занижает вероятность. Плюс история без замков</p>
-    <button class="btn-trial" id="btnTrialPro" style="display:none" onclick="startTrial()"><svg class="ic"><use href="#i-gift"/></svg> Попробовать бесплатно · 3 дня</button>
-    <button class="btn-sub" data-price="3" onclick="goSubscribe()">Оформить PRO · 3 <svg class="ic"><use href="#i-star"/></svg>/мес</button>
+    <button class="btn-trial" id="btnTrialPro" style="display:none" onclick="startTrial()"><svg class="ic"><use href="#i-gift"/></svg> Попробовать бесплатно · <span class="trial-days">3</span> дн.</button>
+    <button class="btn-sub plan-price" data-open="pro" onclick="goSubscribe()">Оформить PRO · 777 <svg class="ic"><use href="#i-star"/></svg> / 30 дней</button>
   </div>
 
   
@@ -1205,9 +1223,14 @@ async function loadReal() {
 
 /* ================= settings ================= */
 const CONFIG = {
-  VERSION: '0.8.0', // версия приложения для отслеживания обновлений
+  VERSION: '0.8.1', // версия приложения для отслеживания обновлений
   SUBSCRIBE_URL: 'https://t.me/pxaxbetai_bot',
-  API_BASE: 'https://site-technician-lee-aerial.trycloudflare.com', // адрес бэкенда (cloudflared tunnel), обновляется при перезапуске туннеля
+  /* Адрес бэкенда оплаты. Держим его здесь, потому что мини-апп — один файл без сборки.
+     Сейчас это Cloudflare Worker (worker/ в репозитории) — у него постоянный адрес,
+     в отличие от прежнего cloudflared-туннеля, который менялся при каждом перезапуске
+     и из-за этого «отваливалась» оплата. Пока адрес не вписан, кнопки оплаты уводят
+     в чат бота. */
+  API_BASE: 'https://pxaxbet-payments.xstayis.workers.dev',
   FREE_DAILY: 5,   // бесплатных прогнозов в день
   PRO_DAILY: 5,    // прогнозов Pro-ИИ в день
   STAT_DAYS: 14,
@@ -1401,6 +1424,11 @@ function renderSportFilter() {
     b.onclick = () => { sportFilter = b.dataset.sf; haptic(); render(); };
   });
 }
+/* Кеш статуса PRO для офлайн-старта. Источник правды — ответ сервера
+   (`/api/status` перезаписывает это значение при каждой загрузке), поэтому
+   подмена строки в localStorage открывает VIP-экраны только до ответа сервера.
+   Отдельно стоит помнить: прогнозы PRO лежат в публичном data/predictions.json,
+   так что пейвол здесь — витрина, а не защита контента (см. README, «Что дальше»). */
 const store = {
   get pro() { return localStorage.getItem('pxax_pro') === '1'; },
   set pro(v) { localStorage.setItem('pxax_pro', v ? '1' : '0'); },
@@ -1639,12 +1667,22 @@ function slideHTML(p, unlocked, isPro, isHistory) {
         `<div class="pick"><div class="m">${m.market}</div><div class="v">${m.prob}%</div>${
           m.odds ? `<div class="sub">кэф ${m.odds.toFixed(2)}</div>` : ''}</div>`).join('')}</div>`
     : '';
-  return `
-    <div class="slide ${unlocked ? '' : 'locked'}">
-      <div class="p-card ${isPro ? 'pro-card' : ''}">
-        ${res}
-        <div class="wm">${sportIcon(p.sport)}</div>
-        <div class="blur">
+  // Заблокированная карточка: сам прогноз (рынок, кэф, перевес, разбор) в разметку
+  // не попадает — вместо него обезличенные плейсхолдеры. До этого контент размывался
+  // CSS-фильтром, и в кадре до/во время применения blur VIP-ставка читалась.
+  const maskedBody = `
+        <div class="p-top">
+          <span class="sport">${sportIcon(p.sport)}</span><span>${p.league}</span>
+          <span class="ai-tag pro">${ic('diamond')} Pro AI</span>
+        </div>
+        <div class="p-body">
+          <div class="league-line"><span class="lg-dot"></span>${p.league}</div>
+          <div class="lock-ph lp-title"></div>
+          <div class="lock-ph lp-teams"></div>
+          <div class="lock-ph lp-line"></div>
+          <div class="lock-ph lp-note"></div>
+        </div>`;
+  const openBody = `
           <div class="p-top">
             <span class="sport">${sportIcon(p.sport)}</span><span>${p.league}</span>
             <span class="ai-tag ${isPro ? 'pro' : ''}">${isPro ? ic('diamond') + ' Pro AI' : ic('cpu') + ' AI'}</span>
@@ -1674,12 +1712,19 @@ function slideHTML(p, unlocked, isPro, isHistory) {
           </div>
           ${extraMarkets}
           ${lineChip}
-          <div class="bet-wrap">${unlocked ? betBtn(p) + myBetBtn(p, isHistory) : ''}</div>
+          <div class="bet-wrap">${betBtn(p) + myBetBtn(p, isHistory)}</div>
           <div class="conf">
             <div class="lbl"><span>уверенность ИИ</span><b>${p.confidence}%</b></div>
             <div class="bar"><i data-w="${p.confidence}"></i></div>
           </div>
           <div class="ai-note"><b>${isPro ? 'Pro-разбор:' : 'Разбор ИИ:'}</b> ${p.note}</div>
+          `;
+  return `
+    <div class="slide ${unlocked ? '' : 'locked'}">
+      <div class="p-card ${isPro ? 'pro-card' : ''}">
+        ${res}
+        <div class="wm">${sportIcon(p.sport)}</div>
+        <div class="blur">${unlocked ? openBody : maskedBody}
         </div>
         ${unlocked ? '' : `
         <div class="lock-overlay">
@@ -1711,6 +1756,7 @@ function render() {
   document.querySelectorAll('.vsn').forEach(e => e.textContent = CONFIG.VERSION);
   document.getElementById('profVisits').textContent = visits;
   document.getElementById('streakV').textContent = streak;
+  syncTrialButtons();
 
   // честная статистика: показываем цифры только по реальным завершённым матчам
   const hasReal = !!(REAL.results && REAL.results.length);
@@ -1845,17 +1891,29 @@ function renderBetOfTheDay() {
     && botd.minConfidence >= 70 && Number.isFinite(Number(botd.combinedOdds));
   if (!valid) { wrap.hidden = true; return; }
   wrap.hidden = false;
-  document.getElementById('botdLegs').innerHTML = botd.legs.map(l => `
+  const pro = store.pro;
+  // Экспресс дня тоже под пейволом: без PRO матчи, рынки и кэфы в DOM не рендерим,
+  // иначе ноги экспресса лежали в разметке под blur-оверлеем и читались в кадре до его отрисовки.
+  const legOdds = document.getElementById('botdOdds');
+  const legDetail = document.getElementById('botdDetail');
+  if (pro) {
+    document.getElementById('botdLegs').innerHTML = botd.legs.map(l => `
     <div class="botd-leg">
       <span>${sportIcon(l.sport)}</span>
       <span class="lg-m">${l.home} — ${l.away} · ${l.market}</span>
       <span class="lg-p">${l.confidence}%</span>
       <span class="lg-o">${Number(l.odds).toFixed(2)}</span>
     </div>`).join('');
-  document.getElementById('botdOdds').textContent = Number(botd.combinedOdds).toFixed(2);
-  document.getElementById('botdDetail').textContent =
-    `экспресс на ${botd.legs.length} · все ноги ≥ ${botd.minConfidence}% · совм. вероятность модели ${Math.round((botd.combinedProb || 0) * 100)}%`;
-  const pro = store.pro;
+    legOdds.textContent = Number(botd.combinedOdds).toFixed(2);
+    legDetail.textContent =
+      `экспресс на ${botd.legs.length} · все ноги ≥ ${botd.minConfidence}% · совм. вероятность модели ${Math.round((botd.combinedProb || 0) * 100)}%`;
+  } else {
+    document.getElementById('botdLegs').innerHTML = `
+    <div class="botd-leg"><span class="lock-ph" style="height:14px;flex:1"></span></div>
+    <div class="botd-leg"><span class="lock-ph" style="height:14px;flex:1"></span></div>`;
+    legOdds.textContent = '—.—';
+    legDetail.textContent = `экспресс на ${botd.legs.length} · ноги и кэфы открываются с PRO`;
+  }
   document.getElementById('botdLock').style.display = pro ? 'none' : 'flex';
   document.getElementById('botdLink').style.visibility = pro ? 'visible' : 'hidden';
 }
@@ -2029,51 +2087,92 @@ function toast(msg) {
 }
 async function goSubscribe() {
   document.querySelector('[data-view="pro"]').click();
-  // реальная оплата через Telegram Stars
-  if (isTg && tg?.initData && CONFIG.API_BASE && !CONFIG.API_BASE.startsWith('__')) {
+  // Реальная оплата Telegram Stars. Основной способ — openInvoice нативной ссылкой
+  // воркера: счёт открывается сразу в вебвью, не нужно искать его в чате. Если воркер
+  // или версия клиента не поддерживают openInvoice — падаем на счёт из чата бота.
+  if (isTg && tg?.initData && apiReady()) {
     try {
       haptic('impact');
-      toast('Выставляю счёт…');
-      const r = await fetch(CONFIG.API_BASE + '/pay', {
+      toast('Готовлю счёт…');
+      const r = await fetch(CONFIG.API_BASE + '/api/invoice', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ initData: tg.initData }),
       });
       const j = await r.json();
-      if (j.ok && j.sent) {
-        haptic('success');
-        toast('Счёт отправлен в чат бота — оплати там!');
-        tg.openTelegramLink(CONFIG.SUBSCRIBE_URL);
-      } else if (j.needs_start) {
-        toast('Сначала нажми START в чате бота');
-        tg.openTelegramLink(CONFIG.SUBSCRIBE_URL);
-      } else {
-        toast('Не удалось выставить счёт, попробуй позже');
+      if (j.ok && j.invoiceUrl && tg.openInvoice) {
+        haptic('impact');
+        let settled = false;
+        tg.openInvoice(j.invoiceUrl, async (status) => {
+          settled = true;
+          if (status === 'paid') {
+            haptic('success');
+            toast('Оплата прошла — включаю PRO');
+          } else if (status === 'failed') {
+            haptic('error');
+            toast('Оплата не прошла, попробуй ещё раз');
+            return;
+          }
+          // Вебвью не всегда отдаёт колбэк (и статус может прийти раньше вебхука),
+          // поэтому доступ подтверждаем по серверу, а не по одному лишь статусу.
+          await pollProAfterPayment();
+        });
+        // если колбэк так и не пришёл — не оставляем человека без проверки статуса
+        setTimeout(() => { if (!settled) pollProAfterPayment(); }, 45 * 1000);
+        return;
       }
+      if (j.ok && j.invoiceUrl && tg.openTelegramLink) {
+        haptic('success');
+        toast('Счёт в чате бота — оплати там');
+        tg.openTelegramLink(CONFIG.SUBSCRIBE_URL);
+        return;
+      }
+      if (!j.ok) toast(j.error === 'not_configured' ? 'Оплата ещё настраивается' : 'Не удалось выставить счёт, попробуй позже');
     } catch (e) {
-    console.warn('Payment error:', e);
-    haptic('error');
-    toast('Сервер оплаты недоступен');
-  }
-    return;
+      console.warn('Payment error:', e);
+      haptic('error');
+      toast('Сервер оплаты недоступен');
+      return;
+    }
   }
   if (tg?.openTelegramLink) tg.openTelegramLink(CONFIG.SUBSCRIBE_URL + '?start=subscribe');
   else toast('Оплата через бота: ' + CONFIG.SUBSCRIBE_URL);
 }
+// бэкенд оплаты настроен (адрес вписан) — иначе ведём в чат бота
+function apiReady() {
+  return !!CONFIG.API_BASE && !/^__|trycloudflare/.test(CONFIG.API_BASE);
+}
+/* После закрытия счёта оплата может дойти до вебхука на секунду-две позже
+   события в вебвью, поэтому статус проверяем несколько раз, а не один. */
+async function pollProAfterPayment() {
+  for (const wait of [700, 1500, 2500, 4000, 6000]) {
+    await new Promise(r => setTimeout(r, wait));
+    if (await loadServerPro()) { render(); toast('PRO активна — приятных прогнозов!'); return; }
+  }
+  toast('Оплата прошла, статус обновится в течение минуты');
+}
 // реальный PRO-статус с бэкенда (сервер — источник правды)
 let TRIAL = { available: null };
-// цена из /status (источник правды — config.json сервера); 3 — только заглушка до ответа
-// (временно снижена с 777, пока оплата может отваливаться из-за туннельного API_BASE)
-let PRICE = 3;
-function syncPriceLabels() {
-  // innerHTML, а не textContent: внутри кнопки SVG-иконка звезды Telegram Stars
-  document.querySelectorAll('button.btn-sub[data-price]').forEach(b => {
-    b.innerHTML = b.innerHTML.replace(/\d+(?=\s*<svg)/, PRICE);
+// Цена и срок — только с сервера (/api/status): фронтенд не хардкодит их.
+// Значения ниже — то, что видно до первого ответа сервера (совпадают с [vars] воркера).
+let PRICE = 777;
+let PRO_DAYS = 30;
+let TRIAL_DAYS = 3;
+// Подписи цены и пробного периода в кнопках приводим к данным сервера: иначе
+// в разметке остаются числа, которые расходятся с реальным счётом Stars.
+function syncPlanLabels() {
+  document.querySelectorAll('button.plan-price').forEach(b => {
+    // меняем только само число перед иконкой Stars: захват пробелов вокруг съедал
+    // разделитель «· 777» и получалось «·777»
+    b.innerHTML = b.innerHTML.replace(/\d[\d\s.,]*(?=\s*<svg)/, String(PRICE));
+    b.innerHTML = b.innerHTML.replace(/(\/\s*)\d+\s*дн(?:ей|я)?/, '$1' + PRO_DAYS + ' дней');
   });
+  document.querySelectorAll('.trial-days').forEach(el => { el.textContent = TRIAL_DAYS; });
 }
+function syncPriceLabels() { syncPlanLabels(); }
 async function loadServerPro() {
-  if (!isTg || !user || !CONFIG.API_BASE || CONFIG.API_BASE.startsWith('__')) return false;
+  if (!isTg || !user || !apiReady()) return false;
   try {
-    const r = await fetch(CONFIG.API_BASE + '/status?uid=' + user.id +
+    const r = await fetch(CONFIG.API_BASE + '/api/status?uid=' + user.id +
       '&initData=' + encodeURIComponent(tg.initData || ''), { cache: 'no-store' });
     if (!r.ok) {
       console.warn('Server status returned', r.status);
@@ -2082,18 +2181,21 @@ async function loadServerPro() {
     const j = await r.json();
     store.pro = !!j.pro;
     TRIAL.available = !j.pro && !j.trialUsed;
+    // цена и срок — только с сервера (в воркере это [vars] STARS_PRICE / PRO_DAYS)
     if (j.price) { PRICE = j.price; syncPriceLabels(); }
+    if (j.days) PRO_DAYS = j.days;
+    if (j.trialDays) TRIAL_DAYS = j.trialDays;
     return j.pro;
   } catch (e) {
     console.warn('Failed to load server pro status:', e);
     return false;
   }
 }
-// активация бесплатного пробного периода (3 дня)
+// активация бесплатного пробного периода
 async function startTrial() {
-  if (!isTg || !user || !CONFIG.API_BASE || CONFIG.API_BASE.startsWith('__')) { toast('Доступно в Telegram'); return; }
+  if (!isTg || !user || !apiReady()) { toast('Доступно в Telegram'); return; }
   try {
-    const r = await fetch(CONFIG.API_BASE + '/trial', {
+    const r = await fetch(CONFIG.API_BASE + '/api/trial', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ initData: tg.initData }),
     });
@@ -2101,11 +2203,12 @@ async function startTrial() {
     if (j.ok) {
       TRIAL.available = false;
       haptic('success');
-      toast('Пробный период активирован — 3 дня PRO');
+      toast(`Пробный период активирован — ${TRIAL_DAYS} дн. PRO`);
       await loadServerPro();
       render();
     } else if (j.reason === 'used') { toast('Пробный период уже был использован'); }
     else if (j.reason === 'active') { toast('У тебя уже активна PRO'); }
+    else if (j.reason === 'disabled') { toast('Пробный период недоступен'); }
     else { toast('Не удалось активировать, попробуй позже'); }
   } catch (e) { haptic('error'); toast('Сервер недоступен'); }
 }
@@ -2134,12 +2237,15 @@ document.addEventListener('click', e => {
 });
 // ---- управление подпиской (bottom-sheet) ----
 async function openManage() {
-  let st = { pro: store.pro, until: null, payments: [], price: 3, days: 30, demo: !isTg };
-  if (isTg && user && CONFIG.API_BASE && !CONFIG.API_BASE.startsWith('__')) {
+  let st = { pro: store.pro, until: null, payments: [], price: PRICE, days: PRO_DAYS, trialDays: TRIAL_DAYS, trialUsed: !TRIAL.available, demo: !isTg };
+  if (isTg && user && apiReady()) {
     try {
-      const r = await fetch(CONFIG.API_BASE + '/status?uid=' + user.id +
+      const r = await fetch(CONFIG.API_BASE + '/api/status?uid=' + user.id +
         '&initData=' + encodeURIComponent(tg.initData || '') + '&v=' + Date.now(), { cache: 'no-store' });
       st = { ...(await r.json()), demo: false };
+      if (st.price) { PRICE = st.price; syncPriceLabels(); }
+      if (st.days) PRO_DAYS = st.days;
+      if (st.trialDays) TRIAL_DAYS = st.trialDays;
     } catch (e) {}
   }
   if (st.pro && !store.pro) store.pro = true;
@@ -2160,8 +2266,8 @@ async function openManage() {
         ${st.demo ? '<div class="d">демо-режим (браузер без Telegram)</div>' : ''}
       </div>
       ${hist ? `<div class="m-hist"><div class="t">История платежей</div>${hist}</div>` : ''}
-      ${!st.pro && st.trialUsed === false ? `<button class="btn-trial" id="mTrial">${ic('gift')} Попробовать бесплатно · 3 дня</button>` : ''}
-      <button class="btn-sub" id="mAction">${st.pro ? `Продлить на +${st.days || 30} дней · ${st.price || 777} ${ic('star')}` : `Оформить PRO · ${st.price || 777} ${ic('star')}`}</button>
+      ${!st.pro && st.trialUsed === false ? `<button class="btn-trial" id="mTrial">${ic('gift')} Попробовать бесплатно · ${st.trialDays || TRIAL_DAYS} дн.</button>` : ''}
+      <button class="btn-sub" id="mAction">${st.pro ? `Продлить на +${st.days || PRO_DAYS} дней · ${st.price || PRICE} ${ic('star')}` : `Оформить PRO · ${st.price || PRICE} ${ic('star')}`}</button>
       <div class="m-note">Оплата разовая в Telegram Stars. Продление суммируется с текущим сроком. Stars не возвращаются. Прогнозы не гарантируют результат, 18+.</div>
       <button class="m-close" id="mClose">Закрыть</button>
     </div>`;
@@ -2172,12 +2278,18 @@ async function openManage() {
   ov.querySelector('#mAction').onclick = () => { ov.remove(); goSubscribe(); };
 }
 document.getElementById('btnSubscribe2').onclick = openManage;
-// показываем/прячем кнопки пробного периода
-const showTrial = TRIAL.available === true && !store.pro;
-['btnTrialHome', 'btnTrialPro'].forEach(id => {
-  const b = document.getElementById(id);
-  if (b) b.style.display = showTrial ? 'block' : 'none';
-});
+// Кнопки пробного периода зависят от ответа сервера (/api/status), который приходит
+// асинхронно уже после разбора разметки. Раньше видимость считалась один раз при
+// загрузке — TRIAL.available тогда ещё null, и кнопка «Попробовать бесплатно» не
+// показывалась никогда. Теперь состояние обновляется из render().
+function syncTrialButtons() {
+  const show = TRIAL.available === true && !store.pro;
+  ['btnTrialHome', 'btnTrialPro'].forEach(id => {
+    const b = document.getElementById(id);
+    if (b) b.style.display = show ? 'block' : 'none';
+  });
+}
+syncTrialButtons();
 
 // фильтр статистики: Все / Базовый ИИ / VIP
 document.querySelectorAll('.f-btn').forEach(b => {
@@ -2370,7 +2482,7 @@ function showOnboarding() {
   if (localStorage.getItem('pxax_onboarded') === '1') return;
   const steps = [
     { i: 'target', t: 'Привет! Это PXAX AI', d: 'Каждый день — свежие прогнозы на спорт от ИИ: 5 бесплатных прогнозов и отбор Pro-ИИ с value-ставками.' },
-    { i: 'diamond', t: 'PRO — value-ставки', d: 'Модель сравнивает свои вероятности с линией букмекера и берёт рынки с перевесом. 3 Telegram Stars в месяц, плюс бесплатная проба 3 дня.' },
+    { i: 'diamond', t: 'PRO — value-ставки', d: 'Модель сравнивает свои вероятности с линией букмекера и берёт рынки с перевесом. Оплата разовая в Telegram Stars, плюс бесплатная проба.' },
     { i: 'shield', t: 'Честные правила', d: 'Прогнозы — аналитика ИИ, а не гарантия: вероятность не 100%. Ставьте только то, что готовы потерять. 18+.' },
   ];
   let cur = 0;

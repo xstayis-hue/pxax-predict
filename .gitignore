@@ -4,3 +4,7 @@ config.json
 .env
 server/users.json
 server/config.json
+
+# локальный стейт и кеш wrangler (miniflare) — машинно-специфичный, не коммитим
+.wrangler/
+worker/.wrangler/
