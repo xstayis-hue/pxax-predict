@@ -542,6 +542,23 @@
   },
   {
     "date": "2026-10-09",
+    "id": "401898395",
+    "kind": "free",
+    "sport": "🏀",
+    "league": "NBA",
+    "home": "Dallas Mavericks",
+    "away": "Houston Rockets",
+    "market": "П1",
+    "confidence": 63,
+    "modelProb": 0.632,
+    "odds": null,
+    "edge": null,
+    "value": false,
+    "score": "117:135",
+    "result": "miss"
+  },
+  {
+    "date": "2026-10-09",
     "id": "401898717",
     "kind": "pro",
     "sport": "🏀",
