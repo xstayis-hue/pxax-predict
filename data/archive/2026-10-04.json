@@ -2,83 +2,15 @@
   "date": "2026-10-04",
   "generated": "2026-10-04T20:41:38.887Z",
   "model": "poisson-v2 @ ESPN standings + odds",
-  "count": 8,
-  "valueCount": 2,
+  "count": 5,
+  "proCount": 3,
+  "botdLegs": 0,
+  "valueCount": 1,
   "thresholds": {
     "freeMin": 55,
     "proMin": 60
   },
   "predictions": [
-    {
-      "id": "401908947",
-      "lgKey": "basketball/nba",
-      "lgName": "NBA",
-      "sport": "🏀",
-      "type": "us",
-      "home": "Detroit Pistons",
-      "away": "Phoenix Suns",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/det.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/phx.png",
-      "time": "02:00 МСК",
-      "matchDate": "2026-10-05T23:00Z",
-      "market": "П1",
-      "confidence": 77,
-      "modelProb": 0.769,
-      "odds": null,
-      "impliedProb": null,
-      "edge": null,
-      "value": false,
-      "expected": {
-        "home": 125.06,
-        "away": 112.94
-      },
-      "markets": [
-        {
-          "market": "П1",
-          "prob": 77,
-          "odds": null,
-          "edge": null
-        }
-      ],
-      "record": "0-0 / 0-0",
-      "note": "Ожидаемые очки: 125,06 : 112,94 (модель по таблице лиги). Исходы: П1 77% · П2 23%. Модель даёт 77% на «П1».",
-      "tier": "pro"
-    },
-    {
-      "id": "401898716",
-      "lgKey": "basketball/nba",
-      "lgName": "NBA",
-      "sport": "🏀",
-      "type": "us",
-      "home": "Sacramento Kings",
-      "away": "Los Angeles Lakers",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/sac.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/lal.png",
-      "time": "05:00 МСК",
-      "matchDate": "2026-10-06T02:00Z",
-      "market": "П1",
-      "confidence": 70,
-      "modelProb": 0.7,
-      "odds": null,
-      "impliedProb": null,
-      "edge": null,
-      "value": false,
-      "expected": {
-        "home": 122.38,
-        "away": 113.76
-      },
-      "markets": [
-        {
-          "market": "П1",
-          "prob": 70,
-          "odds": null,
-          "edge": null
-        }
-      ],
-      "record": "0-0 / 0-0",
-      "note": "Ожидаемые очки: 122,38 : 113,76 (модель по таблице лиги). Исходы: П1 70% · П2 30%. Модель даёт 70% на «П1».",
-      "tier": "pro"
-    },
     {
       "id": "401914102",
       "lgKey": "basketball/nba",
@@ -113,41 +45,6 @@
       "record": "0-0 / 0-0",
       "note": "Ожидаемые очки: 120,42 : 113,00 (модель по таблице лиги). Исходы: П1 67% · П2 33%. Модель даёт 67% на «П1».",
       "tier": "free"
-    },
-    {
-      "id": "401892448",
-      "lgKey": "hockey/nhl",
-      "lgName": "NHL",
-      "sport": "🏒",
-      "type": "us",
-      "home": "Dallas Stars",
-      "away": "San Jose Sharks",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/dal.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/sj.png",
-      "time": "03:00 МСК",
-      "matchDate": "2026-10-06T00:00Z",
-      "market": "П1",
-      "confidence": 66,
-      "modelProb": 0.662,
-      "odds": 1.6024096385542168,
-      "impliedProb": 0.6,
-      "edge": 0.105,
-      "value": true,
-      "expected": {
-        "home": 3.85,
-        "away": 2.69
-      },
-      "markets": [
-        {
-          "market": "П1",
-          "prob": 66,
-          "odds": 1.6024096385542168,
-          "edge": 10
-        }
-      ],
-      "record": "0-2-0 / 2-0-0",
-      "note": "Ожидаемые шайбы: 3,85 : 2,69 (модель по таблице лиги). Исходы: П1 66% · П2 32%. Модель даёт 66% на «П1». Линия 1,60 недооценивает исход: перевес модели +10%.",
-      "tier": "pro"
     },
     {
       "id": "401898388",

@@ -8,3 +8,8 @@ server/config.json
 # локальный стейт и кеш wrangler (miniflare) — машинно-специфичный, не коммитим
 .wrangler/
 worker/.wrangler/
+
+# VIP-прогнозы Pro-ИИ: в репозиторий не попадают и на GitHub Pages не раздаются.
+# Генератор пишет их сюда, scripts/publish-pro.mjs заливает в KV воркера,
+# подписчик получает их через /api/pro по initData.
+data/pro-feed.json

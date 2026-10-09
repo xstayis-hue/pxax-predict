@@ -130,7 +130,8 @@
     "edge": null,
     "value": false,
     "score": "123:132",
-    "result": "miss"
+    "result": "miss",
+    "preseason": true
   },
   {
     "date": "2026-10-05",
@@ -147,7 +148,8 @@
     "edge": null,
     "value": false,
     "score": "109:107",
-    "result": "hit"
+    "result": "hit",
+    "preseason": true
   },
   {
     "date": "2026-10-05",
@@ -164,7 +166,8 @@
     "edge": null,
     "value": false,
     "score": "120:97",
-    "result": "hit"
+    "result": "hit",
+    "preseason": true
   },
   {
     "date": "2026-10-06",
@@ -232,7 +235,8 @@
     "edge": null,
     "value": false,
     "score": "103:127",
-    "result": "miss"
+    "result": "miss",
+    "preseason": true
   },
   {
     "date": "2026-10-06",
@@ -249,7 +253,8 @@
     "edge": null,
     "value": false,
     "score": "90:124",
-    "result": "miss"
+    "result": "miss",
+    "preseason": true
   },
   {
     "date": "2026-10-06",
@@ -266,7 +271,8 @@
     "edge": null,
     "value": false,
     "score": "97:116",
-    "result": "miss"
+    "result": "miss",
+    "preseason": true
   },
   {
     "date": "2026-10-07",
@@ -368,7 +374,8 @@
     "edge": 0.469,
     "value": true,
     "score": "123:112",
-    "result": "hit"
+    "result": "hit",
+    "preseason": true
   },
   {
     "date": "2026-10-07",
@@ -436,7 +443,8 @@
     "edge": 0.665,
     "value": true,
     "score": "118:122",
-    "result": "miss"
+    "result": "miss",
+    "preseason": true
   },
   {
     "date": "2026-10-08",
@@ -453,7 +461,8 @@
     "edge": null,
     "value": false,
     "score": "113:124",
-    "result": "miss"
+    "result": "miss",
+    "preseason": true
   },
   {
     "date": "2026-10-08",
@@ -470,7 +479,8 @@
     "edge": null,
     "value": false,
     "score": "128:118",
-    "result": "hit"
+    "result": "hit",
+    "preseason": true
   },
   {
     "date": "2026-10-08",
@@ -487,7 +497,8 @@
     "edge": null,
     "value": false,
     "score": "126:128",
-    "result": "miss"
+    "result": "miss",
+    "preseason": true
   },
   {
     "date": "2026-10-08",
@@ -504,7 +515,8 @@
     "edge": 0.68,
     "value": true,
     "score": "124:117",
-    "result": "hit"
+    "result": "hit",
+    "preseason": true
   },
   {
     "date": "2026-10-08",
@@ -521,7 +533,8 @@
     "edge": null,
     "value": false,
     "score": "123:118",
-    "result": "hit"
+    "result": "hit",
+    "preseason": true
   },
   {
     "date": "2026-10-09",
@@ -542,6 +555,24 @@
   },
   {
     "date": "2026-10-09",
+    "id": "401898395",
+    "kind": "free",
+    "sport": "🏀",
+    "league": "NBA",
+    "home": "Dallas Mavericks",
+    "away": "Houston Rockets",
+    "market": "П1",
+    "confidence": 63,
+    "modelProb": 0.632,
+    "odds": null,
+    "edge": null,
+    "value": false,
+    "score": "117:135",
+    "result": "miss",
+    "preseason": true
+  },
+  {
+    "date": "2026-10-09",
     "id": "401898717",
     "kind": "pro",
     "sport": "🏀",
@@ -555,6 +586,7 @@
     "edge": 0.29,
     "value": true,
     "score": "114:110",
-    "result": "miss"
+    "result": "miss",
+    "preseason": true
   }
 ]

@@ -2,41 +2,11 @@
   "date": "2026-10-03",
   "generated": "2026-10-03T17:53:04.604Z",
   "model": "rules-v1 @ ESPN data",
+  "count": 3,
+  "proCount": 2,
+  "botdLegs": 0,
+  "valueCount": 0,
   "predictions": [
-    {
-      "id": "401892441",
-      "lgKey": "hockey/nhl",
-      "lgName": "NHL",
-      "sport": "🏒",
-      "type": "us",
-      "home": "San Jose Sharks",
-      "away": "Los Angeles Kings",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/sj.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/la.png",
-      "time": "05:00 МСК",
-      "matchDate": "2026-10-04T02:00Z",
-      "market": "П1",
-      "confidence": 69,
-      "note": "Баланс сил: San Jose Sharks 1-0-0 против Los Angeles Kings 0-1-0. Процент побед выше у фаворита, модель учитывает домашнюю площадку: 69%.",
-      "tier": "pro"
-    },
-    {
-      "id": "401892440",
-      "lgKey": "hockey/nhl",
-      "lgName": "NHL",
-      "sport": "🏒",
-      "type": "us",
-      "home": "Vancouver Canucks",
-      "away": "Calgary Flames",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/van.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/cgy.png",
-      "time": "05:00 МСК",
-      "matchDate": "2026-10-04T02:00Z",
-      "market": "П1",
-      "confidence": 62,
-      "note": "Баланс сил: Vancouver Canucks 1-1-0 против Calgary Flames 0-1-0. Процент побед выше у фаворита, модель учитывает домашнюю площадку: 62%.",
-      "tier": "pro"
-    },
     {
       "id": "401892438",
       "lgKey": "hockey/nhl",
@@ -88,6 +58,5 @@
       "note": "Баланс сил: Minnesota Wild 1-0-0 против Boston Bruins 2-0-0. Процент побед выше у фаворита, модель учитывает домашнюю площадку: 51%.",
       "tier": "free"
     }
-  ],
-  "resolved": true
+  ]
 }

@@ -11,9 +11,22 @@ PRO_DAYS = "30"            # срок PRO за одну оплату
 TRIAL_DAYS = "3"           # бесплатный пробный период
 MINIAPP_URL = "https://xstayis-hue.github.io/pxax-predict/"
 
-# Хранилище пользователей: u:<telegram_id> -> { until, trial, payments, charges }.
-# Создать: npx wrangler kv namespace create USERS
-# и вписать сюда возвращённый id вместо REPLACE_WITH_KV_ID.
+# --- хранилище: D1 (основное), KV (запасное) ---
+# Почему D1, а не KV: на free-плане у KV 1000 записей в сутки НА АККАУНТ, и этот
+# лимит выбирает соседний проект (PxAxAi пишет состояние, память и rate-limit:
+# по аналитике Cloudflare вышло 1201 запись за сутки при лимите 1000). Из-за этого
+# оплата падала с «KV put() limit exceeded for the day» — для приёма денег это
+# недопустимо, запись о платеже не должна зависеть от чужого трафика.
+# У D1 лимиты на порядки выше (100 000 строк в сутки), поэтому пользователи и
+# VIP-фид живут здесь. Таблицы с префиксом pxaxbet_, чтобы не пересекаться с
+# таблицами PxAxAi (users, cron_meta, codes) в общей базе.
+[[d1_databases]]
+binding = "DB"
+database_name = "pxaxbyte"
+database_id = "aac92270-c582-4673-ae66-5a3ad74ef78b"
+
+# KV оставлен как запасной путь: если D1-binding когда-нибудь уберут, воркер
+# продолжит работать на KV (медленнее и с оглядкой на лимит записей).
 [[kv_namespaces]]
 binding = "USERS"
 id = "8fe3bbfa99014981a2d57b47360ae847"

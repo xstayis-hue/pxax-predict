@@ -1,6 +1,9 @@
 // Резолвер v2: проверяет прогнозы по реальным результатам ESPN.
 // Проверяет все матчи за последние 3 дня, которые уже должны были сыграть.
-// Источники: data/predictions.json + data/archive/*.json
+// Источники: data/predictions.json (free) + data/archive/*.json + VIP-фид из KV воркера.
+// PRO-прогнозы в публичный репозиторий больше не пишутся, поэтому их резолвер
+// забирает с бэкенда админ-роутом — иначе история PRO терялась бы и проходимость
+// VIP считалась бы по неполным данным.
 // Поддерживает рынки: П1, Х, П2, Х2, ТБ/ТМ (любая линия), Ф1/Ф2 -1.5.
 // Сохраняет модельную вероятность, коэффициент и перевес — для калибровки.
 import { writeFileSync, readFileSync, existsSync, readdirSync } from 'node:fs';
@@ -65,6 +68,27 @@ if (existsSync('data/archive')) {
     if (f.endsWith('.json')) checkFile(`data/archive/${f}`);
   }
 }
+
+// VIP-прогнозы лежат в KV воркера (в репозиторий не попадают). Забираем их
+// админ-ключом за те же 3 дня, что и публичные, — иначе PRO-история не резолвится
+// и статистика VIP считалась бы только по бесплатным прогнозам.
+const workerUrl = (process.env.PXAX_WORKER_URL || '').replace(/\/+$/, '');
+const adminKey = process.env.PXAX_ADMIN_KEY || '';
+if (workerUrl && adminKey) {
+  for (let i = 0; i < 4; i++) {
+    const day = new Date(mskNow - i * 86400e3).toISOString().slice(0, 10);
+    try {
+      const res = await fetchJson(`${workerUrl}/api/admin/pro-feed?key=${encodeURIComponent(adminKey)}&date=${day}`);
+      const feed = res?.feed;
+      if (feed && Array.isArray(feed.predictions) && feed.predictions.length) {
+        sources.push({ file: `kv:pro:${day}`, data: feed });
+      }
+    } catch (e) { console.warn('pro-feed fetch skip', day, String(e).slice(0, 120)); }
+  }
+} else {
+  console.log('resolver: PXAX_WORKER_URL/PXAX_ADMIN_KEY не заданы — PRO-прогнозы из KV не подтянуты');
+}
+
 if (!sources.length) { console.log(`no predictions with matches after ${cutoffDate}`); process.exit(0); }
 
 const results = [];
@@ -84,11 +108,18 @@ for (const src of sources) {
       const comp = j.header?.competitions?.[0];
       if (!comp) continue;
 
+      // Предсезонные матчи помечаем, но из статистики исключаем: модель считает
+      // силу команд по таблицам регулярного сезона, а в preseason играют ротацией.
+      // Такие строки уже успели попасть в историю до фильтра в генераторе — их
+      // нельзя оставлять в проходимости, иначе цифра врёт в обе стороны.
+      const preseason = j.header?.season?.type === 1;
+
       const base = {
         date: matchDate, id: p.id, kind: p.tier === 'pro' ? 'pro' : 'free',
         sport: p.sport, league: p.lgName, home: p.home, away: p.away,
         market: p.market, confidence: p.confidence,
         modelProb: p.modelProb ?? null, odds: p.odds ?? null, edge: p.edge ?? null, value: !!p.value,
+        ...(preseason ? { preseason: true } : {}),
       };
 
       const desc = (comp.status?.type?.description || '').toLowerCase();
@@ -129,7 +160,8 @@ hist = hist.slice(-800);
 writeFileSync(file, JSON.stringify(hist, null, 2));
 
 // --- честная калибровка по накопленной истории (Brier + reliability) ---
-const scored = hist.filter(x => (x.result === 'hit' || x.result === 'miss') && Number.isFinite(x.modelProb));
+// preseason-строки в калибровку не идут: модель там не работает, и Brier бы портился
+const scored = hist.filter(x => !x.preseason && (x.result === 'hit' || x.result === 'miss') && Number.isFinite(x.modelProb));
 let summary = null;
 if (scored.length >= 20) {
   const brier = scored.reduce((a, x) => a + Math.pow(x.modelProb - (x.result === 'hit' ? 1 : 0), 2), 0) / scored.length;

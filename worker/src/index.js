@@ -6,13 +6,17 @@
    Роуты:
      GET  /health                                  — готовность и наличие секретов
      GET  /api/status?uid=&initData=               — статус PRO, цена, история платежей
+     GET  /api/pro?initData=                       — VIP-прогнозы: только подписчику
      POST /api/trial    {initData}                 — активировать бесплатные 3 дня
      POST /api/invoice  {initData}                 — ссылка на счёт Stars для tg.openInvoice
      POST /tg/<secret>                             — вебхук Telegram (счёт, оплата, /start)
+     POST /api/admin/pro-feed?key=                 — залить свежий pro-feed.json (из CI)
+     GET  /api/admin/pro-feed?key=&date=           — забрать фид (резолверу для сверки)
 
    Секреты (wrangler secret put): BOT_TOKEN, WEBHOOK_SECRET, ADMIN_KEY.
    Переменные (wrangler.toml [vars]): STARS_PRICE, PRO_DAYS, TRIAL_DAYS, MINIAPP_URL.
-   Хранилище: KV (USERS) — по ключу u:<telegram_id> лежит запись пользователя. */
+   Хранилище: KV (USERS) — по ключу u:<telegram_id> лежит запись пользователя,
+   по ключу pro:<дата> — VIP-прогнозы дня (в публичный репозиторий не попадают). */
 
 const JSON_HEADERS = { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' };
 
@@ -89,12 +93,103 @@ export async function validateInitData(initData, botToken) {
   }
 }
 
-/* ---------- хранилище ---------- */
-const userKey = (uid) => `u:${uid}`;
-const loadUser = async (env, uid) => (await env.USERS.get(userKey(uid), 'json')) || null;
+/* ---------- хранилище ----------
+   Предпочитаем D1, KV — запасной вариант.
 
-const saveUser = (env, uid, user) =>
-  env.USERS.put(userKey(uid), JSON.stringify(user));
+   Почему так: на free-плане у KV всего 1000 записей в сутки НА АККАУНТ, и этот
+   лимит выбирает соседний проект (AI-компаньон PxAxAi постоянно пишет состояние,
+   память и rate-limit). Факт с продакшена: 1201 запись за сутки при лимите 1000 —
+   и оплата падала с «KV put() limit exceeded for the day». Для приёма денег это
+   недопустимо: запись о платеже не должна зависеть от чужого трафика.
+   У D1 лимиты на порядки выше (100 000 строк в сутки), поэтому платежи живут там.
+   Если D1 не привязана — молча работаем на KV, чтобы воркер оставался совместимым. */
+const TABLE_USERS = 'pxaxbet_users';
+const TABLE_PRO = 'pxaxbet_pro';
+const userKey = (uid) => `u:${uid}`;
+const proKey = (date) => `pro:${date}`;
+// Схему создаём один раз НА КОНКРЕТНУЮ БАЗУ, а не на изолят: в проде база одна,
+// но в тестах каждый прогон поднимает свой D1, и общий флаг ломал бы второй тест.
+const schemaReady = new WeakSet();
+
+async function ensureSchema(env) {
+  if (!env.DB || schemaReady.has(env.DB)) return;
+  // D1 exec() выполняет каждую строку как отдельный стейтмент, поэтому DDL
+  // пишем одной строкой — многострочный CREATE TABLE падает с «incomplete input»
+  await env.DB.exec(`CREATE TABLE IF NOT EXISTS ${TABLE_USERS} (uid TEXT PRIMARY KEY, data TEXT NOT NULL, updated_at TEXT NOT NULL)`);
+  await env.DB.exec(`CREATE TABLE IF NOT EXISTS ${TABLE_PRO} (date TEXT PRIMARY KEY, data TEXT NOT NULL, updated_at TEXT NOT NULL)`);
+  schemaReady.add(env.DB);
+}
+
+export const loadUser = async (env, uid) => {
+  if (env.DB) {
+    await ensureSchema(env);
+    const row = await env.DB.prepare(`SELECT data FROM ${TABLE_USERS} WHERE uid = ?`).bind(String(uid)).first();
+    if (!row || !row.data) return null;
+    try { return JSON.parse(row.data); } catch { return null; }
+  }
+  return (await env.USERS.get(userKey(uid), 'json')) || null;
+};
+
+export const saveUser = async (env, uid, user) => {
+  const payload = JSON.stringify(user);
+  if (env.DB) {
+    await ensureSchema(env);
+    await env.DB.prepare(
+      `INSERT INTO ${TABLE_USERS} (uid, data, updated_at) VALUES (?, ?, ?)
+       ON CONFLICT(uid) DO UPDATE SET data = excluded.data, updated_at = excluded.updated_at`
+    ).bind(String(uid), payload, new Date().toISOString()).run();
+    return;
+  }
+  await env.USERS.put(userKey(uid), payload);
+};
+
+export const getProFeed = async (env, date) => {
+  if (env.DB) {
+    await ensureSchema(env);
+    const row = await env.DB.prepare(`SELECT data FROM ${TABLE_PRO} WHERE date = ?`).bind(date).first();
+    if (!row || !row.data) return null;
+    try { return JSON.parse(row.data); } catch { return null; }
+  }
+  return env.USERS.get(proKey(date), 'json');
+};
+
+export const putProFeed = async (env, date, feed) => {
+  const payload = JSON.stringify(feed);
+  if (env.DB) {
+    await ensureSchema(env);
+    await env.DB.prepare(
+      `INSERT INTO ${TABLE_PRO} (date, data, updated_at) VALUES (?, ?, ?)
+       ON CONFLICT(date) DO UPDATE SET data = excluded.data, updated_at = excluded.updated_at`
+    ).bind(date, payload, new Date().toISOString()).run();
+    return;
+  }
+  await env.USERS.put(proKey(date), payload);
+};
+
+// оставляем только нужные дни: и KV, и таблица не должны расти бесконечно
+const pruneProFeed = async (env, keep) => {
+  if (env.DB) {
+    await ensureSchema(env);
+    const marks = [...keep].map(() => '?').join(',');
+    await env.DB.prepare(`DELETE FROM ${TABLE_PRO} WHERE date NOT IN (${marks})`).bind(...keep).run();
+    return;
+  }
+  const list = await env.USERS.list({ prefix: 'pro:' });
+  for (const k of list.keys) {
+    if (!keep.has(k.name.slice('pro:'.length))) await env.USERS.delete(k.name);
+  }
+};
+
+// список пользователей — для админ-сводки
+const listUserIds = async (env) => {
+  if (env.DB) {
+    await ensureSchema(env);
+    const res = await env.DB.prepare(`SELECT uid FROM ${TABLE_USERS}`).all();
+    return (res.results || []).map(r => r.uid);
+  }
+  const list = await env.USERS.list({ prefix: 'u:', limit: 1000 });
+  return list.keys.map(k => k.name.slice('u:'.length));
+};
 
 const isPro = (user) => !!(user && user.until && new Date(user.until) > new Date());
 
@@ -137,6 +232,61 @@ const parsePayload = (payload) => {
   const m = /^pro_(\d+)_([a-z0-9-]{4,16})$/i.exec(String(payload || ''));
   return m ? { uid: m[1] } : null;
 };
+
+/* ---------- VIP-фид (прогнозы Pro-ИИ) ----------
+   В публичный репозиторий не попадает: генератор пишет его в data/pro-feed.json
+   (в .gitignore), CI заливает сюда админ-роутом, а подписчик забирает через
+   /api/pro. Так VIP-контент не скачивается без подписки. */
+
+async function handlePro(request, env, cfg) {
+  if (!cfg.token) return json({ ok: false, error: 'not_configured' }, 503);
+  const url = new URL(request.url);
+  const initData = url.searchParams.get('initData') || request.headers.get('X-Telegram-Init-Data') || '';
+  const user = await validateInitData(initData, cfg.token);
+  if (!user) return json({ ok: false, error: 'bad_auth' }, 401);
+
+  const stored = await loadUser(env, user.id);
+  if (!isPro(stored)) return json({ ok: false, error: 'no_subscription', pro: false }, 403);
+
+  const today = new Date(Date.now() + 3 * 3600e3).toISOString().slice(0, 10); // день по МСК
+  const feed = await getProFeed(env, today);
+  if (!feed) return json({ ok: true, pro: true, date: today, count: 0, botd: null, predictions: [] });
+  return json({ ok: true, pro: true, ...feed });
+}
+
+async function handleProFeedAdmin(request, env, cfg) {
+  const url = new URL(request.url);
+  if (!cfg.adminKey || url.searchParams.get('key') !== cfg.adminKey) {
+    return json({ error: 'unauthorized' }, 401);
+  }
+  if (request.method === 'GET') {
+    const date = url.searchParams.get('date');
+    if (!date) return json({ error: 'date_required' }, 400);
+    const feed = await getProFeed(env, date);
+    return json({ ok: true, date, feed: feed || null });
+  }
+  // POST — заливка фида генератором (из CI, ключом админа)
+  const body = await request.json().catch(() => null);
+  if (!body || !body.date || !Array.isArray(body.predictions)) {
+    return json({ error: 'bad_feed' }, 400);
+  }
+  // в VIP-фиде не должно быть бесплатных прогнозов: иначе он утечёт целиком
+  const leaked = body.predictions.filter(p => p.tier && p.tier !== 'pro');
+  if (leaked.length) return json({ error: 'feed_contains_free' }, 400);
+
+  await putProFeed(env, body.date, body);
+  // чистим старые дни, чтобы хранилище не росло бесконечно (7 дней истории
+  // достаточно для сверки результатов, дольше резолвер не смотрит)
+  try {
+    const keep = new Set();
+    for (let i = 0; i < 7; i++) {
+      keep.add(new Date(Date.now() + 3 * 3600e3 - i * 86400e3).toISOString().slice(0, 10));
+    }
+    await pruneProFeed(env, keep);
+  } catch (e) { console.warn('pro-feed cleanup:', String(e)); }
+
+  return json({ ok: true, date: body.date, count: body.predictions.length });
+}
 
 /* ---------- пользовательские роуты ---------- */
 async function handleStatus(request, env, cfg) {
@@ -294,12 +444,16 @@ export default {
         bot: Boolean(cfg.token),
         price: cfg.price,
         days: cfg.proDays,
-        storage: Boolean(env.USERS),
+        storage: env.DB ? 'd1' : (env.USERS ? 'kv' : 'none'),
       });
     }
     if (url.pathname === '/api/status' && request.method === 'GET') return handleStatus(request, env, cfg);
+    if (url.pathname === '/api/pro' && request.method === 'GET') return handlePro(request, env, cfg);
     if (url.pathname === '/api/trial' && request.method === 'POST') return handleTrial(request, env, cfg);
     if (url.pathname === '/api/invoice' && request.method === 'POST') return handleInvoice(request, env, cfg);
+    if (url.pathname === '/api/admin/pro-feed' && (request.method === 'GET' || request.method === 'POST')) {
+      return handleProFeedAdmin(request, env, cfg);
+    }
     if (url.pathname.startsWith('/tg/') && request.method === 'POST') {
       return handleWebhook(request, env, cfg, url.pathname.slice('/tg/'.length));
     }
@@ -308,15 +462,15 @@ export default {
       if (!cfg.adminKey || url.searchParams.get('key') !== cfg.adminKey) {
         return json({ error: 'unauthorized' }, 401);
       }
-      const list = await env.USERS.list({ prefix: 'u:', limit: 1000 });
+      const ids = await listUserIds(env);
       let pro = 0, trial = 0;
-      for (const key of list.keys) {
-        const u = await env.USERS.get(key.name, 'json');
+      for (const uid of ids) {
+        const u = await loadUser(env, uid);
         if (!u) continue;
         if (isPro(u)) pro++;
         if (u.trial) trial++;
       }
-      return json({ users: list.keys.length, pro, trialUsed: trial, truncated: list.list_complete === false });
+      return json({ users: ids.length, pro, trialUsed: trial, storage: env.DB ? 'd1' : 'kv' });
     }
     return json({ error: 'not_found' }, 404);
   },

@@ -2,95 +2,16 @@
   "date": "2026-10-07",
   "generated": "2026-10-07T17:23:29.385Z",
   "model": "pxax-v2 @ ESPN standings + odds",
-  "count": 11,
-  "valueCount": 8,
+  "count": 7,
+  "proCount": 4,
+  "botdLegs": 3,
+  "valueCount": 4,
   "thresholds": {
     "freeMin": 55,
     "proMin": 60,
     "value": 0.05
   },
-  "botd": {
-    "legs": [
-      {
-        "id": "401898391",
-        "home": "Memphis Grizzlies",
-        "away": "Orlando Magic",
-        "market": "П1",
-        "odds": 2.14,
-        "confidence": 76,
-        "sport": "🏀",
-        "league": "NBA",
-        "value": true
-      },
-      {
-        "id": "401908620",
-        "home": "Oklahoma City Thunder",
-        "away": "Milwaukee Bucks",
-        "market": "ТБ 218.5",
-        "odds": 1.89,
-        "confidence": 85,
-        "sport": "🏀",
-        "league": "NBA",
-        "value": true
-      },
-      {
-        "id": "401908939",
-        "home": "Chicago Bulls",
-        "away": "Phoenix Suns",
-        "market": "П1",
-        "odds": 2.14,
-        "confidence": 73,
-        "sport": "🏀",
-        "league": "NBA",
-        "value": true
-      }
-    ],
-    "combinedOdds": 8.67,
-    "combinedProb": 0.477,
-    "minConfidence": 73
-  },
   "predictions": [
-    {
-      "id": "401908620",
-      "lgKey": "basketball/nba",
-      "lgName": "NBA",
-      "sport": "🏀",
-      "type": "us",
-      "home": "Oklahoma City Thunder",
-      "away": "Milwaukee Bucks",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/okc.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/mil.png",
-      "time": "03:00 МСК",
-      "matchDate": "2026-10-08T00:00Z",
-      "market": "ТБ 218.5",
-      "confidence": 85,
-      "modelProb": 0.854,
-      "odds": 1.8928571428571428,
-      "impliedProb": 0.504,
-      "edge": 0.694,
-      "value": true,
-      "expected": {
-        "home": 125.9,
-        "away": 110.53
-      },
-      "markets": [
-        {
-          "market": "ТБ 218.5",
-          "prob": 85,
-          "odds": 1.8928571428571428,
-          "edge": 69
-        },
-        {
-          "market": "П1",
-          "prob": 82,
-          "odds": 1.1481481481481481,
-          "edge": -1
-        }
-      ],
-      "record": "0-1 / 0-1",
-      "note": "Ожидаемые очки: 125,90 : 110,53 (модель таблица лиги). Исходы: П1 82% · П2 18%. Модель даёт 85% на «ТБ 218.5». Линия 1,89 недооценивает исход: перевес модели +69%. Дополнительно модель видит «П1» с вероятностью 82%. Травмы: Oklahoma City Thunder — Jaylin Williams, Thomas Sorber, Nikola Topic.",
-      "tier": "pro"
-    },
     {
       "id": "401898393",
       "lgKey": "basketball/nba",
@@ -125,129 +46,6 @@
       "record": "1-0 / 1-0",
       "note": "Ожидаемые очки: 123,53 : 108,74 (модель таблица лиги). Исходы: П1 82% · П2 18%. Модель даёт 82% на «П1». Травмы: Miami Heat — Keshad Johnson (не выйдет), Dru Smith.",
       "tier": "free"
-    },
-    {
-      "id": "401914129",
-      "lgKey": "basketball/nba",
-      "lgName": "NBA",
-      "sport": "🏀",
-      "type": "us",
-      "home": "Portland Trail Blazers",
-      "away": "Golden State Warriors",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/por.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/gs.png",
-      "time": "05:00 МСК",
-      "matchDate": "2026-10-08T02:00Z",
-      "market": "ТБ 216.5",
-      "confidence": 81,
-      "modelProb": 0.812,
-      "odds": 1.9090909090909092,
-      "impliedProb": 0.5,
-      "edge": 0.624,
-      "value": true,
-      "expected": {
-        "home": 118.36,
-        "away": 113.19
-      },
-      "markets": [
-        {
-          "market": "ТБ 216.5",
-          "prob": 81,
-          "odds": 1.9090909090909092,
-          "edge": 62
-        },
-        {
-          "market": "П1",
-          "prob": 62,
-          "odds": 1.1923076923076923,
-          "edge": -23
-        }
-      ],
-      "record": "0-0 / 1-1",
-      "note": "Ожидаемые очки: 118,36 : 113,19 (модель таблица лиги). Исходы: П1 62% · П2 38%. Модель даёт 81% на «ТБ 216.5». Линия 1,91 недооценивает исход: перевес модели +62%. Дополнительно модель видит «П1» с вероятностью 62%. Травмы: Portland Trail Blazers — Shaedon Sharpe (не выйдет); Golden State Warriors — Gui Santos, Brandin Podziemski, Gary Payton II.",
-      "tier": "pro"
-    },
-    {
-      "id": "401898391",
-      "lgKey": "basketball/nba",
-      "lgName": "NBA",
-      "sport": "🏀",
-      "type": "us",
-      "home": "Memphis Grizzlies",
-      "away": "Orlando Magic",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/mem.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/orl.png",
-      "time": "03:00 МСК",
-      "matchDate": "2026-10-08T00:00Z",
-      "market": "П1",
-      "confidence": 76,
-      "modelProb": 0.762,
-      "odds": 2.1399999999999997,
-      "impliedProb": 0.449,
-      "edge": 0.698,
-      "value": true,
-      "expected": {
-        "home": 121.67,
-        "away": 109.96
-      },
-      "markets": [
-        {
-          "market": "П1",
-          "prob": 76,
-          "odds": 2.1399999999999997,
-          "edge": 70
-        },
-        {
-          "market": "ТМ 234.5",
-          "prob": 57,
-          "odds": 1.925925925925926,
-          "edge": 14
-        }
-      ],
-      "record": "1-0 / 0-0",
-      "note": "Ожидаемые очки: 121,67 : 109,96 (модель таблица лиги). Исходы: П1 76% · П2 24%. Модель даёт 76% на «П1». Линия 2,14 недооценивает исход: перевес модели +70%. Дополнительно модель видит «ТМ 234.5» с вероятностью 57%. Травмы: Memphis Grizzlies — Micah Peavy, Isaiah Stewart, Zach Edey; Orlando Magic — Jalen Suggs, Jonathan Isaac, Noah Penda.",
-      "tier": "pro"
-    },
-    {
-      "id": "401908939",
-      "lgKey": "basketball/nba",
-      "lgName": "NBA",
-      "sport": "🏀",
-      "type": "us",
-      "home": "Chicago Bulls",
-      "away": "Phoenix Suns",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/chi.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/phx.png",
-      "time": "03:00 МСК",
-      "matchDate": "2026-10-08T00:00Z",
-      "market": "П1",
-      "confidence": 73,
-      "modelProb": 0.733,
-      "odds": 2.1399999999999997,
-      "impliedProb": 0.449,
-      "edge": 0.635,
-      "value": true,
-      "expected": {
-        "home": 126.54,
-        "away": 116.27
-      },
-      "markets": [
-        {
-          "market": "ТБ 229.5",
-          "prob": 78,
-          "odds": 1.9090909090909092,
-          "edge": 57
-        },
-        {
-          "market": "П1",
-          "prob": 73,
-          "odds": 2.1399999999999997,
-          "edge": 63
-        }
-      ],
-      "record": "0-0 / 0-1",
-      "note": "Ожидаемые очки: 126,54 : 116,27 (модель таблица лиги). Исходы: П1 73% · П2 27%. Модель даёт 73% на «П1». Линия 2,14 недооценивает исход: перевес модели +63%. Дополнительно модель видит «ТБ 229.5» с вероятностью 78%. Травмы: Chicago Bulls — Zach Collins, Nic Claxton; Phoenix Suns — Mark Williams (не выйдет).",
-      "tier": "pro"
     },
     {
       "id": "401898392",

@@ -320,7 +320,20 @@ function edgeOf(modelProb, fairProb) {
   return modelProb / fairProb - 1;
 }
 
+// ESPN помечает предсезонку по-разному: у US-лиг это season.type === 1 и slug
+// «preseason» (NBA в октябре), у футбола в type лежит id сезона (14308 и т.п.),
+// поэтому проверяем и slug, и type. Предсезонные матчи модель считать не должна:
+// команды играют ротацией, а сила атаки/обороны берётся из таблиц регулярного
+// сезона — отсюда были «перевесы» в +66% на тоталах NBA.
+function isPreseason(e) {
+  const s = e.season;
+  if (!s) return false;
+  if (s.slug && /preseason|pre-season/i.test(s.slug)) return true;
+  return s.type === 1;
+}
+
 const preds = [];
+let skippedPreseason = 0;
 for (const lg of LEAGUES) {
   try {
     let events;
@@ -347,6 +360,7 @@ for (const lg of LEAGUES) {
       const home = comp?.competitors?.find(c => c.homeAway === 'home');
       const away = comp?.competitors?.find(c => c.homeAway === 'away');
       if (!home || !away || e.status?.type?.state !== 'pre') continue;
+      if (isPreseason(e)) { skippedPreseason++; continue; }
 
       // вид спорта: soccer | hockey | basketball
       const kind = lg.key.split('/')[0];
@@ -572,14 +586,37 @@ function pickBetOfTheDay(pool) {
 const botd = pickBetOfTheDay(final);
 
 mkdirSync('data', { recursive: true });
+// Публичный файл: только бесплатные прогнозы. PRO-ставки, их коэффициенты и
+// «ставка дня» лежат в data/pro-feed.json — этот файл в .gitignore, в репозиторий
+// он не попадает и на GitHub Pages не раздаётся. Его загружает в KV воркер оплаты
+// (scripts/publish-pro.mjs), а оттуда его получает подписчик по initData.
+// Раньше всё лежало в одном публичном файле вместе с tier, и весь VIP-контент
+// скачивался curl-ом без подписки.
+const free = final.filter(p => p.tier === 'free');
+const pro = final.filter(p => p.tier === 'pro');
+// в публичном файле поле tier не пишем вовсе: там только free, а само поле
+// подсказывало бы, что бывают и другие уровни
+const stripTier = (p) => { const { tier, ...rest } = p; return rest; };
 writeFileSync('data/predictions.json', JSON.stringify({
   date: dateStr,
   generated: new Date().toISOString(),
   model: 'pxax-v2 @ ESPN standings + odds',
-  count: final.length,
-  valueCount: final.filter(p => p.value).length,
+  count: free.length,
+  proCount: pro.length,          // только число: сколько сигналов Pro-ИИ сегодня
+  botdLegs: botd ? botd.legs.length : 0, // тоже только число — для пейвол-тизера
+  valueCount: free.filter(p => p.value).length,
   thresholds: { freeMin: FREE_MIN, proMin: PRO_MIN, value: 0.05 },
-  botd,
-  predictions: final,
+  predictions: free.map(stripTier),
 }, null, 2));
-console.log(`OK: ${final.length} predictions (pro=${final.filter(p => p.tier === 'pro').length}, free=${final.filter(p => p.tier === 'free').length}, value=${final.filter(p => p.value).length}${botd ? `, bet-of-the-day: ${botd.legs.length} legs @ ${botd.combinedOdds}` : ''}) for ${dateStr} [free>=${FREE_MIN}%, pro>=${PRO_MIN}%]`);
+
+writeFileSync('data/pro-feed.json', JSON.stringify({
+  date: dateStr,
+  generated: new Date().toISOString(),
+  count: pro.length,
+  botd,
+  predictions: pro,
+}, null, 2));
+
+console.log(`OK: ${final.length} predictions (pro=${pro.length}, free=${free.length}, value=${final.filter(p => p.value).length}${botd ? `, bet-of-the-day: ${botd.legs.length} legs @ ${botd.combinedOdds}` : ''}) for ${dateStr} [free>=${FREE_MIN}%, pro>=${PRO_MIN}%]`
+  + `; публично free=${free.length}, PRO уходит в data/pro-feed.json`);
+if (skippedPreseason) console.log(`preseason skipped: ${skippedPreseason} матчей (модель считает только регулярный сезон)`);

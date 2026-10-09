@@ -2,14 +2,15 @@
   "date": "2026-10-08",
   "generated": "2026-10-08T19:49:45.808Z",
   "model": "pxax-v2 @ ESPN standings + odds",
-  "count": 25,
-  "valueCount": 17,
+  "count": 20,
+  "proCount": 5,
+  "botdLegs": 0,
+  "valueCount": 12,
   "thresholds": {
     "freeMin": 55,
     "proMin": 60,
     "value": 0.05
   },
-  "botd": null,
   "predictions": [
     {
       "id": "401878772",
@@ -106,141 +107,6 @@
       "tier": "free"
     },
     {
-      "id": "401878775",
-      "lgKey": "soccer/eng.1",
-      "lgName": "EPL",
-      "sport": "⚽",
-      "type": "soccer",
-      "home": "Chelsea",
-      "away": "AFC Bournemouth",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/363.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/349.png",
-      "time": "17:00 МСК",
-      "matchDate": "2026-10-10T14:00Z",
-      "market": "ТБ 2.5",
-      "confidence": 66,
-      "modelProb": 0.655,
-      "odds": 2.25,
-      "impliedProb": 0.422,
-      "edge": 0.551,
-      "value": true,
-      "expected": {
-        "home": 1.8,
-        "away": 1.58
-      },
-      "markets": [
-        {
-          "market": "ТБ 2.5",
-          "prob": 66,
-          "odds": 2.25,
-          "edge": 55
-        },
-        {
-          "market": "Х2",
-          "prob": 57,
-          "odds": 2.1724137931034484,
-          "edge": 29
-        }
-      ],
-      "record": "2-1-2 / 0-3-2",
-      "note": "Ожидаемые голы: 1,80 : 1,58 (модель таблица лиги + xG-форма). Исходы: П1 43% · Х 23% · П2 34%. Модель даёт 66% на «ТБ 2.5». Линия 2,25 недооценивает исход: перевес модели +55%. Дополнительно модель видит «Х2» с вероятностью 57%. xG за последние 5 игр: Chelsea 1,79 за / 2,06 против, AFC Bournemouth 1,62 / 1,40.",
-      "tier": "pro"
-    },
-    {
-      "id": "401885094",
-      "lgKey": "soccer/ger.2",
-      "lgName": "2. Бундеслига",
-      "sport": "⚽",
-      "type": "soccer",
-      "home": "TSV Eintracht Braunschweig",
-      "away": "Holstein Kiel",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/3067.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/7884.png",
-      "time": "19:30 МСК",
-      "matchDate": "2026-10-09T16:30Z",
-      "market": "ТБ 2.5",
-      "confidence": 66,
-      "modelProb": 0.655,
-      "odds": 2.3,
-      "impliedProb": 0.406,
-      "edge": 0.614,
-      "value": true,
-      "expected": {
-        "home": 1.86,
-        "away": 1.51
-      },
-      "markets": [
-        {
-          "market": "ТБ 2.5",
-          "prob": 66,
-          "odds": 2.3,
-          "edge": 61
-        },
-        {
-          "market": "Х2",
-          "prob": 54,
-          "odds": 1.4709677419354839,
-          "edge": -16
-        },
-        {
-          "market": "П1",
-          "prob": 46,
-          "odds": 2.65,
-          "edge": 29
-        }
-      ],
-      "record": "1-1-4 / 0-4-2",
-      "note": "Ожидаемые голы: 1,86 : 1,51 (модель таблица лиги). Исходы: П1 46% · Х 22% · П2 32%. Модель даёт 66% на «ТБ 2.5». Линия 2,30 недооценивает исход: перевес модели +61%. Дополнительно модель видит «Х2» с вероятностью 54%.",
-      "tier": "pro"
-    },
-    {
-      "id": "761845",
-      "lgKey": "soccer/usa.1",
-      "lgName": "MLS",
-      "sport": "⚽",
-      "type": "soccer",
-      "home": "Toronto FC",
-      "away": "CF Montréal",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/7318.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/9720.png",
-      "time": "20:00 МСК",
-      "matchDate": "2026-10-10T17:00Z",
-      "market": "ТБ 2.5",
-      "confidence": 65,
-      "modelProb": 0.646,
-      "odds": 2.3,
-      "impliedProb": 0.411,
-      "edge": 0.571,
-      "value": true,
-      "expected": {
-        "home": 1.85,
-        "away": 1.48
-      },
-      "markets": [
-        {
-          "market": "ТБ 2.5",
-          "prob": 65,
-          "odds": 2.3,
-          "edge": 57
-        },
-        {
-          "market": "Х2",
-          "prob": 54,
-          "odds": 1.7832167832167831,
-          "edge": 4
-        },
-        {
-          "market": "П1",
-          "prob": 46,
-          "odds": 1.9090909090909092,
-          "edge": -4
-        }
-      ],
-      "record": "6-11-10 / 6-6-15",
-      "note": "Ожидаемые голы: 1,85 : 1,48 (модель таблица лиги). Исходы: П1 46% · Х 23% · П2 31%. Модель даёт 65% на «ТБ 2.5». Линия 2,30 недооценивает исход: перевес модели +57%. Дополнительно модель видит «Х2» с вероятностью 54%.",
-      "tier": "pro"
-    },
-    {
       "id": "401875021",
       "lgKey": "soccer/ita.1",
       "lgName": "Серия А",
@@ -321,47 +187,6 @@
       "record": "2-2-7 / 5-1-4",
       "note": "Ожидаемые голы: 1,46 : 1,49 (модель таблица лиги). Исходы: П1 37% · Х 24% · П2 38%. Модель даёт 63% на «Х2». Линия 1,49 примерно совпадает с моделью. Дополнительно модель видит «ТБ 2.5» с вероятностью 57%.",
       "tier": "free"
-    },
-    {
-      "id": "401898717",
-      "lgKey": "basketball/nba",
-      "lgName": "NBA",
-      "sport": "🏀",
-      "type": "us",
-      "home": "Los Angeles Lakers",
-      "away": "Sacramento Kings",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/lal.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/sac.png",
-      "time": "05:30 МСК",
-      "matchDate": "2026-10-09T02:30Z",
-      "market": "ТБ 230.5",
-      "confidence": 63,
-      "modelProb": 0.631,
-      "odds": 1.9523809523809523,
-      "impliedProb": 0.489,
-      "edge": 0.29,
-      "value": true,
-      "expected": {
-        "home": 122.86,
-        "away": 113.32
-      },
-      "markets": [
-        {
-          "market": "П1",
-          "prob": 72,
-          "odds": 1.2272727272727273,
-          "edge": -8
-        },
-        {
-          "market": "ТБ 230.5",
-          "prob": 63,
-          "odds": 1.9523809523809523,
-          "edge": 29
-        }
-      ],
-      "record": "1-1 / 0-1",
-      "note": "Ожидаемые очки: 122,86 : 113,32 (модель таблица лиги). Исходы: П1 72% · П2 28%. Модель даёт 63% на «ТБ 230.5». Линия 1,95 недооценивает исход: перевес модели +29%. Дополнительно модель видит «П1» с вероятностью 72%. Травмы: Los Angeles Lakers — Arthur Kaluma, Collin Sexton, Ziaire Williams; Sacramento Kings — Keegan Murray, Malik Monk, Ben Simmons.",
-      "tier": "pro"
     },
     {
       "id": "401898395",
@@ -473,53 +298,6 @@
       "record": "2-0-3 / 0-2-3",
       "note": "Ожидаемые голы: 1,63 : 1,47 (модель таблица лиги + xG-форма). Исходы: П1 42% · Х 24% · П2 35%. Модель даёт 60% на «ТБ 2.5». Линия 1,74 недооценивает исход: перевес модели +10%. Дополнительно модель видит «Х2» с вероятностью 58%. xG за последние 5 игр: Ipswich Town 1,42 за / 2,06 против, Fulham 1,59 / 2,09.",
       "tier": "free"
-    },
-    {
-      "id": "401874754",
-      "lgKey": "soccer/ita.1",
-      "lgName": "Серия А",
-      "sport": "⚽",
-      "type": "soccer",
-      "home": "Napoli",
-      "away": "Frosinone",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/114.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/4057.png",
-      "time": "21:45 МСК",
-      "matchDate": "2026-10-10T18:45Z",
-      "market": "Х2",
-      "confidence": 60,
-      "modelProb": 0.601,
-      "odds": 2.635514018691589,
-      "impliedProb": 0.353,
-      "edge": 0.705,
-      "value": true,
-      "expected": {
-        "home": 1.46,
-        "away": 1.34
-      },
-      "markets": [
-        {
-          "market": "Х2",
-          "prob": 60,
-          "odds": 2.635514018691589,
-          "edge": 70
-        },
-        {
-          "market": "ТБ 2.5",
-          "prob": 53,
-          "odds": 2.2,
-          "edge": 23
-        },
-        {
-          "market": "ТМ 2.5",
-          "prob": 47,
-          "odds": 1.6666666666666665,
-          "edge": -18
-        }
-      ],
-      "record": "2-1-2 / 3-1-1",
-      "note": "Ожидаемые голы: 1,46 : 1,34 (модель таблица лиги + xG-форма). Исходы: П1 40% · Х 25% · П2 35%. Модель даёт 60% на «Х2». Линия 2,64 недооценивает исход: перевес модели +70%. Дополнительно модель видит «ТБ 2.5» с вероятностью 53%. xG за последние 5 игр: Napoli 1,78 за / 1,32 против, Frosinone 1,62 / 2,20.",
-      "tier": "pro"
     },
     {
       "id": "401883310",

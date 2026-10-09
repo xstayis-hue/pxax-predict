@@ -5,6 +5,9 @@ on:
   workflow_dispatch:
 permissions:
   contents: write
+concurrency:
+  group: daily-predictions
+  cancel-in-progress: false
 jobs:
   daily:
     runs-on: ubuntu-latest
@@ -15,7 +18,18 @@ jobs:
           node-version: 24
       - name: Generate predictions
         run: node scripts/generate-predictions.mjs
+      # PRO-прогнозы уходят в KV воркера и в репозиторий не попадают (data/pro-feed.json
+      # в .gitignore): иначе VIP-контент скачивался бы curl-ом без подписки.
+      - name: Publish VIP feed to worker KV
+        env:
+          PXAX_WORKER_URL: ${{ secrets.PXAX_WORKER_URL }}
+          PXAX_ADMIN_KEY: ${{ secrets.PXAX_ADMIN_KEY }}
+        run: node scripts/publish-pro.mjs
       - name: Resolve yesterday results
+        env:
+          # резолверу VIP-фид нужен, чтобы PRO-история не выпадала из статистики
+          PXAX_WORKER_URL: ${{ secrets.PXAX_WORKER_URL }}
+          PXAX_ADMIN_KEY: ${{ secrets.PXAX_ADMIN_KEY }}
         run: node scripts/resolve-results.mjs
       - name: Commit data
         run: |

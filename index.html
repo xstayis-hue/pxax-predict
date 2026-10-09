@@ -1185,9 +1185,9 @@ function haptic(kind) {
 }
 
 /* ================= реальные данные (GitHub Actions -> data/*.json) ================= */
-const REAL = { loaded: false, date: null, free: [], pro: [], results: null, backtest: null, botd: null, lastUpdate: null };
+const REAL = { loaded: false, date: null, free: [], pro: [], results: null, backtest: null, botd: null, lastUpdate: null, proCount: 0, botdLegs: 0 };
 // отпечатки загруженных файлов — чтобы автообновление не перерисовывало UI, когда данные не изменились
-let feedFingerprint = null, resultsFp = null, backtestFp = null;
+let feedFingerprint = null, resultsFp = null, backtestFp = null, proFp = null;
 function resultsFingerprint(j) { return j.map(r => r.id + '|' + r.result).join(';'); }
 async function loadReal() {
   try {
@@ -1199,9 +1199,11 @@ async function loadReal() {
       REAL.lastUpdate = d.generated || new Date().toISOString();
       if (d.date === today && Array.isArray(d.predictions)) {
         REAL.date = d.date;
-        REAL.free = d.predictions.filter(p => p.tier === 'free');
-        REAL.pro = d.predictions.filter(p => p.tier === 'pro');
-        REAL.botd = (d.botd && Array.isArray(d.botd.legs) && d.botd.legs.length >= 2) ? d.botd : null;
+        // публичный файл теперь содержит только бесплатные прогнозы: PRO-контент
+        // лежит в KV воркера и приходит отдельным запросом loadProFeed().
+        REAL.free = d.predictions.filter(p => !p.tier || p.tier === 'free');
+        REAL.proCount = Number(d.proCount) || 0;
+        REAL.botdLegs = Number(d.botdLegs) || 0;
       }
     }
   } catch (e) { console.warn('Failed to load predictions:', e); }
@@ -1223,7 +1225,7 @@ async function loadReal() {
 
 /* ================= settings ================= */
 const CONFIG = {
-  VERSION: '0.8.1', // версия приложения для отслеживания обновлений
+  VERSION: '0.9.0', // версия приложения для отслеживания обновлений
   SUBSCRIBE_URL: 'https://t.me/pxaxbetai_bot',
   /* Адрес бэкенда оплаты. Держим его здесь, потому что мини-апп — один файл без сборки.
      Сейчас это Cloudflare Worker (worker/ в репозитории) — у него постоянный адрес,
@@ -1373,12 +1375,20 @@ function resultOf(p) {
 }
 
 function collectStats(days, onlyKind) {
+  // 'all' — это не вид прогноза, а отсутствие фильтра: раньше строка ниже
+  // сравнивала r.kind с 'all' и отбрасывала всё, поэтому на вкладке
+  // «Статистика» всегда было 0/0/0, хотя данные есть
+  if (onlyKind === 'all') onlyKind = null;
   // реальные результаты (если есть) — приоритет над моком
   if (REAL.results) {
     let hits = 0, miss = 0, total = 0;
     const cutoff = dayKey(new Date(Date.now() - days * 86400000));
     for (const r of REAL.results) {
       if (r.date < cutoff) continue;
+      // preseason-матчи в статистику не берём: модель считает силу команд по
+      // таблицам регулярного сезона, а в предсезонке играют ротацией — такие
+      // результаты искажали проходимость в обе стороны
+      if (r.preseason) continue;
       if (onlyKind && r.kind !== onlyKind) continue;
       total++;
       if (r.result === 'hit') hits++;
@@ -1554,6 +1564,10 @@ if (lastVersion !== CONFIG.VERSION) {
 
 let freeToday = generateDay(today, 'free');
 let proToday = generateDay(today, 'pro');
+// Сколько PRO-прогнозов есть на сервере. Публичный файл отдаёт только число —
+// сам список приходит с /api/pro и лишь подписчику. Без подписки показываем это
+// число в пейволе, чтобы человек видел, что покупает.
+let proTotalToday = proToday.length;
 
 /* ================= учёт реально просмотренных прогнозов ================= */
 function markViewed(deck, i) {
@@ -1763,8 +1777,9 @@ function render() {
   const statsAll = hasReal ? collectStats(CONFIG.STAT_DAYS) : null;
   const statsView = hasReal ? collectStats(CONFIG.STAT_DAYS, statFilter) : null;
   // честная статистика: живая история считается надёжной, когда её >= 20;
-  // меньше — честно пишем «собираем данные» и (если есть) даём бэктест модели
-  const liveN = hasReal ? REAL.results.length : 0;
+  // меньше — честно пишем «собираем данные» и (если есть) даём бэктест модели.
+  // preseason-строки в размер выборки не идут: они не про модель (см. collectStats)
+  const liveN = hasReal ? REAL.results.filter(r => !r.preseason).length : 0;
   const bt = REAL.backtest && REAL.backtest.signals >= 30 && REAL.backtest.hitRate != null ? REAL.backtest : null;
   const rateEl = document.getElementById('statRate');
   const rateLbl = document.querySelector('#view-home .stats .stat .l');
@@ -1788,7 +1803,7 @@ function render() {
   const cEl = document.getElementById('collectChip');
   if (cEl) cEl.hidden = true;
   document.getElementById('statFree').textContent = freeToday.length;
-  document.getElementById('statProCnt').textContent = proToday.length;
+  document.getElementById('statProCnt').textContent = proTotalToday;
   document.getElementById('hHits').textContent = hasReal ? statsView.hits : '—';
   document.getElementById('hMiss').textContent = hasReal ? statsView.miss : '—';
   document.getElementById('hRate').textContent = hasReal ? statsView.rate + '%' : '—';
@@ -1797,8 +1812,8 @@ function render() {
   document.getElementById('pMiss').textContent = hasReal ? statsAll.miss : '—';
   document.getElementById('pRate').textContent = hasReal ? statsAll.rate + '%' : '—';
   // динамические счётчики вместо захардкоженных
-  document.getElementById('payProTitle').innerHTML = `${ic('diamond')} Ещё ${proToday.length} ${plural(proToday.length, 'прогноз', 'прогноза', 'прогнозов')} — у Pro-ИИ`;
-  document.getElementById('proCnt').textContent = `${proToday.length} ${plural(proToday.length, 'прогноз', 'прогноза', 'прогнозов')} в VIP на сегодня`;
+  document.getElementById('payProTitle').innerHTML = `${ic('diamond')} Ещё ${proTotalToday} ${plural(proTotalToday, 'прогноз', 'прогноза', 'прогнозов')} — у Pro-ИИ`;
+  document.getElementById('proCnt').textContent = `${proTotalToday} ${plural(proTotalToday, 'прогноз', 'прогноза', 'прогнозов')} в VIP на сегодня`;
   renderBetOfTheDay();
 
   // колоды (+ честные пустые состояния, если матчей в окне нет)
@@ -1818,12 +1833,17 @@ function render() {
   if (proView.length) {
     pt.innerHTML = proView.map(p => slideHTML(p, pro, true, false)).join('');
     proDeckObj = makeDeck(pt, document.getElementById('proNav'), proView.length, 'pro');
+  } else if (!pro && proTotalToday > 0) {
+    // Подписки нет, но сигналы на сервере есть: показываем замок, а не «матчей нет» —
+    // иначе человек решит, что PRO сегодня пустой, и не станет платить.
+    pt.innerHTML = `<div class="empty" style="margin:0">${ic('lock')} Сегодня ${proTotalToday} ${plural(proTotalToday, 'сигнал Pro-ИИ', 'сигнала Pro-ИИ', 'сигналов Pro-ИИ')} — открываются с подпиской.</div>`;
+    document.getElementById('proNav').innerHTML = '';
   } else {
     pt.innerHTML = `<div class="empty" style="margin:0">${ic('diamond')} Сигналы Pro-ИИ появятся перед ближайшими матчами.</div>`;
     document.getElementById('proNav').innerHTML = '';
   }
-  document.getElementById('paywallCta').style.display = (pro || !proToday.length) ? 'none' : 'block';
-  document.getElementById('proPaywall').style.display = (pro || !proToday.length) ? 'none' : 'block';
+  document.getElementById('paywallCta').style.display = (pro || !proTotalToday) ? 'none' : 'block';
+  document.getElementById('proPaywall').style.display = (pro || !proTotalToday) ? 'none' : 'block';
 
   // статистика прошедших прогнозов
   const hEl = document.getElementById('historyList');
@@ -1846,7 +1866,9 @@ function render() {
   if (REAL.results) {
     const cutoff = dayKey(new Date(Date.now() - 7 * 86400000));
     const rows = REAL.results
-      .filter(r => r.date >= cutoff && kinds.includes(r.kind))
+      // preseason-матчи в списке не показываем: это не работа модели, и они
+      // портили бы впечатление от проходимости (в статистику они тоже не идут)
+      .filter(r => r.date >= cutoff && kinds.includes(r.kind) && !r.preseason)
       .sort((a, b) => b.date.localeCompare(a.date));
     for (const r of rows) {
       const cls = r.result === 'hit' ? 'hit' : r.result === 'miss' ? 'miss' : 'push';
@@ -1886,12 +1908,29 @@ function render() {
 function renderBetOfTheDay() {
   const wrap = document.getElementById('botdWrap');
   if (!wrap) return;
+  const pro = store.pro;
   const botd = REAL.botd;
   const valid = botd && Array.isArray(botd.legs) && botd.legs.length >= 2
     && botd.minConfidence >= 70 && Number.isFinite(Number(botd.combinedOdds));
-  if (!valid) { wrap.hidden = true; return; }
+  if (!valid) {
+    // Без подписки самого экспресса в данных нет (он приходит только с /api/pro).
+    // Показываем тизер по числу ног из публичного файла: сколько ног сегодня есть,
+    // но без матчей, рынков и кэфов — они и есть платный контент.
+    if (!pro && REAL.botdLegs >= 2) {
+      wrap.hidden = false;
+      document.getElementById('botdLegs').innerHTML = Array.from({ length: REAL.botdLegs },
+        () => `<div class="botd-leg"><span class="lock-ph" style="height:14px;flex:1"></span></div>`).join('');
+      document.getElementById('botdOdds').textContent = '—.—';
+      document.getElementById('botdDetail').textContent =
+        `экспресс на ${REAL.botdLegs} · матчи, рынки и кэфы открываются с PRO`;
+      document.getElementById('botdLock').style.display = 'flex';
+      document.getElementById('botdLink').style.visibility = 'hidden';
+      return;
+    }
+    wrap.hidden = true;
+    return;
+  }
   wrap.hidden = false;
-  const pro = store.pro;
   // Экспресс дня тоже под пейволом: без PRO матчи, рынки и кэфы в DOM не рендерим,
   // иначе ноги экспресса лежали в разметке под blur-оверлеем и читались в кадре до его отрисовки.
   const legOdds = document.getElementById('botdOdds');
@@ -2169,6 +2208,36 @@ function syncPlanLabels() {
   document.querySelectorAll('.trial-days').forEach(el => { el.textContent = TRIAL_DAYS; });
 }
 function syncPriceLabels() { syncPlanLabels(); }
+/* VIP-прогнозы приходят с бэкенда и только подписчику: в публичном
+   data/predictions.json их нет, поэтому curl-ом без оплаты их не достать.
+   Возвращает true, если состав фида изменился (для автообновления). */
+async function loadProFeed() {
+  REAL.pro = []; REAL.botd = null;
+  if (!isTg || !user || !apiReady() || !store.pro) {
+    proToday = [];
+    proFp = null;
+    return false;
+  }
+  try {
+    const r = await fetch(CONFIG.API_BASE + '/api/pro?initData=' + encodeURIComponent(tg.initData || ''), { cache: 'no-store' });
+    if (!r.ok) { console.warn('Pro feed returned', r.status); proToday = []; return false; }
+    const j = await r.json();
+    if (!j.ok) { proToday = []; return false; }
+    const list = Array.isArray(j.predictions) ? j.predictions : [];
+    const fp = (j.date || '') + ':' + (j.generated || '') + ':' + list.length;
+    const changed = fp !== proFp;
+    proFp = fp;
+    REAL.pro = list;
+    REAL.botd = (j.botd && Array.isArray(j.botd.legs) && j.botd.legs.length >= 2) ? j.botd : null;
+    proToday = list.slice(0, 5).map(p => ({ ...p, kind: 'pro', league: p.lgName }));
+    if (list.length) proTotalToday = list.length;
+    return changed;
+  } catch (e) {
+    console.warn('Failed to load pro feed:', e);
+    proToday = [];
+    return false;
+  }
+}
 async function loadServerPro() {
   if (!isTg || !user || !apiReady()) return false;
   try {
@@ -2441,14 +2510,17 @@ async function autoRefresh() {
         if (d.date === today && Array.isArray(d.predictions)) {
           REAL.loaded = true;
           REAL.date = d.date;
-          REAL.free = d.predictions.filter(p => p.tier === 'free');
-          REAL.pro = d.predictions.filter(p => p.tier === 'pro');
-          REAL.botd = (d.botd && Array.isArray(d.botd.legs) && d.botd.legs.length >= 2) ? d.botd : null;
+          REAL.free = d.predictions.filter(p => !p.tier || p.tier === 'free');
+          REAL.proCount = Number(d.proCount) || 0;
+          REAL.botdLegs = Number(d.botdLegs) || 0;
           freeToday = REAL.free.slice(0, 5).map(p => ({ ...p, kind: 'free', league: p.lgName }));
-          proToday = REAL.pro.slice(0, 5).map(p => ({ ...p, kind: 'pro', league: p.lgName }));
+          proTotalToday = REAL.proCount || proTotalToday;
         }
       }
     }
+    // VIP-фид обновляется вместе с витриной: если генератор пересчитал PRO-ставки,
+    // подписчик должен увидеть новые, не перезапуская приложение
+    if (await loadProFeed()) changed = true;
     try {
       const rr = await fetch('data/results.json?v=' + Date.now(), { cache: 'no-store' });
       if (rr.ok) {
@@ -2522,8 +2594,9 @@ function showOnboarding() {
   // мок остаётся только для локального превью без хостинга (fetch не сработал)
   if (REAL.loaded && REAL.date === today) {
     freeToday = REAL.free.slice(0, 5).map(p => ({ ...p, kind: 'free', league: p.lgName }));
-    proToday = REAL.pro.slice(0, 5).map(p => ({ ...p, kind: 'pro', league: p.lgName }));
   }
+  // PRO приходит отдельно и только подписчику
+  await loadProFeed();
   render();
   if (serverPro) toast('PRO активна — спасибо за поддержку!');
   setTimeout(showOnboarding, 600);

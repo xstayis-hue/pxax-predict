@@ -1,166 +1,17 @@
 {
   "date": "2026-10-09",
-  "generated": "2026-10-09T08:52:59.753Z",
+  "generated": "2026-10-09T16:46:12.903Z",
   "model": "pxax-v2 @ ESPN standings + odds",
-  "count": 31,
-  "valueCount": 22,
+  "count": 16,
+  "proCount": 5,
+  "botdLegs": 0,
+  "valueCount": 12,
   "thresholds": {
     "freeMin": 55,
     "proMin": 60,
     "value": 0.05
   },
-  "botd": {
-    "legs": [
-      {
-        "id": "761850",
-        "home": "Atlanta United FC",
-        "away": "FC Cincinnati",
-        "market": "ТБ 2.5",
-        "odds": 2,
-        "confidence": 70,
-        "sport": "⚽",
-        "league": "MLS",
-        "value": true
-      },
-      {
-        "id": "401898398",
-        "home": "Boston Celtics",
-        "away": "Philadelphia 76ers",
-        "market": "П1",
-        "odds": 1.16,
-        "confidence": 86,
-        "sport": "🏀",
-        "league": "NBA",
-        "value": false
-      },
-      {
-        "id": "401898396",
-        "home": "Indiana Pacers",
-        "away": "Atlanta Hawks",
-        "market": "П1",
-        "odds": 1.32,
-        "confidence": 76,
-        "sport": "🏀",
-        "league": "NBA",
-        "value": false
-      }
-    ],
-    "combinedOdds": 3.06,
-    "combinedProb": 0.459,
-    "minConfidence": 70
-  },
   "predictions": [
-    {
-      "id": "401898398",
-      "lgKey": "basketball/nba",
-      "lgName": "NBA",
-      "sport": "🏀",
-      "type": "us",
-      "home": "Boston Celtics",
-      "away": "Philadelphia 76ers",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/bos.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/phi.png",
-      "time": "03:00 МСК",
-      "matchDate": "2026-10-11T00:00Z",
-      "market": "П1",
-      "confidence": 86,
-      "modelProb": 0.863,
-      "odds": null,
-      "impliedProb": null,
-      "edge": null,
-      "value": false,
-      "expected": {
-        "home": 125.06,
-        "away": 107.01
-      },
-      "markets": [
-        {
-          "market": "П1",
-          "prob": 86,
-          "odds": null,
-          "edge": null
-        }
-      ],
-      "record": "1-0 / 1-1",
-      "note": "Ожидаемые очки: 125,06 : 107,01 (модель таблица лиги). Исходы: П1 86% · П2 14%. Модель даёт 86% на «П1». Травмы: Boston Celtics — Sam Hauser, Ron Harper Jr., Payton Pritchard; Philadelphia 76ers — Dominick Barlow, Anfernee Simons, Adem Bona.",
-      "tier": "free"
-    },
-    {
-      "id": "401898396",
-      "lgKey": "basketball/nba",
-      "lgName": "NBA",
-      "sport": "🏀",
-      "type": "us",
-      "home": "Indiana Pacers",
-      "away": "Atlanta Hawks",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/ind.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/atl.png",
-      "time": "02:00 МСК",
-      "matchDate": "2026-10-10T23:00Z",
-      "market": "П1",
-      "confidence": 76,
-      "modelProb": 0.757,
-      "odds": null,
-      "impliedProb": null,
-      "edge": null,
-      "value": false,
-      "expected": {
-        "home": 127.99,
-        "away": 116.5
-      },
-      "markets": [
-        {
-          "market": "П1",
-          "prob": 76,
-          "odds": null,
-          "edge": null
-        }
-      ],
-      "record": "1-0 / 1-1",
-      "note": "Ожидаемые очки: 127,99 : 116,50 (модель таблица лиги). Исходы: П1 76% · П2 24%. Модель даёт 76% на «П1». Травмы: Indiana Pacers — Larry Nance Jr., T.J. McConnell, Johnny Furphy (не выйдет); Atlanta Hawks — Keshon Gilbert, Luguentz Dort, Jalen Johnson.",
-      "tier": "free"
-    },
-    {
-      "id": "761850",
-      "lgKey": "soccer/usa.1",
-      "lgName": "MLS",
-      "sport": "⚽",
-      "type": "soccer",
-      "home": "Atlanta United FC",
-      "away": "FC Cincinnati",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/18418.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/18267.png",
-      "time": "02:30 МСК",
-      "matchDate": "2026-10-10T23:30Z",
-      "market": "ТБ 2.5",
-      "confidence": 70,
-      "modelProb": 0.703,
-      "odds": 2,
-      "impliedProb": 0.474,
-      "edge": 0.484,
-      "value": true,
-      "expected": {
-        "home": 1.87,
-        "away": 1.76
-      },
-      "markets": [
-        {
-          "market": "ТБ 2.5",
-          "prob": 70,
-          "odds": 2,
-          "edge": 48
-        },
-        {
-          "market": "Х2",
-          "prob": 59,
-          "odds": 1.5178571428571426,
-          "edge": -4
-        }
-      ],
-      "record": "7-6-14 / 8-9-9",
-      "note": "Ожидаемые голы: 1,87 : 1,76 (модель таблица лиги). Исходы: П1 41% · Х 22% · П2 37%. Модель даёт 70% на «ТБ 2.5». Линия 2,00 недооценивает исход: перевес модели +48%. Дополнительно модель видит «Х2» с вероятностью 59%.",
-      "tier": "free"
-    },
     {
       "id": "401878772",
       "lgKey": "soccer/eng.1",
@@ -176,9 +27,9 @@
       "market": "ТБ 2.5",
       "confidence": 69,
       "modelProb": 0.689,
-      "odds": 1.7692307692307692,
-      "impliedProb": 0.537,
-      "edge": 0.283,
+      "odds": 1.8,
+      "impliedProb": 0.526,
+      "edge": 0.308,
       "value": true,
       "expected": {
         "home": 1.49,
@@ -188,277 +39,24 @@
         {
           "market": "Х2",
           "prob": 72,
-          "odds": 1.4139830508474576,
-          "edge": 7
+          "odds": 1.3879310344827587,
+          "edge": 6
         },
         {
           "market": "ТБ 2.5",
           "prob": 69,
-          "odds": 1.7692307692307692,
-          "edge": 28
+          "odds": 1.8,
+          "edge": 31
         },
         {
           "market": "П2",
           "prob": 51,
-          "odds": 2.35,
-          "edge": 25
+          "odds": 2.3,
+          "edge": 24
         }
       ],
       "record": "1-1-3 / 3-1-1",
-      "note": "Ожидаемые голы: 1,49 : 2,07 (модель таблица лиги + xG-форма). Исходы: П1 28% · Х 21% · П2 51%. Модель даёт 69% на «ТБ 2.5». Линия 1,77 недооценивает исход: перевес модели +28%. Дополнительно модель видит «Х2» с вероятностью 72%. xG за последние 5 игр: Sunderland 2,01 за / 1,77 против, Brighton & Hove Albion 2,58 / 1,73.",
-      "tier": "free"
-    },
-    {
-      "id": "401908940",
-      "lgKey": "basketball/nba",
-      "lgName": "NBA",
-      "sport": "🏀",
-      "type": "us",
-      "home": "Chicago Bulls",
-      "away": "Memphis Grizzlies",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/chi.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/mem.png",
-      "time": "03:00 МСК",
-      "matchDate": "2026-10-10T00:00Z",
-      "market": "ТБ 239.5",
-      "confidence": 69,
-      "modelProb": 0.688,
-      "odds": 1.9090909090909092,
-      "impliedProb": 0.5,
-      "edge": 0.377,
-      "value": true,
-      "expected": {
-        "home": 126.69,
-        "away": 121.16
-      },
-      "markets": [
-        {
-          "market": "ТБ 239.5",
-          "prob": 69,
-          "odds": 1.9090909090909092,
-          "edge": 38
-        },
-        {
-          "market": "П1",
-          "prob": 63,
-          "odds": 1.6756756756756757,
-          "edge": 10
-        }
-      ],
-      "record": "1-0 / 1-1",
-      "note": "Ожидаемые очки: 126,69 : 121,16 (модель таблица лиги). Исходы: П1 63% · П2 37%. Модель даёт 69% на «ТБ 239.5». Линия 1,91 недооценивает исход: перевес модели +38%. Дополнительно модель видит «П1» с вероятностью 63%. Травмы: Chicago Bulls — Zach Collins, Jaylin Sellers, Tre Jones; Memphis Grizzlies — Micah Peavy, Isaiah Stewart.",
-      "tier": "free"
-    },
-    {
-      "id": "401878775",
-      "lgKey": "soccer/eng.1",
-      "lgName": "EPL",
-      "sport": "⚽",
-      "type": "soccer",
-      "home": "Chelsea",
-      "away": "AFC Bournemouth",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/363.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/349.png",
-      "time": "17:00 МСК",
-      "matchDate": "2026-10-10T14:00Z",
-      "market": "ТБ 2.5",
-      "confidence": 66,
-      "modelProb": 0.655,
-      "odds": 2.2,
-      "impliedProb": 0.431,
-      "edge": 0.52,
-      "value": true,
-      "expected": {
-        "home": 1.8,
-        "away": 1.58
-      },
-      "markets": [
-        {
-          "market": "ТБ 2.5",
-          "prob": 66,
-          "odds": 2.2,
-          "edge": 52
-        },
-        {
-          "market": "Х2",
-          "prob": 57,
-          "odds": 2.2179775280898877,
-          "edge": 32
-        }
-      ],
-      "record": "2-1-2 / 0-3-2",
-      "note": "Ожидаемые голы: 1,80 : 1,58 (модель таблица лиги + xG-форма). Исходы: П1 43% · Х 23% · П2 34%. Модель даёт 66% на «ТБ 2.5». Линия 2,20 недооценивает исход: перевес модели +52%. Дополнительно модель видит «Х2» с вероятностью 57%. xG за последние 5 игр: Chelsea 1,79 за / 2,06 против, AFC Bournemouth 1,62 / 1,40.",
-      "tier": "pro"
-    },
-    {
-      "id": "401885094",
-      "lgKey": "soccer/ger.2",
-      "lgName": "2. Бундеслига",
-      "sport": "⚽",
-      "type": "soccer",
-      "home": "TSV Eintracht Braunschweig",
-      "away": "Holstein Kiel",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/3067.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/7884.png",
-      "time": "19:30 МСК",
-      "matchDate": "2026-10-09T16:30Z",
-      "market": "ТБ 2.5",
-      "confidence": 66,
-      "modelProb": 0.655,
-      "odds": 2.15,
-      "impliedProb": 0.437,
-      "edge": 0.5,
-      "value": true,
-      "expected": {
-        "home": 1.86,
-        "away": 1.51
-      },
-      "markets": [
-        {
-          "market": "ТБ 2.5",
-          "prob": 66,
-          "odds": 2.15,
-          "edge": 50
-        },
-        {
-          "market": "Х2",
-          "prob": 54,
-          "odds": 1.4709677419354839,
-          "edge": -16
-        },
-        {
-          "market": "П1",
-          "prob": 46,
-          "odds": 2.65,
-          "edge": 29
-        }
-      ],
-      "record": "1-1-4 / 0-4-2",
-      "note": "Ожидаемые голы: 1,86 : 1,51 (модель таблица лиги). Исходы: П1 46% · Х 22% · П2 32%. Модель даёт 66% на «ТБ 2.5». Линия 2,15 недооценивает исход: перевес модели +50%. Дополнительно модель видит «Х2» с вероятностью 54%.",
-      "tier": "pro"
-    },
-    {
-      "id": "761845",
-      "lgKey": "soccer/usa.1",
-      "lgName": "MLS",
-      "sport": "⚽",
-      "type": "soccer",
-      "home": "Toronto FC",
-      "away": "CF Montréal",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/7318.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/9720.png",
-      "time": "20:00 МСК",
-      "matchDate": "2026-10-10T17:00Z",
-      "market": "ТБ 2.5",
-      "confidence": 65,
-      "modelProb": 0.646,
-      "odds": 2.3,
-      "impliedProb": 0.411,
-      "edge": 0.571,
-      "value": true,
-      "expected": {
-        "home": 1.85,
-        "away": 1.48
-      },
-      "markets": [
-        {
-          "market": "ТБ 2.5",
-          "prob": 65,
-          "odds": 2.3,
-          "edge": 57
-        },
-        {
-          "market": "Х2",
-          "prob": 54,
-          "odds": 1.7832167832167831,
-          "edge": 4
-        },
-        {
-          "market": "П1",
-          "prob": 46,
-          "odds": 1.9090909090909092,
-          "edge": -4
-        }
-      ],
-      "record": "6-11-10 / 6-6-15",
-      "note": "Ожидаемые голы: 1,85 : 1,48 (модель таблица лиги). Исходы: П1 46% · Х 23% · П2 31%. Модель даёт 65% на «ТБ 2.5». Линия 2,30 недооценивает исход: перевес модели +57%. Дополнительно модель видит «Х2» с вероятностью 54%.",
-      "tier": "pro"
-    },
-    {
-      "id": "761852",
-      "lgKey": "soccer/usa.1",
-      "lgName": "MLS",
-      "sport": "⚽",
-      "type": "soccer",
-      "home": "Charlotte FC",
-      "away": "FC Dallas",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/21300.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/185.png",
-      "time": "02:30 МСК",
-      "matchDate": "2026-10-10T23:30Z",
-      "market": "ТБ 2.5",
-      "confidence": 65,
-      "modelProb": 0.646,
-      "odds": 2.35,
-      "impliedProb": 0.401,
-      "edge": 0.612,
-      "value": true,
-      "expected": {
-        "home": 1.79,
-        "away": 1.53
-      },
-      "markets": [
-        {
-          "market": "ТБ 2.5",
-          "prob": 65,
-          "odds": 2.35,
-          "edge": 61
-        },
-        {
-          "market": "Х2",
-          "prob": 56,
-          "odds": 1.5609375,
-          "edge": -5
-        }
-      ],
-      "record": "12-7-8 / 13-8-6",
-      "note": "Ожидаемые голы: 1,79 : 1,53 (модель таблица лиги). Исходы: П1 44% · Х 23% · П2 33%. Модель даёт 65% на «ТБ 2.5». Линия 2,35 недооценивает исход: перевес модели +61%. Дополнительно модель видит «Х2» с вероятностью 56%.",
-      "tier": "pro"
-    },
-    {
-      "id": "401898397",
-      "lgKey": "basketball/nba",
-      "lgName": "NBA",
-      "sport": "🏀",
-      "type": "us",
-      "home": "Miami Heat",
-      "away": "Minnesota Timberwolves",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/mia.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/min.png",
-      "time": "03:00 МСК",
-      "matchDate": "2026-10-11T00:00Z",
-      "market": "П1",
-      "confidence": 65,
-      "modelProb": 0.647,
-      "odds": null,
-      "impliedProb": null,
-      "edge": null,
-      "value": false,
-      "expected": {
-        "home": 117.46,
-        "away": 111.25
-      },
-      "markets": [
-        {
-          "market": "П1",
-          "prob": 65,
-          "odds": null,
-          "edge": null
-        }
-      ],
-      "record": "2-0 / 1-1",
-      "note": "Ожидаемые очки: 117,46 : 111,25 (модель таблица лиги). Исходы: П1 65% · П2 35%. Модель даёт 65% на «П1». Травмы: Miami Heat — Kylor Kelley, Pelle Larsson, Keshad Johnson (не выйдет); Minnesota Timberwolves — Donte DiVincenzo (не выйдет).",
-      "tier": "free"
+      "note": "Ожидаемые голы: 1,49 : 2,07 (модель таблица лиги + xG-форма). Исходы: П1 28% · Х 21% · П2 51%. Модель даёт 69% на «ТБ 2.5». Линия 1,80 недооценивает исход: перевес модели +31%. Дополнительно модель видит «Х2» с вероятностью 72%. xG за последние 5 игр: Sunderland 2,01 за / 1,77 против, Brighton & Hove Albion 2,58 / 1,73."
     },
     {
       "id": "401875021",
@@ -476,8 +74,8 @@
       "confidence": 63,
       "modelProb": 0.632,
       "odds": 1.8695652173913042,
-      "impliedProb": 0.5,
-      "edge": 0.263,
+      "impliedProb": 0.505,
+      "edge": 0.25,
       "value": true,
       "expected": {
         "home": 2.07,
@@ -488,18 +86,17 @@
           "market": "ТБ 2.5",
           "prob": 63,
           "odds": 1.8695652173913042,
-          "edge": 26
+          "edge": 25
         },
         {
           "market": "П1",
           "prob": 57,
-          "odds": 1.125,
+          "odds": 1.1111111111111112,
           "edge": -31
         }
       ],
       "record": "4-1-0 / 1-1-3",
-      "note": "Ожидаемые голы: 2,07 : 1,19 (модель таблица лиги + xG-форма). Исходы: П1 57% · Х 21% · П2 21%. Модель даёт 63% на «ТБ 2.5». Линия 1,87 недооценивает исход: перевес модели +26%. Дополнительно модель видит «П1» с вероятностью 57%. xG за последние 5 игр: Internazionale 3,11 за / 1,49 против, Parma 0,85 / 1,96.",
-      "tier": "free"
+      "note": "Ожидаемые голы: 2,07 : 1,19 (модель таблица лиги + xG-форма). Исходы: П1 57% · Х 21% · П2 21%. Модель даёт 63% на «ТБ 2.5». Линия 1,87 недооценивает исход: перевес модели +25%. Дополнительно модель видит «П1» с вероятностью 57%. xG за последние 5 игр: Internazionale 3,11 за / 1,49 против, Parma 0,85 / 1,96."
     },
     {
       "id": "401892469",
@@ -516,10 +113,10 @@
       "market": "П1",
       "confidence": 62,
       "modelProb": 0.618,
-      "odds": null,
-      "impliedProb": null,
-      "edge": null,
-      "value": false,
+      "odds": 1.7692307692307692,
+      "impliedProb": 0.543,
+      "edge": 0.139,
+      "value": true,
       "expected": {
         "home": 3.41,
         "away": 2.65
@@ -528,13 +125,12 @@
         {
           "market": "П1",
           "prob": 62,
-          "odds": null,
-          "edge": null
+          "odds": 1.7692307692307692,
+          "edge": 14
         }
       ],
       "record": "3-2-0 / 0-3-2",
-      "note": "Ожидаемые шайбы: 3,41 : 2,65 (модель таблица лиги). Исходы: П1 62% · П2 37%. Модель даёт 62% на «П1». Травмы: Boston Bruins — Charlie McAvoy; Philadelphia Flyers — Rasmus Ristolainen (не выйдет), Nikita Grebenkin, Helge Grans.",
-      "tier": "free"
+      "note": "Ожидаемые шайбы: 3,41 : 2,65 (модель таблица лиги). Исходы: П1 62% · П2 37%. Модель даёт 62% на «П1». Линия 1,77 недооценивает исход: перевес модели +14%. Травмы: Boston Bruins — Charlie McAvoy; Philadelphia Flyers — Rasmus Ristolainen, Nikita Grebenkin, Helge Grans."
     },
     {
       "id": "401879265",
@@ -569,60 +165,12 @@
         {
           "market": "Х2",
           "prob": 58,
-          "odds": 1.4319327731092437,
-          "edge": -12
+          "odds": 1.4669421487603307,
+          "edge": -11
         }
       ],
       "record": "2-0-3 / 0-2-3",
-      "note": "Ожидаемые голы: 1,63 : 1,47 (модель таблица лиги + xG-форма). Исходы: П1 42% · Х 24% · П2 35%. Модель даёт 60% на «ТБ 2.5». Линия 1,74 недооценивает исход: перевес модели +10%. Дополнительно модель видит «Х2» с вероятностью 58%. xG за последние 5 игр: Ipswich Town 1,42 за / 2,06 против, Fulham 1,59 / 2,09.",
-      "tier": "free"
-    },
-    {
-      "id": "401874754",
-      "lgKey": "soccer/ita.1",
-      "lgName": "Серия А",
-      "sport": "⚽",
-      "type": "soccer",
-      "home": "Napoli",
-      "away": "Frosinone",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/114.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/4057.png",
-      "time": "21:45 МСК",
-      "matchDate": "2026-10-10T18:45Z",
-      "market": "Х2",
-      "confidence": 60,
-      "modelProb": 0.601,
-      "odds": 2.635514018691589,
-      "impliedProb": 0.353,
-      "edge": 0.705,
-      "value": true,
-      "expected": {
-        "home": 1.46,
-        "away": 1.34
-      },
-      "markets": [
-        {
-          "market": "Х2",
-          "prob": 60,
-          "odds": 2.635514018691589,
-          "edge": 70
-        },
-        {
-          "market": "ТБ 2.5",
-          "prob": 53,
-          "odds": 2.2,
-          "edge": 23
-        },
-        {
-          "market": "ТМ 2.5",
-          "prob": 47,
-          "odds": 1.6666666666666665,
-          "edge": -18
-        }
-      ],
-      "record": "2-1-2 / 3-1-1",
-      "note": "Ожидаемые голы: 1,46 : 1,34 (модель таблица лиги + xG-форма). Исходы: П1 40% · Х 25% · П2 35%. Модель даёт 60% на «Х2». Линия 2,64 недооценивает исход: перевес модели +70%. Дополнительно модель видит «ТБ 2.5» с вероятностью 53%. xG за последние 5 игр: Napoli 1,78 за / 1,32 против, Frosinone 1,62 / 2,20.",
-      "tier": "pro"
+      "note": "Ожидаемые голы: 1,63 : 1,47 (модель таблица лиги + xG-форма). Исходы: П1 42% · Х 24% · П2 35%. Модель даёт 60% на «ТБ 2.5». Линия 1,74 недооценивает исход: перевес модели +10%. Дополнительно модель видит «Х2» с вероятностью 58%. xG за последние 5 игр: Ipswich Town 1,42 за / 2,06 против, Fulham 1,59 / 2,09."
     },
     {
       "id": "401883310",
@@ -662,166 +210,7 @@
         }
       ],
       "record": "2-2-4 / 2-2-4",
-      "note": "Ожидаемые голы: 1,52 : 1,40 (модель таблица лиги). Исходы: П1 40% · Х 25% · П2 35%. Модель даёт 60% на «Х2». Дополнительно модель видит «ТБ 2.5» с вероятностью 56%.",
-      "tier": "free"
-    },
-    {
-      "id": "401841609",
-      "lgKey": "soccer/arg.1",
-      "lgName": "Аргентина",
-      "sport": "⚽",
-      "type": "soccer",
-      "home": "Gimnasia La Plata",
-      "away": "Atlético Tucumán",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/9.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/9785.png",
-      "time": "00:00 МСК",
-      "matchDate": "2026-10-09T21:00Z",
-      "market": "Х2",
-      "confidence": 60,
-      "modelProb": 0.596,
-      "odds": 1.8635761589403972,
-      "impliedProb": 0.506,
-      "edge": 0.178,
-      "value": true,
-      "expected": {
-        "home": 1.29,
-        "away": 1.13
-      },
-      "markets": [
-        {
-          "market": "Х2",
-          "prob": 60,
-          "odds": 1.8635761589403972,
-          "edge": 18
-        },
-        {
-          "market": "ТМ 2.5",
-          "prob": 56,
-          "odds": 1.5714285714285714,
-          "edge": -5
-        }
-      ],
-      "record": "5-3-3 / 3-4-4",
-      "note": "Ожидаемые голы: 1,29 : 1,13 (модель таблица лиги). Исходы: П1 40% · Х 27% · П2 32%. Модель даёт 60% на «Х2». Линия 1,86 недооценивает исход: перевес модели +18%. Дополнительно модель видит «ТМ 2.5» с вероятностью 56%.",
-      "tier": "free"
-    },
-    {
-      "id": "401876447",
-      "lgKey": "soccer/fra.1",
-      "lgName": "Ligue 1",
-      "sport": "⚽",
-      "type": "soccer",
-      "home": "Lens",
-      "away": "Lyon",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/175.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/167.png",
-      "time": "21:45 МСК",
-      "matchDate": "2026-10-09T18:45Z",
-      "market": "ТБ 2.5",
-      "confidence": 59,
-      "modelProb": 0.588,
-      "odds": 2.25,
-      "impliedProb": 0.419,
-      "edge": 0.402,
-      "value": true,
-      "expected": {
-        "home": 1.39,
-        "away": 1.66
-      },
-      "markets": [
-        {
-          "market": "Х2",
-          "prob": 68,
-          "odds": 1.5775193798449612,
-          "edge": 11
-        },
-        {
-          "market": "ТБ 2.5",
-          "prob": 59,
-          "odds": 2.25,
-          "edge": 40
-        }
-      ],
-      "record": "1-1-3 / 3-2-0",
-      "note": "Ожидаемые голы: 1,39 : 1,66 (модель таблица лиги + xG-форма). Исходы: П1 32% · Х 24% · П2 44%. Модель даёт 59% на «ТБ 2.5». Линия 2,25 недооценивает исход: перевес модели +40%. Дополнительно модель видит «Х2» с вероятностью 68%. xG за последние 5 игр: Lens 2,50 за / 1,66 против, Lyon 1,99 / 1,18.",
-      "tier": "free"
-    },
-    {
-      "id": "401885100",
-      "lgKey": "soccer/ger.2",
-      "lgName": "2. Бундеслига",
-      "sport": "⚽",
-      "type": "soccer",
-      "home": "1. FC Heidenheim 1846",
-      "away": "Kaiserslautern",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/6418.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/130.png",
-      "time": "19:30 МСК",
-      "matchDate": "2026-10-09T16:30Z",
-      "market": "ТБ 2.5",
-      "confidence": 59,
-      "modelProb": 0.586,
-      "odds": 2.2,
-      "impliedProb": 0.425,
-      "edge": 0.38,
-      "value": true,
-      "expected": {
-        "home": 1.61,
-        "away": 1.43
-      },
-      "markets": [
-        {
-          "market": "ТБ 2.5",
-          "prob": 59,
-          "odds": 2.2,
-          "edge": 38
-        },
-        {
-          "market": "Х2",
-          "prob": 58,
-          "odds": 1.8367346938775508,
-          "edge": 13
-        }
-      ],
-      "record": "4-1-1 / 3-2-1",
-      "note": "Ожидаемые голы: 1,61 : 1,43 (модель таблица лиги). Исходы: П1 42% · Х 24% · П2 34%. Модель даёт 59% на «ТБ 2.5». Линия 2,20 недооценивает исход: перевес модели +38%. Дополнительно модель видит «Х2» с вероятностью 58%.",
-      "tier": "free"
-    },
-    {
-      "id": "401902645",
-      "lgKey": "basketball/nba",
-      "lgName": "NBA",
-      "sport": "🏀",
-      "type": "us",
-      "home": "Toronto Raptors",
-      "away": "LA Clippers",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/tor.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/lac.png",
-      "time": "01:30 МСК",
-      "matchDate": "2026-10-10T22:30Z",
-      "market": "П1",
-      "confidence": 59,
-      "modelProb": 0.586,
-      "odds": null,
-      "impliedProb": null,
-      "edge": null,
-      "value": false,
-      "expected": {
-        "home": 116.96,
-        "away": 113.4
-      },
-      "markets": [
-        {
-          "market": "П1",
-          "prob": 59,
-          "odds": null,
-          "edge": null
-        }
-      ],
-      "record": "0-1 / 1-0",
-      "note": "Ожидаемые очки: 116,96 : 113,40 (модель таблица лиги). Исходы: П1 59% · П2 41%. Модель даёт 59% на «П1». Травмы: Toronto Raptors — Trayce Jackson-Davis, Jamison Battle, Allen Graves; LA Clippers — Kobe Sanders, Bradley Beal, Max Strus (не выйдет).",
-      "tier": "free"
+      "note": "Ожидаемые голы: 1,52 : 1,40 (модель таблица лиги). Исходы: П1 40% · Х 25% · П2 35%. Модель даёт 60% на «Х2». Дополнительно модель видит «ТБ 2.5» с вероятностью 56%."
     },
     {
       "id": "401879268",
@@ -856,60 +245,18 @@
         {
           "market": "ТМ 2.5",
           "prob": 52,
-          "odds": 1.9523809523809523,
-          "edge": 8
+          "odds": 2,
+          "edge": 9
         },
         {
           "market": "ТБ 2.5",
           "prob": 48,
           "odds": 1.8333333333333335,
-          "edge": -7
+          "edge": -8
         }
       ],
       "record": "4-0-1 / 2-3-0",
-      "note": "Ожидаемые голы: 1,41 : 1,18 (модель таблица лиги + xG-форма). Исходы: П1 42% · Х 26% · П2 31%. Модель даёт 58% на «Х2». Линия 3,08 недооценивает исход: перевес модели +86%. Дополнительно модель видит «ТМ 2.5» с вероятностью 52%. xG за последние 5 игр: Arsenal 1,88 за / 1,09 против, Leeds United 1,45 / 1,28.",
-      "tier": "free"
-    },
-    {
-      "id": "401841612",
-      "lgKey": "soccer/arg.1",
-      "lgName": "Аргентина",
-      "sport": "⚽",
-      "type": "soccer",
-      "home": "Aldosivi",
-      "away": "Sarmiento (Junín)",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/9739.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/10158.png",
-      "time": "20:30 МСК",
-      "matchDate": "2026-10-09T17:30Z",
-      "market": "ТБ 2.5",
-      "confidence": 57,
-      "modelProb": 0.567,
-      "odds": 2.3,
-      "impliedProb": 0.406,
-      "edge": 0.397,
-      "value": true,
-      "expected": {
-        "home": 1.46,
-        "away": 1.49
-      },
-      "markets": [
-        {
-          "market": "Х2",
-          "prob": 63,
-          "odds": 1.4983333333333335,
-          "edge": 0
-        },
-        {
-          "market": "ТБ 2.5",
-          "prob": 57,
-          "odds": 2.3,
-          "edge": 40
-        }
-      ],
-      "record": "2-2-7 / 5-1-4",
-      "note": "Ожидаемые голы: 1,46 : 1,49 (модель таблица лиги). Исходы: П1 37% · Х 24% · П2 38%. Модель даёт 57% на «ТБ 2.5». Линия 2,30 недооценивает исход: перевес модели +40%. Дополнительно модель видит «Х2» с вероятностью 63%.",
-      "tier": "free"
+      "note": "Ожидаемые голы: 1,41 : 1,18 (модель таблица лиги + xG-форма). Исходы: П1 42% · Х 26% · П2 31%. Модель даёт 58% на «Х2». Линия 3,08 недооценивает исход: перевес модели +86%. Дополнительно модель видит «ТМ 2.5» с вероятностью 52%. xG за последние 5 игр: Arsenal 1,88 за / 1,09 против, Leeds United 1,45 / 1,28."
     },
     {
       "id": "401876953",
@@ -949,8 +296,7 @@
         }
       ],
       "record": "2-4-4 / 6-2-2",
-      "note": "Ожидаемые голы: 1,38 : 1,60 (модель таблица лиги). Исходы: П1 33% · Х 24% · П2 43%. Модель даёт 57% на «ТБ 2.5». Линия 1,69 недооценивает исход: перевес модели +3%. Дополнительно модель видит «Х2» с вероятностью 67%.",
-      "tier": "free"
+      "note": "Ожидаемые голы: 1,38 : 1,60 (модель таблица лиги). Исходы: П1 33% · Х 24% · П2 43%. Модель даёт 57% на «ТБ 2.5». Линия 1,69 недооценивает исход: перевес модели +3%. Дополнительно модель видит «Х2» с вероятностью 67%."
     },
     {
       "id": "401874947",
@@ -990,8 +336,7 @@
         }
       ],
       "record": "0-1-4 / 1-1-3",
-      "note": "Ожидаемые голы: 1,54 : 1,38 (модель таблица лиги + xG-форма). Исходы: П1 41% · Х 25% · П2 34%. Модель даёт 56% на «ТБ 2.5». Линия 2,05 недооценивает исход: перевес модели +21%. Дополнительно модель видит «Х2» с вероятностью 59%. xG за последние 5 игр: Genoa 0,97 за / 1,58 против, Fiorentina 1,53 / 1,93.",
-      "tier": "free"
+      "note": "Ожидаемые голы: 1,54 : 1,38 (модель таблица лиги + xG-форма). Исходы: П1 41% · Х 25% · П2 34%. Модель даёт 56% на «ТБ 2.5». Линия 2,05 недооценивает исход: перевес модели +21%. Дополнительно модель видит «Х2» с вероятностью 59%. xG за последние 5 игр: Genoa 0,97 за / 1,58 против, Fiorentina 1,53 / 1,93."
     },
     {
       "id": "401883184",
@@ -1008,9 +353,9 @@
       "market": "ТБ 2.5",
       "confidence": 56,
       "modelProb": 0.562,
-      "odds": 1.5714285714285714,
-      "impliedProb": 0.589,
-      "edge": -0.046,
+      "odds": 1.5882352941176472,
+      "impliedProb": 0.592,
+      "edge": -0.05,
       "value": false,
       "expected": {
         "home": 1.61,
@@ -1020,19 +365,18 @@
         {
           "market": "ТБ 2.5",
           "prob": 56,
-          "odds": 1.5714285714285714,
+          "odds": 1.5882352941176472,
           "edge": -5
         },
         {
           "market": "Х2",
           "prob": 56,
-          "odds": 1.5336,
+          "odds": 1.5590551181102361,
           "edge": -8
         }
       ],
       "record": "2-2-4 / 3-0-5",
-      "note": "Ожидаемые голы: 1,61 : 1,33 (модель таблица лиги). Исходы: П1 44% · Х 24% · П2 32%. Модель даёт 56% на «ТБ 2.5». Линия 1,57 примерно совпадает с моделью. Дополнительно модель видит «Х2» с вероятностью 56%.",
-      "tier": "free"
+      "note": "Ожидаемые голы: 1,61 : 1,33 (модель таблица лиги). Исходы: П1 44% · Х 24% · П2 32%. Модель даёт 56% на «ТБ 2.5». Линия 1,59 примерно совпадает с моделью. Дополнительно модель видит «Х2» с вероятностью 56%."
     },
     {
       "id": "401841259",
@@ -1049,9 +393,9 @@
       "market": "Х2",
       "confidence": 56,
       "modelProb": 0.56,
-      "odds": 2.2044198895027627,
-      "impliedProb": 0.424,
-      "edge": 0.321,
+      "odds": 2.159090909090909,
+      "impliedProb": 0.432,
+      "edge": 0.296,
       "value": true,
       "expected": {
         "home": 1.44,
@@ -1061,25 +405,24 @@
         {
           "market": "Х2",
           "prob": 56,
-          "odds": 2.2044198895027627,
-          "edge": 32
+          "odds": 2.159090909090909,
+          "edge": 30
         },
         {
           "market": "ТМ 2.5",
           "prob": 52,
-          "odds": 1.8,
-          "edge": 2
+          "odds": 1.7692307692307692,
+          "edge": 1
         },
         {
           "market": "ТБ 2.5",
           "prob": 48,
           "odds": 1.9090909090909092,
-          "edge": -2
+          "edge": -1
         }
       ],
       "record": "10-6-13 / 10-6-13",
-      "note": "Ожидаемые голы: 1,44 : 1,14 (модель таблица лиги). Исходы: П1 44% · Х 26% · П2 30%. Модель даёт 56% на «Х2». Линия 2,20 недооценивает исход: перевес модели +32%. Дополнительно модель видит «ТМ 2.5» с вероятностью 52%.",
-      "tier": "free"
+      "note": "Ожидаемые голы: 1,44 : 1,14 (модель таблица лиги). Исходы: П1 44% · Х 26% · П2 30%. Модель даёт 56% на «Х2». Линия 2,16 недооценивает исход: перевес модели +30%. Дополнительно модель видит «ТМ 2.5» с вероятностью 52%."
     },
     {
       "id": "761846",
@@ -1119,8 +462,7 @@
         }
       ],
       "record": "13-6-8 / 8-9-10",
-      "note": "Ожидаемые голы: 1,71 : 1,43 (модель таблица лиги). Исходы: П1 44% · Х 23% · П2 32%. Модель даёт 56% на «Х2». Линия 1,93 недооценивает исход: перевес модели +15%. Дополнительно модель видит «ТБ 2.5» с вероятностью 61%.",
-      "tier": "free"
+      "note": "Ожидаемые голы: 1,71 : 1,43 (модель таблица лиги). Исходы: П1 44% · Х 23% · П2 32%. Модель даёт 56% на «Х2». Линия 1,93 недооценивает исход: перевес модели +15%. Дополнительно модель видит «ТБ 2.5» с вероятностью 61%."
     },
     {
       "id": "761851",
@@ -1166,8 +508,7 @@
         }
       ],
       "record": "14-4-9 / 10-8-9",
-      "note": "Ожидаемые голы: 1,63 : 1,31 (модель таблица лиги). Исходы: П1 45% · Х 24% · П2 31%. Модель даёт 56% на «ТБ 2.5». Линия 2,25 недооценивает исход: перевес модели +34%. Дополнительно модель видит «Х2» с вероятностью 55%.",
-      "tier": "free"
+      "note": "Ожидаемые голы: 1,63 : 1,31 (модель таблица лиги). Исходы: П1 45% · Х 24% · П2 31%. Модель даёт 56% на «ТБ 2.5». Линия 2,25 недооценивает исход: перевес модели +34%. Дополнительно модель видит «Х2» с вероятностью 55%."
     },
     {
       "id": "401892468",
@@ -1201,8 +542,7 @@
         }
       ],
       "record": "3-0-1 / 2-1-0",
-      "note": "Ожидаемые шайбы: 3,32 : 2,96 (модель таблица лиги). Исходы: П1 56% · П2 43%. Модель даёт 56% на «П1». Линия 1,80 недооценивает исход: перевес модели +4%. Травмы: Winnipeg Jets — Josh Morrissey, Connor Hellebuyck, Garrett Brown; Anaheim Ducks — Drew Helleson, Troy Terry, Ian Moore.",
-      "tier": "free"
+      "note": "Ожидаемые шайбы: 3,32 : 2,96 (модель таблица лиги). Исходы: П1 56% · П2 43%. Модель даёт 56% на «П1». Линия 1,80 недооценивает исход: перевес модели +4%. Травмы: Winnipeg Jets — Josh Morrissey (не выйдет), Connor Hellebuyck, Garrett Brown; Anaheim Ducks — Drew Helleson, Troy Terry, Ian Moore."
     },
     {
       "id": "401878773",
@@ -1248,8 +588,7 @@
         }
       ],
       "record": "1-2-2 / 0-2-3",
-      "note": "Ожидаемые голы: 1,77 : 1,12 (модель таблица лиги + xG-форма). Исходы: П1 53% · Х 23% · П2 24%. Модель даёт 55% на «ТБ 2.5». Линия 2,25 недооценивает исход: перевес модели +31%. Дополнительно модель видит «П1» с вероятностью 53%. xG за последние 5 игр: Manchester United 2,12 за / 1,44 против, Tottenham Hotspur 1,16 / 1,84.",
-      "tier": "free"
+      "note": "Ожидаемые голы: 1,77 : 1,12 (модель таблица лиги + xG-форма). Исходы: П1 53% · Х 23% · П2 24%. Модель даёт 55% на «ТБ 2.5». Линия 2,25 недооценивает исход: перевес модели +31%. Дополнительно модель видит «П1» с вероятностью 53%. xG за последние 5 игр: Manchester United 2,12 за / 1,44 против, Tottenham Hotspur 1,16 / 1,84."
     },
     {
       "id": "401841262",
@@ -1278,8 +617,8 @@
         {
           "market": "ТБ 2.5",
           "prob": 55,
-          "odds": 1.5555555555555556,
-          "edge": -8
+          "odds": 1.5714285714285714,
+          "edge": -7
         },
         {
           "market": "Х2",
@@ -1296,13 +635,12 @@
         {
           "market": "ТМ 2.5",
           "prob": 45,
-          "odds": 2.3,
-          "edge": 12
+          "odds": 2.25,
+          "edge": 10
         }
       ],
       "record": "9-7-12 / 5-9-15",
-      "note": "Ожидаемые голы: 1,61 : 1,27 (модель таблица лиги). Исходы: П1 45% · Х 24% · П2 30%. Модель даёт 55% на «Х2». Линия 3,41 недооценивает исход: перевес модели +99%. Дополнительно модель видит «ТБ 2.5» с вероятностью 55%.",
-      "tier": "free"
+      "note": "Ожидаемые голы: 1,61 : 1,27 (модель таблица лиги). Исходы: П1 45% · Х 24% · П2 30%. Модель даёт 55% на «Х2». Линия 3,41 недооценивает исход: перевес модели +99%. Дополнительно модель видит «ТБ 2.5» с вероятностью 55%."
     },
     {
       "id": "401841613",
@@ -1348,8 +686,7 @@
         }
       ],
       "record": "4-1-6 / 6-3-2",
-      "note": "Ожидаемые голы: 1,41 : 1,47 (модель таблица лиги). Исходы: П1 36% · Х 25% · П2 39%. Модель даёт 55% на «ТБ 2.5». Линия 2,10 недооценивает исход: перевес модели +23%. Дополнительно модель видит «Х2» с вероятностью 64%.",
-      "tier": "free"
+      "note": "Ожидаемые голы: 1,41 : 1,47 (модель таблица лиги). Исходы: П1 36% · Х 25% · П2 39%. Модель даёт 55% на «ТБ 2.5». Линия 2,10 недооценивает исход: перевес модели +23%. Дополнительно модель видит «Х2» с вероятностью 64%."
     }
   ]
 }
