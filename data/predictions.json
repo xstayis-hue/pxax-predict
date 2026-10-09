@@ -1,8 +1,8 @@
 {
   "date": "2026-10-09",
-  "generated": "2026-10-09T17:57:57.242Z",
+  "generated": "2026-10-09T18:01:56.754Z",
   "model": "pxax-v2 @ ESPN standings + odds",
-  "count": 16,
+  "count": 15,
   "proCount": 5,
   "botdLegs": 0,
   "valueCount": 12,
@@ -509,40 +509,6 @@
       ],
       "record": "14-4-9 / 10-8-9",
       "note": "Ожидаемые голы: 1,63 : 1,31 (модель таблица лиги). Исходы: П1 45% · Х 24% · П2 31%. Модель даёт 56% на «ТБ 2.5». Линия 2,25 недооценивает исход: перевес модели +34%. Дополнительно модель видит «Х2» с вероятностью 55%."
-    },
-    {
-      "id": "401892468",
-      "lgKey": "hockey/nhl",
-      "lgName": "NHL",
-      "sport": "🏒",
-      "type": "us",
-      "home": "Winnipeg Jets",
-      "away": "Anaheim Ducks",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/wpg.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/ana.png",
-      "time": "03:00 МСК",
-      "matchDate": "2026-10-10T00:00Z",
-      "market": "П1",
-      "confidence": 56,
-      "modelProb": 0.556,
-      "odds": 1.8,
-      "impliedProb": 0.532,
-      "edge": 0.044,
-      "value": false,
-      "expected": {
-        "home": 3.32,
-        "away": 2.96
-      },
-      "markets": [
-        {
-          "market": "П1",
-          "prob": 56,
-          "odds": 1.8,
-          "edge": 4
-        }
-      ],
-      "record": "3-0-1 / 2-1-0",
-      "note": "Ожидаемые шайбы: 3,32 : 2,96 (модель таблица лиги). Исходы: П1 56% · П2 43%. Модель даёт 56% на «П1». Линия 1,80 недооценивает исход: перевес модели +4%. Травмы: Winnipeg Jets — Josh Morrissey (не выйдет), Connor Hellebuyck, Garrett Brown; Anaheim Ducks — Drew Helleson, Troy Terry, Ian Moore."
     },
     {
       "id": "401878773",
