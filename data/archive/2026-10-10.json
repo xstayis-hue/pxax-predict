@@ -1,0 +1,214 @@
+{
+  "date": "2026-10-10",
+  "generated": "2026-10-10T18:27:44.935Z",
+  "model": "pxax-v2 @ ESPN standings + odds",
+  "count": 6,
+  "proCount": 4,
+  "botdLegs": 0,
+  "thresholds": {
+    "freeMin": 55,
+    "proMin": 60
+  },
+  "predictions": [
+    {
+      "id": "761858",
+      "lgKey": "soccer/usa.1",
+      "lgName": "MLS",
+      "sport": "⚽",
+      "type": "soccer",
+      "home": "LAFC",
+      "away": "Vancouver Whitecaps",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/18966.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/9727.png",
+      "time": "05:30 МСК",
+      "matchDate": "2026-10-11T02:30Z",
+      "market": "Х2",
+      "confidence": 62,
+      "modelProb": 0.624,
+      "odds": 1.5173387096774194,
+      "expected": {
+        "home": 1.48,
+        "away": 1.49
+      },
+      "markets": [
+        {
+          "market": "Х2",
+          "prob": 62,
+          "odds": 1.5173387096774194
+        },
+        {
+          "market": "ТБ 2.5",
+          "prob": 57,
+          "odds": 1.5882352941176472
+        }
+      ],
+      "record": "11-8-9 / 15-5-7",
+      "note": "Ожидаемые голы: 1,48 : 1,49 (модель таблица лиги). Исходы: П1 38% · Х 24% · П2 38%. Модель даёт 62% на «Х2». Дополнительно модель видит «ТБ 2.5» с вероятностью 57%."
+    },
+    {
+      "id": "401892481",
+      "lgKey": "hockey/nhl",
+      "lgName": "NHL",
+      "sport": "🏒",
+      "type": "us",
+      "home": "Vegas Golden Knights",
+      "away": "Los Angeles Kings",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/vgk.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/la.png",
+      "time": "05:00 МСК",
+      "matchDate": "2026-10-11T02:00Z",
+      "market": "П1",
+      "confidence": 61,
+      "modelProb": 0.612,
+      "odds": 1.5882352941176472,
+      "expected": {
+        "home": 3.76,
+        "away": 2.96
+      },
+      "markets": [
+        {
+          "market": "П1",
+          "prob": 61,
+          "odds": 1.5882352941176472
+        }
+      ],
+      "record": "4-1-0 / 0-2-1",
+      "note": "Ожидаемые шайбы: 3,76 : 2,96 (модель таблица лиги). Исходы: П1 61% · П2 37%. Модель даёт 61% на «П1». Травмы: Vegas Golden Knights — Victor Olofsson (не выйдет), Lukas Cormier; Los Angeles Kings — Alex Turcotte, Mats Zuccarello, Jakub Dvorak."
+    },
+    {
+      "id": "761856",
+      "lgKey": "soccer/usa.1",
+      "lgName": "MLS",
+      "sport": "⚽",
+      "type": "soccer",
+      "home": "Austin FC",
+      "away": "Nashville SC",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/20906.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/18986.png",
+      "time": "03:30 МСК",
+      "matchDate": "2026-10-11T00:30Z",
+      "market": "ТБ 2.5",
+      "confidence": 59,
+      "modelProb": 0.592,
+      "odds": 1.7142857142857144,
+      "expected": {
+        "home": 1.3,
+        "away": 1.77
+      },
+      "markets": [
+        {
+          "market": "Х2",
+          "prob": 72,
+          "odds": 1.2475247524752475
+        },
+        {
+          "market": "ТБ 2.5",
+          "prob": 59,
+          "odds": 1.7142857142857144
+        },
+        {
+          "market": "П2",
+          "prob": 48,
+          "odds": 1.9090909090909092
+        }
+      ],
+      "record": "7-10-10 / 18-6-3",
+      "note": "Ожидаемые голы: 1,30 : 1,77 (модель таблица лиги). Исходы: П1 28% · Х 23% · П2 48%. Модель даёт 59% на «ТБ 2.5». Дополнительно модель видит «Х2» с вероятностью 72%."
+    },
+    {
+      "id": "401876951",
+      "lgKey": "soccer/mex.1",
+      "lgName": "Лига MX",
+      "sport": "⚽",
+      "type": "soccer",
+      "home": "Atlas",
+      "away": "Guadalajara",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/216.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/219.png",
+      "time": "04:00 МСК",
+      "matchDate": "2026-10-11T01:00Z",
+      "market": "ТБ 2.5",
+      "confidence": 59,
+      "modelProb": 0.588,
+      "odds": 1.7692307692307692,
+      "expected": {
+        "home": 1.49,
+        "away": 1.56
+      },
+      "markets": [
+        {
+          "market": "Х2",
+          "prob": 64,
+          "odds": 1.2995535714285713
+        },
+        {
+          "market": "ТБ 2.5",
+          "prob": 59,
+          "odds": 1.7692307692307692
+        }
+      ],
+      "record": "5-2-3 / 5-3-2",
+      "note": "Ожидаемые голы: 1,49 : 1,56 (модель таблица лиги). Исходы: П1 36% · Х 24% · П2 40%. Модель даёт 59% на «ТБ 2.5». Дополнительно модель видит «Х2» с вероятностью 64%."
+    },
+    {
+      "id": "401892483",
+      "lgKey": "hockey/nhl",
+      "lgName": "NHL",
+      "sport": "🏒",
+      "type": "us",
+      "home": "New York Rangers",
+      "away": "Vancouver Canucks",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/nyr.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/van.png",
+      "time": "01:00 МСК",
+      "matchDate": "2026-10-11T22:00Z",
+      "market": "П1",
+      "confidence": 59,
+      "modelProb": 0.588,
+      "odds": 1.4,
+      "expected": {
+        "home": 3.57,
+        "away": 2.97
+      },
+      "markets": [
+        {
+          "market": "П1",
+          "prob": 59,
+          "odds": 1.4
+        }
+      ],
+      "record": "4-2-0 / 2-3-0",
+      "note": "Ожидаемые шайбы: 3,57 : 2,97 (модель таблица лиги). Исходы: П1 59% · П2 40%. Модель даёт 59% на «П1». Линия 1,40 примерно совпадает с моделью. Травмы: New York Rangers — Joe Veleno, Joonas Korpisalo, Igor Shesterkin (не выйдет); Vancouver Canucks — Jack Thompson, Akil Thomas, Mackenzie MacEachern."
+    },
+    {
+      "id": "401892480",
+      "lgKey": "hockey/nhl",
+      "lgName": "NHL",
+      "sport": "🏒",
+      "type": "us",
+      "home": "Calgary Flames",
+      "away": "Anaheim Ducks",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/cgy.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/ana.png",
+      "time": "05:00 МСК",
+      "matchDate": "2026-10-11T02:00Z",
+      "market": "П2",
+      "confidence": 56,
+      "modelProb": 0.558,
+      "odds": 1.819672131147541,
+      "expected": {
+        "home": 3.01,
+        "away": 3.5
+      },
+      "markets": [
+        {
+          "market": "П2",
+          "prob": 56,
+          "odds": 1.819672131147541
+        }
+      ],
+      "record": "0-4-0 / 3-1-0",
+      "note": "Ожидаемые шайбы: 3,01 : 3,50 (модель таблица лиги). Исходы: П1 43% · П2 56%. Модель даёт 56% на «П2». Травмы: Calgary Flames — Samuel Honzek (не выйдет), Jonathan Huberdeau; Anaheim Ducks — Drew Helleson, Troy Terry, Ian Moore."
+    }
+  ]
+}
