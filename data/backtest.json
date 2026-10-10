@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-09T07:25:33.239Z",
+  "generated": "2026-10-10T07:07:19.078Z",
   "windowDays": 90,
   "leagues": [
     "АПЛ",
@@ -11,11 +11,11 @@
     "Аргентина",
     "MLS"
   ],
-  "matches": 620,
-  "signals": 599,
-  "hits": 361,
-  "hitRate": 0.603,
-  "brier": 0.6473,
+  "matches": 627,
+  "signals": 606,
+  "hits": 367,
+  "hitRate": 0.606,
+  "brier": 0.6482,
   "signalThreshold": 0.55,
   "byLeague": {
     "АПЛ": {
@@ -25,10 +25,10 @@
       "rate": 0.65
     },
     "Ла Лига": {
-      "matches": 57,
-      "signals": 57,
-      "hits": 38,
-      "rate": 0.667
+      "matches": 58,
+      "signals": 58,
+      "hits": 39,
+      "rate": 0.672
     },
     "Серия A": {
       "matches": 40,
@@ -37,16 +37,16 @@
       "rate": 0.641
     },
     "Бундеслига": {
-      "matches": 27,
-      "signals": 27,
-      "hits": 20,
-      "rate": 0.741
+      "matches": 28,
+      "signals": 28,
+      "hits": 21,
+      "rate": 0.75
     },
     "Лига 1": {
-      "matches": 36,
-      "signals": 36,
+      "matches": 37,
+      "signals": 37,
       "hits": 21,
-      "rate": 0.583
+      "rate": 0.568
     },
     "Бразилия · Серия A": {
       "matches": 102,
@@ -55,10 +55,10 @@
       "rate": 0.537
     },
     "Аргентина": {
-      "matches": 149,
-      "signals": 144,
-      "hits": 75,
-      "rate": 0.521
+      "matches": 153,
+      "signals": 148,
+      "hits": 79,
+      "rate": 0.534
     },
     "MLS": {
       "matches": 169,
