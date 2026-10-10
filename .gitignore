@@ -13,3 +13,8 @@ worker/.wrangler/
 # Генератор пишет их сюда, scripts/publish-pro.mjs заливает в KV воркера,
 # подписчик получает их через /api/pro по initData.
 data/pro-feed.json
+
+# локальная тестовая сборка страницы и предпросмотр-сервер (машинно-специфичный
+# путь) — это инструменты разработки, в репозиторий не идут
+index.test.html
+tools/serve-preview.cjs

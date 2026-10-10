@@ -595,6 +595,9 @@
   .verdict { margin:10px 16px 0; padding:10px 12px; border-radius:12px; font-size:12px; line-height:1.5; }
   .verdict.good { background:rgba(0,230,118,.08); border:1px solid rgba(0,230,118,.35); color:#9fe8c4; }
   .verdict.neutral { background:rgba(139,163,199,.07); border:1px solid rgba(139,163,199,.25); color:#9fb3d4; }
+  .pre-note { margin:8px 16px 0; padding:8px 11px; border-radius:10px; font-size:11px; line-height:1.5;
+    background:rgba(139,163,199,.06); border:1px solid rgba(139,163,199,.18); color:#8fa3c0; }
+  .pre-note .ic { width:13px; height:13px; vertical-align:-2px; margin-right:3px; }
 
   /* ---------- profile ---------- */
   .prof-head { display:flex; align-items:center; gap:13px; padding: 14px 16px; }
@@ -1004,7 +1007,8 @@
     <div class="stat"><div class="v" style="color:var(--gold)" id="hRate">—</div><div class="l">проходимость</div></div>
   </div>
 
-  <div class="section-title">Прошедшие прогнозы ИИ · 7 дней</div>
+  <div class="section-title" id="histTitle">Прошедшие прогнозы ИИ</div>
+  <div class="pre-note" id="preNote" hidden></div>
   <div class="filter-row">
     <button class="f-btn on" data-f="all">Все</button>
     <button class="f-btn" data-f="free"><svg class="ic"><use href="#i-cpu"/></svg> Базовый ИИ</button>
@@ -1225,7 +1229,7 @@ async function loadReal() {
 
 /* ================= settings ================= */
 const CONFIG = {
-  VERSION: '0.9.0', // версия приложения для отслеживания обновлений
+  VERSION: '0.9.1', // версия приложения для отслеживания обновлений
   SUBSCRIBE_URL: 'https://t.me/pxaxbetai_bot',
   /* Адрес бэкенда оплаты. Держим его здесь, потому что мини-апп — один файл без сборки.
      Сейчас это Cloudflare Worker (worker/ в репозитории) — у него постоянный адрес,
@@ -1235,7 +1239,10 @@ const CONFIG = {
   API_BASE: 'https://pxaxbet-payments.xstayis.workers.dev',
   FREE_DAILY: 5,   // бесплатных прогнозов в день
   PRO_DAILY: 5,    // прогнозов Pro-ИИ в день
-  STAT_DAYS: 14,
+  STAT_DAYS: 14,   // окно статистики и списка истории (должны совпадать)
+  // Минимум решённых прогнозов у каждого вида, чтобы сравнивать Базовый и VIP.
+  // Меньше — разница объясняется случайностью, и писать «заходят чаще» нельзя.
+  MIN_CMP_N: 20,
   // --- партнёрская программа ---
   PARTNER_URL: 'https://r1wjvzfr.life/?p=gfuv',
   PROMO: 'PXAXBET2026',
@@ -1381,20 +1388,22 @@ function collectStats(days, onlyKind) {
   if (onlyKind === 'all') onlyKind = null;
   // реальные результаты (если есть) — приоритет над моком
   if (REAL.results) {
-    let hits = 0, miss = 0, total = 0;
+    let hits = 0, miss = 0, total = 0, preSkip = 0;
     const cutoff = dayKey(new Date(Date.now() - days * 86400000));
     for (const r of REAL.results) {
       if (r.date < cutoff) continue;
+      if (onlyKind && r.kind !== onlyKind) continue;
       // preseason-матчи в статистику не берём: модель считает силу команд по
       // таблицам регулярного сезона, а в предсезонке играют ротацией — такие
-      // результаты искажали проходимость в обе стороны
-      if (r.preseason) continue;
-      if (onlyKind && r.kind !== onlyKind) continue;
+      // результаты искажали проходимость в обе стороны. Но их число считаем
+      // (preSkip) и показываем отдельной строкой: иначе выходило, что часть
+      // отданных подписчику PRO-прогнозов просто исчезала из статистики.
+      if (r.preseason) { preSkip++; continue; }
       total++;
       if (r.result === 'hit') hits++;
       else if (r.result === 'miss') miss++;
     }
-    return { hits, miss, total, rate: (hits + miss) ? Math.round(hits / (hits + miss) * 100) : 0 };
+    return { hits, miss, total, preSkip, rate: (hits + miss) ? Math.round(hits / (hits + miss) * 100) : 0 };
   }
   let hits = 0, miss = 0, total = 0;
   for (let d = 1; d <= days; d++) {
@@ -1407,7 +1416,7 @@ function collectStats(days, onlyKind) {
       }
     }
   }
-  return { hits, miss, total, rate: (hits + miss) ? Math.round(hits / (hits + miss) * 100) : 0 };
+  return { hits, miss, total, preSkip: 0, rate: (hits + miss) ? Math.round(hits / (hits + miss) * 100) : 0 };
 }
 
 /* ================= user state ================= */
@@ -1864,7 +1873,9 @@ function render() {
     hEl.appendChild(el);
   };
   if (REAL.results) {
-    const cutoff = dayKey(new Date(Date.now() - 7 * 86400000));
+    // окно списка — то же, что у цифр выше (CONFIG.STAT_DAYS), иначе подпись
+    // «7 дней» расходилась бы с верхними счётчиками за 14 дней
+    const cutoff = dayKey(new Date(Date.now() - CONFIG.STAT_DAYS * 86400000));
     const rows = REAL.results
       // preseason-матчи в списке не показываем: это не работа модели, и они
       // портили бы впечатление от проходимости (в статистику они тоже не идут)
@@ -1878,6 +1889,22 @@ function render() {
         cls, label, pro || r.kind === 'free');
     }
   }
+  // сколько preseason-строк отдано и исключено из статистики: показываем честно,
+  // чтобы выпавшие матчи не выглядели подчисткой убыточных прогнозов
+  const preNote = document.getElementById('preNote');
+  if (preNote) {
+    const preInfo = hasReal ? collectStats(CONFIG.STAT_DAYS, statFilter) : null;
+    const nPre = preInfo ? preInfo.preSkip : 0;
+    if (nPre > 0) {
+      preNote.hidden = false;
+      preNote.innerHTML = `${ic('eye')} Ещё ${nPre} ${plural(nPre, 'предсезонный матч', 'предсезонных матча', 'предсезонных матчей')} не ${plural(nPre, 'учтён', 'учтены', 'учтены')} выше: модель считает силу команд по регулярному сезону, а в предсезонке играют ротацией.`;
+    } else {
+      preNote.hidden = true;
+    }
+  }
+  // подпись окна истории берём из CONFIG.STAT_DAYS, а не хардкодом
+  const histTitle = document.getElementById('histTitle');
+  if (histTitle) histTitle.textContent = `Прошедшие прогнозы ИИ · ${CONFIG.STAT_DAYS} дней`;
   if (!dIdx) {
     hEl.innerHTML = `<div class="empty"><span class="i">${ic('chart')}</span>Здесь появится статистика прошедших прогнозов.<br>Первые результаты — как только сыграют первые матчи.</div>`;
   }
@@ -2105,7 +2132,17 @@ function renderProfileExtras(statsAll) {
   document.getElementById('cmpFreeD').textContent = `${sf.hits} из ${sf.hits + sf.miss}`;
   document.getElementById('cmpPro').textContent = sp.rate + '%';
   document.getElementById('cmpProD').textContent = `${sp.hits} из ${sp.hits + sp.miss}`;
+  // Вердикт о преимуществе VIP — только когда у обоих видов набрана достаточная
+  // выборка. На 4 из 5 разница «+9 п.п.» целиком внутри случайного разброса
+  // (95% интервал для 4/5 — примерно 38–96%), и писать «подписка может окупиться»
+  // на таких данных нельзя: это продающее утверждение без основания.
+  const nFree = sf.hits + sf.miss, nPro = sp.hits + sp.miss;
   const diff = sp.rate - sf.rate;
+  if (nFree < CONFIG.MIN_CMP_N || nPro < CONFIG.MIN_CMP_N) {
+    v.className = 'verdict neutral';
+    v.innerHTML = `${ic('eye')} Для сравнения нужно хотя бы ${CONFIG.MIN_CMP_N} решённых прогнозов у каждого вида — сейчас Базовый ${nFree}, VIP ${nPro}. На такой выборке разница ничего не доказывает, поэтому честного вердикта пока нет.`;
+    return;
+  }
   if (diff >= 5) {
     v.className = 'verdict good';
     v.innerHTML = `${ic('diamond')} VIP-прогнозы заходят чаще на <b>${diff} п.п.</b> — подписка может окупиться. Но помни: <b>вероятность не 100%</b>.`;
