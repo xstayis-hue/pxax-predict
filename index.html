@@ -2609,19 +2609,20 @@ function showOnboarding() {
   const close = () => { localStorage.setItem('pxax_onboarded', '1'); ov.remove(); };
   const paint = () => {
     const s = steps[cur];
-    document.getElementById('obIcon').innerHTML = ic(s.i);
-    document.getElementById('obTitle').textContent = s.t;
-    document.getElementById('obTxt').textContent = s.d;
+    // ищем внутри ov: на первом кадре оверлей ещё не в DOM, document.getElementById вернул бы null
+    ov.querySelector('#obIcon').innerHTML = ic(s.i);
+    ov.querySelector('#obTitle').textContent = s.t;
+    ov.querySelector('#obTxt').textContent = s.d;
     ov.querySelectorAll('.ob-dot').forEach((d, j) => d.classList.toggle('on', j === cur));
-    document.getElementById('obNext').textContent = cur === steps.length - 1 ? 'Начать' : 'Дальше';
+    ov.querySelector('#obNext').textContent = cur === steps.length - 1 ? 'Начать' : 'Дальше';
   };
   ov.querySelector('#obNext').onclick = () => {
     haptic();
     if (cur < steps.length - 1) { cur++; paint(); } else close();
   };
   ov.querySelector('#obSkip').onclick = close;
-  paint();
   document.body.appendChild(ov);
+  paint();
 }
 
 (async () => {
