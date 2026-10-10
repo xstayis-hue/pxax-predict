@@ -1,11 +1,11 @@
 {
   "date": "2026-10-10",
-  "generated": "2026-10-10T12:21:48.445Z",
+  "generated": "2026-10-10T18:27:44.935Z",
   "model": "pxax-v2 @ ESPN standings + odds",
-  "count": 14,
-  "proCount": 5,
-  "botdLegs": 2,
-  "valueCount": 11,
+  "count": 6,
+  "proCount": 4,
+  "botdLegs": 0,
+  "valueCount": 3,
   "thresholds": {
     "freeMin": 55,
     "proMin": 60,
@@ -13,302 +13,124 @@
   },
   "predictions": [
     {
-      "id": "401875589",
-      "lgKey": "soccer/ned.1",
-      "lgName": "Эредивизи",
+      "id": "761858",
+      "lgKey": "soccer/usa.1",
+      "lgName": "MLS",
       "sport": "⚽",
       "type": "soccer",
-      "home": "Ajax Amsterdam",
-      "away": "NEC Nijmegen",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/139.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/147.png",
-      "time": "22:00 МСК",
-      "matchDate": "2026-10-10T19:00Z",
-      "market": "ТБ 2.5",
-      "confidence": 73,
-      "modelProb": 0.735,
-      "odds": 1.5882352941176472,
-      "impliedProb": 0.586,
-      "edge": 0.253,
-      "value": true,
-      "expected": {
-        "home": 2.31,
-        "away": 1.52
-      },
-      "markets": [
-        {
-          "market": "ТБ 2.5",
-          "prob": 73,
-          "odds": 1.5882352941176472,
-          "edge": 25
-        },
-        {
-          "market": "П1",
-          "prob": 55,
-          "odds": 1.3333333333333333,
-          "edge": -22
-        }
-      ],
-      "record": "4-2-1 / 2-2-3",
-      "note": "Ожидаемые голы: 2,31 : 1,52 (модель таблица лиги). Исходы: П1 55% · Х 20% · П2 25%. Модель даёт 73% на «ТБ 2.5». Линия 1,59 недооценивает исход: перевес модели +25%. Дополнительно модель видит «П1» с вероятностью 55%."
-    },
-    {
-      "id": "401885097",
-      "lgKey": "soccer/ger.2",
-      "lgName": "2. Бундеслига",
-      "sport": "⚽",
-      "type": "soccer",
-      "home": "1. FC Nürnberg",
-      "away": "VfL Wolfsburg",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/269.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/138.png",
-      "time": "21:30 МСК",
-      "matchDate": "2026-10-10T18:30Z",
-      "market": "ТБ 2.5",
-      "confidence": 67,
-      "modelProb": 0.672,
-      "odds": 1.9090909090909092,
-      "impliedProb": 0.49,
-      "edge": 0.371,
-      "value": true,
-      "expected": {
-        "home": 1.93,
-        "away": 1.53
-      },
-      "markets": [
-        {
-          "market": "ТБ 2.5",
-          "prob": 67,
-          "odds": 1.9090909090909092,
-          "edge": 37
-        },
-        {
-          "market": "Х2",
-          "prob": 53,
-          "odds": 1.533984375,
-          "edge": -14
-        },
-        {
-          "market": "П1",
-          "prob": 47,
-          "odds": 2.45,
-          "edge": 22
-        }
-      ],
-      "record": "5-1-0 / 3-2-1",
-      "note": "Ожидаемые голы: 1,93 : 1,53 (модель таблица лиги). Исходы: П1 47% · Х 22% · П2 31%. Модель даёт 67% на «ТБ 2.5». Линия 1,91 недооценивает исход: перевес модели +37%. Дополнительно модель видит «Х2» с вероятностью 53%."
-    },
-    {
-      "id": "401841611",
-      "lgKey": "soccer/arg.1",
-      "lgName": "Аргентина",
-      "sport": "⚽",
-      "type": "soccer",
-      "home": "Barracas Central",
-      "away": "Huracán",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/10060.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/10.png",
-      "time": "21:45 МСК",
-      "matchDate": "2026-10-10T18:45Z",
-      "market": "ТМ 2.5",
-      "confidence": 66,
-      "modelProb": 0.663,
-      "odds": 2.05,
-      "impliedProb": 0.459,
-      "edge": 0.444,
-      "value": true,
-      "expected": {
-        "home": 1.05,
-        "away": 1
-      },
-      "markets": [
-        {
-          "market": "ТМ 2.5",
-          "prob": 66,
-          "odds": 2.05,
-          "edge": 44
-        },
-        {
-          "market": "Х2",
-          "prob": 64,
-          "odds": 1.375,
-          "edge": -7
-        }
-      ],
-      "record": "4-3-4 / 5-4-2",
-      "note": "Ожидаемые голы: 1,05 : 1,00 (модель таблица лиги). Исходы: П1 36% · Х 30% · П2 34%. Модель даёт 66% на «ТМ 2.5». Линия 2,05 недооценивает исход: перевес модели +44%. Дополнительно модель видит «Х2» с вероятностью 64%."
-    },
-    {
-      "id": "401876950",
-      "lgKey": "soccer/mex.1",
-      "lgName": "Лига MX",
-      "sport": "⚽",
-      "type": "soccer",
-      "home": "América",
-      "away": "Monterrey",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/227.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/220.png",
-      "time": "06:10 МСК",
-      "matchDate": "2026-10-11T03:10Z",
-      "market": "ТБ 2.5",
-      "confidence": 65,
-      "modelProb": 0.648,
-      "odds": 1.5882352941176472,
-      "impliedProb": 0.592,
-      "edge": 0.095,
-      "value": true,
-      "expected": {
-        "home": 1.96,
-        "away": 1.38
-      },
-      "markets": [
-        {
-          "market": "ТБ 2.5",
-          "prob": 65,
-          "odds": 1.5882352941176472,
-          "edge": 10
-        },
-        {
-          "market": "П1",
-          "prob": 51,
-          "odds": 1.8695652173913042,
-          "edge": 1
-        },
-        {
-          "market": "Х2",
-          "prob": 49,
-          "odds": 1.8970394736842104,
-          "edge": -1
-        }
-      ],
-      "record": "6-2-1 / 4-1-4",
-      "note": "Ожидаемые голы: 1,96 : 1,38 (модель таблица лиги). Исходы: П1 51% · Х 22% · П2 27%. Модель даёт 65% на «ТБ 2.5». Линия 1,59 недооценивает исход: перевес модели +10%. Дополнительно модель видит «П1» с вероятностью 51%."
-    },
-    {
-      "id": "401883310",
-      "lgKey": "soccer/esp.2",
-      "lgName": "La Liga 2",
-      "sport": "⚽",
-      "type": "soccer",
-      "home": "RC Celta Fortuna",
-      "away": "Real Sociedad II",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/131858.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/20983.png",
-      "time": "22:00 МСК",
-      "matchDate": "2026-10-10T19:00Z",
+      "home": "LAFC",
+      "away": "Vancouver Whitecaps",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/18966.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/9727.png",
+      "time": "05:30 МСК",
+      "matchDate": "2026-10-11T02:30Z",
       "market": "Х2",
-      "confidence": 60,
-      "modelProb": 0.596,
-      "odds": null,
-      "impliedProb": null,
-      "edge": null,
+      "confidence": 62,
+      "modelProb": 0.624,
+      "odds": 1.5173387096774194,
+      "impliedProb": 0.608,
+      "edge": 0.027,
       "value": false,
       "expected": {
-        "home": 1.52,
-        "away": 1.4
-      },
-      "markets": [
-        {
-          "market": "Х2",
-          "prob": 60,
-          "odds": null,
-          "edge": null
-        },
-        {
-          "market": "ТБ 2.5",
-          "prob": 56,
-          "odds": null,
-          "edge": null
-        }
-      ],
-      "record": "2-2-4 / 2-2-4",
-      "note": "Ожидаемые голы: 1,52 : 1,40 (модель таблица лиги). Исходы: П1 40% · Х 25% · П2 35%. Модель даёт 60% на «Х2». Дополнительно модель видит «ТБ 2.5» с вероятностью 56%."
-    },
-    {
-      "id": "401876448",
-      "lgKey": "soccer/fra.1",
-      "lgName": "Ligue 1",
-      "sport": "⚽",
-      "type": "soccer",
-      "home": "Brest",
-      "away": "Angers",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/6997.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/7868.png",
-      "time": "21:45 МСК",
-      "matchDate": "2026-10-10T18:45Z",
-      "market": "Х2",
-      "confidence": 59,
-      "modelProb": 0.594,
-      "odds": 1.8117241379310345,
-      "impliedProb": 0.525,
-      "edge": 0.132,
-      "value": true,
-      "expected": {
         "home": 1.48,
-        "away": 1.34
+        "away": 1.49
       },
       "markets": [
         {
           "market": "Х2",
-          "prob": 59,
-          "odds": 1.8117241379310345,
-          "edge": 13
+          "prob": 62,
+          "odds": 1.5173387096774194,
+          "edge": 3
         },
         {
           "market": "ТБ 2.5",
-          "prob": 54,
-          "odds": 1.6666666666666665,
-          "edge": -6
-        },
-        {
-          "market": "ТМ 2.5",
-          "prob": 46,
-          "odds": 2.2,
-          "edge": 8
+          "prob": 57,
+          "odds": 1.5882352941176472,
+          "edge": -4
         }
       ],
-      "record": "1-2-2 / 2-1-2",
-      "note": "Ожидаемые голы: 1,48 : 1,34 (модель таблица лиги + xG-форма). Исходы: П1 41% · Х 25% · П2 34%. Модель даёт 59% на «Х2». Линия 1,81 недооценивает исход: перевес модели +13%. Дополнительно модель видит «ТБ 2.5» с вероятностью 54%. xG за последние 5 игр: Brest 2,17 за / 1,16 против, Angers 1,67 / 1,51."
+      "record": "11-8-9 / 15-5-7",
+      "note": "Ожидаемые голы: 1,48 : 1,49 (модель таблица лиги). Исходы: П1 38% · Х 24% · П2 38%. Модель даёт 62% на «Х2». Линия 1,52 недооценивает исход: перевес модели +3%. Дополнительно модель видит «ТБ 2.5» с вероятностью 57%."
     },
     {
-      "id": "401841610",
-      "lgKey": "soccer/arg.1",
-      "lgName": "Аргентина",
+      "id": "401892481",
+      "lgKey": "hockey/nhl",
+      "lgName": "NHL",
+      "sport": "🏒",
+      "type": "us",
+      "home": "Vegas Golden Knights",
+      "away": "Los Angeles Kings",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/vgk.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/la.png",
+      "time": "05:00 МСК",
+      "matchDate": "2026-10-11T02:00Z",
+      "market": "П1",
+      "confidence": 61,
+      "modelProb": 0.612,
+      "odds": 1.5882352941176472,
+      "impliedProb": 0.604,
+      "edge": 0.013,
+      "value": false,
+      "expected": {
+        "home": 3.76,
+        "away": 2.96
+      },
+      "markets": [
+        {
+          "market": "П1",
+          "prob": 61,
+          "odds": 1.5882352941176472,
+          "edge": 1
+        }
+      ],
+      "record": "4-1-0 / 0-2-1",
+      "note": "Ожидаемые шайбы: 3,76 : 2,96 (модель таблица лиги). Исходы: П1 61% · П2 37%. Модель даёт 61% на «П1». Линия 1,59 недооценивает исход: перевес модели +1%. Травмы: Vegas Golden Knights — Victor Olofsson (не выйдет), Lukas Cormier; Los Angeles Kings — Alex Turcotte, Mats Zuccarello, Jakub Dvorak."
+    },
+    {
+      "id": "761856",
+      "lgKey": "soccer/usa.1",
+      "lgName": "MLS",
       "sport": "⚽",
       "type": "soccer",
-      "home": "Central Córdoba (Santiago del Estero)",
-      "away": "Estudiantes de La Plata",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/11989.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/8.png",
-      "time": "23:00 МСК",
-      "matchDate": "2026-10-10T20:00Z",
-      "market": "ТМ 2.5",
+      "home": "Austin FC",
+      "away": "Nashville SC",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/20906.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/18986.png",
+      "time": "03:30 МСК",
+      "matchDate": "2026-10-11T00:30Z",
+      "market": "ТБ 2.5",
       "confidence": 59,
-      "modelProb": 0.589,
-      "odds": 2.45,
-      "impliedProb": 0.382,
-      "edge": 0.542,
+      "modelProb": 0.592,
+      "odds": 1.7142857142857144,
+      "impliedProb": 0.551,
+      "edge": 0.075,
       "value": true,
       "expected": {
-        "home": 1.12,
-        "away": 1.2
+        "home": 1.3,
+        "away": 1.77
       },
       "markets": [
         {
           "market": "Х2",
-          "prob": 66,
-          "odds": 1.4232456140350878,
-          "edge": 0
+          "prob": 72,
+          "odds": 1.2475247524752475,
+          "edge": -3
         },
         {
-          "market": "ТМ 2.5",
+          "market": "ТБ 2.5",
           "prob": 59,
-          "odds": 2.45,
-          "edge": 54
+          "odds": 1.7142857142857144,
+          "edge": 8
+        },
+        {
+          "market": "П2",
+          "prob": 48,
+          "odds": 1.9090909090909092,
+          "edge": 0
         }
       ],
-      "record": "2-3-6 / 4-1-6",
-      "note": "Ожидаемые голы: 1,12 : 1,20 (модель таблица лиги). Исходы: П1 34% · Х 28% · П2 38%. Модель даёт 59% на «ТМ 2.5». Линия 2,45 недооценивает исход: перевес модели +54%. Дополнительно модель видит «Х2» с вероятностью 66%."
+      "record": "7-10-10 / 18-6-3",
+      "note": "Ожидаемые голы: 1,30 : 1,77 (модель таблица лиги). Исходы: П1 28% · Х 23% · П2 48%. Модель даёт 59% на «ТБ 2.5». Линия 1,71 недооценивает исход: перевес модели +8%. Дополнительно модель видит «Х2» с вероятностью 72%."
     },
     {
       "id": "401876951",
@@ -325,10 +147,10 @@
       "market": "ТБ 2.5",
       "confidence": 59,
       "modelProb": 0.588,
-      "odds": 1.6666666666666665,
-      "impliedProb": 0.563,
-      "edge": 0.043,
-      "value": false,
+      "odds": 1.7692307692307692,
+      "impliedProb": 0.531,
+      "edge": 0.107,
+      "value": true,
       "expected": {
         "home": 1.49,
         "away": 1.56
@@ -343,270 +165,80 @@
         {
           "market": "ТБ 2.5",
           "prob": 59,
-          "odds": 1.6666666666666665,
-          "edge": 4
+          "odds": 1.7692307692307692,
+          "edge": 11
         }
       ],
       "record": "5-2-3 / 5-3-2",
-      "note": "Ожидаемые голы: 1,49 : 1,56 (модель таблица лиги). Исходы: П1 36% · Х 24% · П2 40%. Модель даёт 59% на «ТБ 2.5». Линия 1,67 недооценивает исход: перевес модели +4%. Дополнительно модель видит «Х2» с вероятностью 64%."
+      "note": "Ожидаемые голы: 1,49 : 1,56 (модель таблица лиги). Исходы: П1 36% · Х 24% · П2 40%. Модель даёт 59% на «ТБ 2.5». Линия 1,77 недооценивает исход: перевес модели +11%. Дополнительно модель видит «Х2» с вероятностью 64%."
     },
     {
-      "id": "401841599",
-      "lgKey": "soccer/arg.1",
-      "lgName": "Аргентина",
-      "sport": "⚽",
-      "type": "soccer",
-      "home": "Tigre",
-      "away": "Banfield",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/7767.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/235.png",
-      "time": "01:15 МСК",
-      "matchDate": "2026-10-10T22:15Z",
-      "market": "Х2",
-      "confidence": 57,
-      "modelProb": 0.569,
-      "odds": 2.058823529411765,
-      "impliedProb": 0.458,
-      "edge": 0.241,
-      "value": true,
-      "expected": {
-        "home": 1.36,
-        "away": 1.09
-      },
-      "markets": [
-        {
-          "market": "Х2",
-          "prob": 57,
-          "odds": 2.058823529411765,
-          "edge": 24
-        },
-        {
-          "market": "ТМ 2.5",
-          "prob": 56,
-          "odds": 1.606060606060606,
-          "edge": -5
-        }
-      ],
-      "record": "3-3-5 / 2-4-5",
-      "note": "Ожидаемые голы: 1,36 : 1,09 (модель таблица лиги). Исходы: П1 43% · Х 27% · П2 30%. Модель даёт 57% на «Х2». Линия 2,06 недооценивает исход: перевес модели +24%. Дополнительно модель видит «ТМ 2.5» с вероятностью 56%."
-    },
-    {
-      "id": "401876442",
-      "lgKey": "soccer/fra.1",
-      "lgName": "Ligue 1",
-      "sport": "⚽",
-      "type": "soccer",
-      "home": "Paris Saint-Germain",
-      "away": "Le Mans",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/160.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/2697.png",
-      "time": "21:45 МСК",
-      "matchDate": "2026-10-10T18:45Z",
-      "market": "Х2",
-      "confidence": 56,
-      "modelProb": 0.557,
-      "odds": 6.428571428571429,
-      "impliedProb": 0.149,
-      "edge": 2.737,
-      "value": true,
-      "expected": {
-        "home": 1.74,
-        "away": 1.47
-      },
-      "markets": [
-        {
-          "market": "ТБ 2.5",
-          "prob": 62,
-          "odds": 1.7142857142857144,
-          "edge": 13
-        },
-        {
-          "market": "Х2",
-          "prob": 56,
-          "odds": 6.428571428571429,
-          "edge": 274
-        }
-      ],
-      "record": "2-2-1 / 1-3-1",
-      "note": "Ожидаемые голы: 1,74 : 1,47 (модель таблица лиги). Исходы: П1 44% · Х 23% · П2 33%. Модель даёт 56% на «Х2». Линия 6,43 недооценивает исход: перевес модели +274%. Дополнительно модель видит «ТБ 2.5» с вероятностью 62%."
-    },
-    {
-      "id": "401841259",
-      "lgKey": "soccer/bra.1",
-      "lgName": "Бразилия · Серия A",
-      "sport": "⚽",
-      "type": "soccer",
-      "home": "São Paulo",
-      "away": "Vitória",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/2026.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/3457.png",
-      "time": "03:00 МСК",
-      "matchDate": "2026-10-11T00:00Z",
-      "market": "Х2",
-      "confidence": 56,
-      "modelProb": 0.56,
-      "odds": 2.2473118279569895,
-      "impliedProb": 0.423,
-      "edge": 0.326,
-      "value": true,
-      "expected": {
-        "home": 1.44,
-        "away": 1.14
-      },
-      "markets": [
-        {
-          "market": "Х2",
-          "prob": 56,
-          "odds": 2.2473118279569895,
-          "edge": 33
-        },
-        {
-          "market": "ТМ 2.5",
-          "prob": 52,
-          "odds": 1.7692307692307692,
-          "edge": -1
-        },
-        {
-          "market": "ТБ 2.5",
-          "prob": 48,
-          "odds": 2,
-          "edge": 1
-        }
-      ],
-      "record": "10-6-13 / 10-6-13",
-      "note": "Ожидаемые голы: 1,44 : 1,14 (модель таблица лиги). Исходы: П1 44% · Х 26% · П2 30%. Модель даёт 56% на «Х2». Линия 2,25 недооценивает исход: перевес модели +33%. Дополнительно модель видит «ТМ 2.5» с вероятностью 52%."
-    },
-    {
-      "id": "761851",
-      "lgKey": "soccer/usa.1",
-      "lgName": "MLS",
-      "sport": "⚽",
-      "type": "soccer",
-      "home": "New England Revolution",
-      "away": "Seattle Sounders FC",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/189.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/9726.png",
-      "time": "02:30 МСК",
-      "matchDate": "2026-10-10T23:30Z",
-      "market": "ТБ 2.5",
-      "confidence": 56,
-      "modelProb": 0.563,
-      "odds": 2.25,
-      "impliedProb": 0.419,
-      "edge": 0.342,
-      "value": true,
-      "expected": {
-        "home": 1.63,
-        "away": 1.31
-      },
-      "markets": [
-        {
-          "market": "ТБ 2.5",
-          "prob": 56,
-          "odds": 2.25,
-          "edge": 34
-        },
-        {
-          "market": "Х2",
-          "prob": 55,
-          "odds": 1.8195205479452052,
-          "edge": 8
-        },
-        {
-          "market": "П1",
-          "prob": 45,
-          "odds": 1.8695652173913042,
-          "edge": -9
-        }
-      ],
-      "record": "14-4-9 / 10-8-9",
-      "note": "Ожидаемые голы: 1,63 : 1,31 (модель таблица лиги). Исходы: П1 45% · Х 24% · П2 31%. Модель даёт 56% на «ТБ 2.5». Линия 2,25 недооценивает исход: перевес модели +34%. Дополнительно модель видит «Х2» с вероятностью 55%."
-    },
-    {
-      "id": "401841262",
-      "lgKey": "soccer/bra.1",
-      "lgName": "Бразилия · Серия A",
-      "sport": "⚽",
-      "type": "soccer",
-      "home": "Vasco da Gama",
-      "away": "Remo",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/3454.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/4936.png",
-      "time": "00:00 МСК",
-      "matchDate": "2026-10-10T21:00Z",
-      "market": "Х2",
-      "confidence": 55,
-      "modelProb": 0.547,
-      "odds": 3.3157894736842106,
-      "impliedProb": 0.284,
-      "edge": 0.927,
-      "value": true,
-      "expected": {
-        "home": 1.61,
-        "away": 1.27
-      },
-      "markets": [
-        {
-          "market": "ТБ 2.5",
-          "prob": 55,
-          "odds": 2.35,
-          "edge": 38
-        },
-        {
-          "market": "Х2",
-          "prob": 55,
-          "odds": 3.3157894736842106,
-          "edge": 93
-        },
-        {
-          "market": "П1",
-          "prob": 45,
-          "odds": 1.3125,
-          "edge": -37
-        },
-        {
-          "market": "ТМ 2.5",
-          "prob": 45,
-          "odds": 1.5555555555555556,
-          "edge": -25
-        }
-      ],
-      "record": "9-7-12 / 5-9-15",
-      "note": "Ожидаемые голы: 1,61 : 1,27 (модель таблица лиги). Исходы: П1 45% · Х 24% · П2 30%. Модель даёт 55% на «Х2». Линия 3,32 недооценивает исход: перевес модели +93%. Дополнительно модель видит «ТБ 2.5» с вероятностью 55%."
-    },
-    {
-      "id": "401892474",
+      "id": "401892483",
       "lgKey": "hockey/nhl",
       "lgName": "NHL",
       "sport": "🏒",
       "type": "us",
-      "home": "Ottawa Senators",
-      "away": "Nashville Predators",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/ott.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/nsh.png",
-      "time": "02:00 МСК",
-      "matchDate": "2026-10-10T23:00Z",
+      "home": "New York Rangers",
+      "away": "Vancouver Canucks",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/nyr.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/van.png",
+      "time": "01:00 МСК",
+      "matchDate": "2026-10-11T22:00Z",
       "market": "П1",
-      "confidence": 55,
-      "modelProb": 0.551,
-      "odds": 1.617283950617284,
-      "impliedProb": 0.593,
-      "edge": -0.072,
+      "confidence": 59,
+      "modelProb": 0.588,
+      "odds": 1.4,
+      "impliedProb": 0.685,
+      "edge": -0.143,
       "value": false,
       "expected": {
-        "home": 3.23,
-        "away": 2.92
+        "home": 3.57,
+        "away": 2.97
       },
       "markets": [
         {
           "market": "П1",
-          "prob": 55,
-          "odds": 1.617283950617284,
-          "edge": -7
+          "prob": 59,
+          "odds": 1.4,
+          "edge": -14
         }
       ],
-      "record": "3-1-0 / 2-1-1",
-      "note": "Ожидаемые шайбы: 3,23 : 2,92 (модель таблица лиги). Исходы: П1 55% · П2 44%. Модель даёт 55% на «П1». Линия 1,62 примерно совпадает с моделью. Травмы: Ottawa Senators — William Eklund (не выйдет), Cameron Crotty, Jake Sanderson; Nashville Predators — Mavrik Bourque, Justus Annunen."
+      "record": "4-2-0 / 2-3-0",
+      "note": "Ожидаемые шайбы: 3,57 : 2,97 (модель таблица лиги). Исходы: П1 59% · П2 40%. Модель даёт 59% на «П1». Линия 1,40 примерно совпадает с моделью. Травмы: New York Rangers — Joe Veleno, Joonas Korpisalo, Igor Shesterkin (не выйдет); Vancouver Canucks — Jack Thompson, Akil Thomas, Mackenzie MacEachern."
+    },
+    {
+      "id": "401892480",
+      "lgKey": "hockey/nhl",
+      "lgName": "NHL",
+      "sport": "🏒",
+      "type": "us",
+      "home": "Calgary Flames",
+      "away": "Anaheim Ducks",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/cgy.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/ana.png",
+      "time": "05:00 МСК",
+      "matchDate": "2026-10-11T02:00Z",
+      "market": "П2",
+      "confidence": 56,
+      "modelProb": 0.558,
+      "odds": 1.819672131147541,
+      "impliedProb": 0.526,
+      "edge": 0.06,
+      "value": true,
+      "expected": {
+        "home": 3.01,
+        "away": 3.5
+      },
+      "markets": [
+        {
+          "market": "П2",
+          "prob": 56,
+          "odds": 1.819672131147541,
+          "edge": 6
+        }
+      ],
+      "record": "0-4-0 / 3-1-0",
+      "note": "Ожидаемые шайбы: 3,01 : 3,50 (модель таблица лиги). Исходы: П1 43% · П2 56%. Модель даёт 56% на «П2». Линия 1,82 недооценивает исход: перевес модели +6%. Травмы: Calgary Flames — Samuel Honzek (не выйдет), Jonathan Huberdeau; Anaheim Ducks — Drew Helleson, Troy Terry, Ian Moore."
     }
   ]
 }
