@@ -1667,13 +1667,17 @@ function slideHTML(p, unlocked, isPro, isHistory) {
       ? `<span class="soon-tag">${ic('bolt')} через ${Math.max(1, Math.round(mdi.hours))} ч</span>`
       : `<span class="rel-tag">завтра</span>`;
   }
-  // value-бейдж: модельная вероятность заметно выше честной вероятности линии
-  const valBadge = (!isHistory && p.value && p.edge != null && p.edge > 0.05) ? `<span class="value-badge">${ic('bolt')} VALUE</span>` : '';
-  // строка линии: коэффициент, вероятность линии и перевес модели
+  // VALUE-бейдж и сравнение с линией — это оплачиваемый сигнал PRO: генератор
+  // больше не кладёт value/edge/impliedProb в публичный файл, поэтому на
+  // бесплатных карточках их нет вовсе. Здесь проверка по isPro — подстраховка,
+  // если запись всё же пришла со старых данных или из VIP-фида в чужую колоду.
+  const showEdge = !!isPro;
+  const valBadge = (!isHistory && showEdge && p.value && p.edge != null && p.edge > 0.05) ? `<span class="value-badge">${ic('bolt')} VALUE</span>` : '';
+  // строка линии: коэффициент; вероятность линии и перевес модели — только PRO
   let lineChip = '';
   if (!isHistory && p.odds) {
-    const imp = p.impliedProb != null ? Math.round(p.impliedProb * 100) : null;
-    const edge = p.edge != null ? Math.round(p.edge * 100) : null;
+    const imp = showEdge && p.impliedProb != null ? Math.round(p.impliedProb * 100) : null;
+    const edge = showEdge && p.edge != null ? Math.round(p.edge * 100) : null;
     const edgeCls = edge > 0 ? 'up' : 'down';
     const edgeTxt = edge == null ? '' : `${edge > 0 ? '+' : ''}${edge}%`;
     const edgeLabel = edge == null ? '' : edge > 0 ? 'перевес модели' : 'модель ниже линии';

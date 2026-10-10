@@ -595,8 +595,27 @@ mkdirSync('data', { recursive: true });
 const free = final.filter(p => p.tier === 'free');
 const pro = final.filter(p => p.tier === 'pro');
 // в публичном файле поле tier не пишем вовсе: там только free, а само поле
-// подсказывало бы, что бывают и другие уровни
-const stripTier = (p) => { const { tier, ...rest } = p; return rest; };
+// подсказывало бы, что бывают и другие уровни.
+// Публичная запись: платный сигнал PRO — это сравнение модели с линией.
+// Раньше в публичный файл уходили value, edge, impliedProb, edge по каждому рынку
+// и прямая фраза «перевес модели +N%» — то есть ровно то, за что берут подписку,
+// скачивалось curl-ом без всякой авторизации, а приложения честно рисовали бейдж
+// VALUE на бесплатных карточках. Вырезаем сравнение с линией, оставляя бесплатную
+// часть: рынок, уверенность модели и коэффициент линии (он и так публичен).
+function publicFree(p) {
+  const { tier, value, edge, impliedProb, ...rest } = p;
+  return {
+    ...rest,
+    markets: Array.isArray(rest.markets)
+      ? rest.markets.map(({ edge: _edge, ...m }) => m)
+      : rest.markets,
+    note: String(rest.note || '')
+      .replace(/\s*Линия [\d.,]+ недооценивает исход: перевес модели \+\d+%\./g, '')
+      .replace(/\s{2,}/g, ' ')
+      .trim(),
+  };
+}
+
 writeFileSync('data/predictions.json', JSON.stringify({
   date: dateStr,
   generated: new Date().toISOString(),
@@ -604,9 +623,8 @@ writeFileSync('data/predictions.json', JSON.stringify({
   count: free.length,
   proCount: pro.length,          // только число: сколько сигналов Pro-ИИ сегодня
   botdLegs: botd ? botd.legs.length : 0, // тоже только число — для пейвол-тизера
-  valueCount: free.filter(p => p.value).length,
-  thresholds: { freeMin: FREE_MIN, proMin: PRO_MIN, value: 0.05 },
-  predictions: free.map(stripTier),
+  thresholds: { freeMin: FREE_MIN, proMin: PRO_MIN },
+  predictions: free.map(publicFree),
 }, null, 2));
 
 writeFileSync('data/pro-feed.json', JSON.stringify({

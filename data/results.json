@@ -76,8 +76,6 @@
     "confidence": 64,
     "modelProb": 0.645,
     "odds": 2.170391061452514,
-    "edge": 0.484,
-    "value": true,
     "score": "3:0",
     "result": "miss"
   },
@@ -93,8 +91,6 @@
     "confidence": 64,
     "modelProb": 0.638,
     "odds": 1.5208333333333335,
-    "edge": 0.01,
-    "value": false,
     "score": "4:1",
     "result": "hit"
   },
@@ -110,8 +106,6 @@
     "confidence": 57,
     "modelProb": 0.567,
     "odds": 2.42,
-    "edge": 0.431,
-    "value": true,
     "score": "2:3",
     "result": "hit"
   },
@@ -127,8 +121,6 @@
     "confidence": 64,
     "modelProb": 0.638,
     "odds": null,
-    "edge": null,
-    "value": false,
     "score": "123:132",
     "result": "miss",
     "preseason": true
@@ -145,8 +137,6 @@
     "confidence": 77,
     "modelProb": 0.769,
     "odds": null,
-    "edge": null,
-    "value": false,
     "score": "109:107",
     "result": "hit",
     "preseason": true
@@ -163,8 +153,6 @@
     "confidence": 57,
     "modelProb": 0.567,
     "odds": null,
-    "edge": null,
-    "value": false,
     "score": "120:97",
     "result": "hit",
     "preseason": true
@@ -181,8 +169,6 @@
     "confidence": 55,
     "modelProb": 0.554,
     "odds": 1.606060606060606,
-    "edge": -0.042,
-    "value": false,
     "score": "1:1",
     "result": "hit"
   },
@@ -198,8 +184,6 @@
     "confidence": 66,
     "modelProb": 0.662,
     "odds": 1.6024096385542168,
-    "edge": 0.105,
-    "value": true,
     "score": "5:0",
     "result": "hit"
   },
@@ -215,8 +199,6 @@
     "confidence": 62,
     "modelProb": 0.618,
     "odds": null,
-    "edge": null,
-    "value": false,
     "score": "5:4",
     "result": "hit"
   },
@@ -232,8 +214,6 @@
     "confidence": 70,
     "modelProb": 0.7,
     "odds": null,
-    "edge": null,
-    "value": false,
     "score": "103:127",
     "result": "miss",
     "preseason": true
@@ -250,8 +230,6 @@
     "confidence": 68,
     "modelProb": 0.676,
     "odds": null,
-    "edge": null,
-    "value": false,
     "score": "90:124",
     "result": "miss",
     "preseason": true
@@ -268,8 +246,6 @@
     "confidence": 67,
     "modelProb": 0.674,
     "odds": null,
-    "edge": null,
-    "value": false,
     "score": "97:116",
     "result": "miss",
     "preseason": true
@@ -286,8 +262,6 @@
     "confidence": 55,
     "modelProb": 0.552,
     "odds": 2.12093023255814,
-    "edge": 0.255,
-    "value": true,
     "score": "4:0",
     "result": "miss"
   },
@@ -303,8 +277,6 @@
     "confidence": 61,
     "modelProb": 0.605,
     "odds": 1.5650793650793648,
-    "edge": 0.008,
-    "value": false,
     "score": "1:1",
     "result": "hit"
   },
@@ -320,8 +292,6 @@
     "confidence": 55,
     "modelProb": 0.553,
     "odds": 1.9585987261146496,
-    "edge": 0.165,
-    "value": true,
     "score": "1:1",
     "result": "hit"
   },
@@ -337,8 +307,6 @@
     "confidence": 60,
     "modelProb": 0.605,
     "odds": 1.6124031007751938,
-    "edge": 0.048,
-    "value": false,
     "score": "2:1",
     "result": "miss"
   },
@@ -354,8 +322,6 @@
     "confidence": 58,
     "modelProb": 0.579,
     "odds": 1.7407407407407407,
-    "edge": 0.084,
-    "value": true,
     "score": "1:2",
     "result": "hit"
   },
@@ -371,8 +337,6 @@
     "confidence": 67,
     "modelProb": 0.672,
     "odds": 2.1,
-    "edge": 0.469,
-    "value": true,
     "score": "123:112",
     "result": "hit",
     "preseason": true
@@ -389,8 +353,6 @@
     "confidence": 63,
     "modelProb": 0.629,
     "odds": 2.1,
-    "edge": 0.399,
-    "value": true,
     "score": "3:1",
     "result": "hit"
   },
@@ -406,8 +368,6 @@
     "confidence": 58,
     "modelProb": 0.581,
     "odds": 1.8666666666666667,
-    "edge": 0.162,
-    "value": true,
     "score": "2:0",
     "result": "miss"
   },
@@ -423,8 +383,6 @@
     "confidence": 61,
     "modelProb": 0.615,
     "odds": 1.704225352112676,
-    "edge": 0.091,
-    "value": true,
     "score": "2:1",
     "result": "hit"
   },
@@ -440,8 +398,6 @@
     "confidence": 76,
     "modelProb": 0.762,
     "odds": 2.1,
-    "edge": 0.665,
-    "value": true,
     "score": "118:122",
     "result": "miss",
     "preseason": true
@@ -458,8 +414,6 @@
     "confidence": 71,
     "modelProb": 0.71,
     "odds": null,
-    "edge": null,
-    "value": false,
     "score": "113:124",
     "result": "miss",
     "preseason": true
@@ -476,8 +430,6 @@
     "confidence": 82,
     "modelProb": 0.815,
     "odds": null,
-    "edge": null,
-    "value": false,
     "score": "128:118",
     "result": "hit",
     "preseason": true
@@ -494,8 +446,6 @@
     "confidence": 82,
     "modelProb": 0.825,
     "odds": null,
-    "edge": null,
-    "value": false,
     "score": "126:128",
     "result": "miss",
     "preseason": true
@@ -512,8 +462,6 @@
     "confidence": 73,
     "modelProb": 0.733,
     "odds": 2.2,
-    "edge": 0.68,
-    "value": true,
     "score": "124:117",
     "result": "hit",
     "preseason": true
@@ -530,8 +478,6 @@
     "confidence": 62,
     "modelProb": 0.623,
     "odds": null,
-    "edge": null,
-    "value": false,
     "score": "123:118",
     "result": "hit",
     "preseason": true
@@ -548,8 +494,6 @@
     "confidence": 60,
     "modelProb": 0.596,
     "odds": 1.8283783783783782,
-    "edge": 0.167,
-    "value": true,
     "score": "1:1",
     "result": "hit"
   },
@@ -565,8 +509,6 @@
     "confidence": 63,
     "modelProb": 0.63,
     "odds": 1.4873949579831935,
-    "edge": -0.003,
-    "value": false,
     "score": "1:3",
     "result": "hit"
   },
@@ -582,8 +524,6 @@
     "confidence": 59,
     "modelProb": 0.588,
     "odds": 2.25,
-    "edge": 0.402,
-    "value": true,
     "score": "2:1",
     "result": "hit"
   },
@@ -599,8 +539,6 @@
     "confidence": 69,
     "modelProb": 0.685,
     "odds": 1.464406779661017,
-    "edge": 0.05,
-    "value": false,
     "score": "1:1",
     "result": "hit"
   },
@@ -616,8 +554,6 @@
     "confidence": 66,
     "modelProb": 0.655,
     "odds": 2.2,
-    "edge": 0.552,
-    "value": true,
     "score": "1:0",
     "result": "miss"
   },
@@ -633,8 +569,6 @@
     "confidence": 58,
     "modelProb": 0.582,
     "odds": 1.8523489932885908,
-    "edge": 0.158,
-    "value": true,
     "score": "0:0",
     "result": "hit"
   },
@@ -650,8 +584,6 @@
     "confidence": 58,
     "modelProb": 0.576,
     "odds": 1.5882352941176472,
-    "edge": -0.046,
-    "value": false,
     "score": "4:3",
     "result": "hit"
   },
@@ -667,8 +599,6 @@
     "confidence": 63,
     "modelProb": 0.632,
     "odds": null,
-    "edge": null,
-    "value": false,
     "score": "117:135",
     "result": "miss",
     "preseason": true
@@ -685,8 +615,6 @@
     "confidence": 63,
     "modelProb": 0.631,
     "odds": 1.9523809523809523,
-    "edge": 0.29,
-    "value": true,
     "score": "114:110",
     "result": "miss",
     "preseason": true
@@ -703,8 +631,6 @@
     "confidence": 55,
     "modelProb": 0.549,
     "odds": 2.1,
-    "edge": 0.251,
-    "value": true,
     "score": "0:2",
     "result": "miss"
   },
@@ -720,8 +646,6 @@
     "confidence": 56,
     "modelProb": 0.559,
     "odds": 2.05,
-    "edge": 0.217,
-    "value": true,
     "score": "2:1",
     "result": "hit"
   },
@@ -737,8 +661,6 @@
     "confidence": 63,
     "modelProb": 0.632,
     "odds": 1.8695652173913042,
-    "edge": 0.25,
-    "value": true,
     "score": "3:0",
     "result": "hit"
   },
@@ -754,8 +676,6 @@
     "confidence": 57,
     "modelProb": 0.571,
     "odds": 1.6666666666666665,
-    "edge": 0.035,
-    "value": false,
     "score": "3:2",
     "result": "hit"
   },
@@ -771,8 +691,6 @@
     "confidence": 69,
     "modelProb": 0.689,
     "odds": 1.7692307692307692,
-    "edge": 0.283,
-    "value": true,
     "score": "0:2",
     "result": "miss"
   },
@@ -788,8 +706,6 @@
     "confidence": 55,
     "modelProb": 0.553,
     "odds": 2.25,
-    "edge": 0.308,
-    "value": true,
     "score": "1:1",
     "result": "miss"
   },
@@ -805,8 +721,6 @@
     "confidence": 66,
     "modelProb": 0.655,
     "odds": 2.25,
-    "edge": 0.551,
-    "value": true,
     "score": "5:1",
     "result": "hit"
   },
@@ -822,8 +736,6 @@
     "confidence": 60,
     "modelProb": 0.599,
     "odds": 1.7407407407407407,
-    "edge": 0.096,
-    "value": true,
     "score": "2:1",
     "result": "hit"
   },
@@ -839,8 +751,6 @@
     "confidence": 58,
     "modelProb": 0.576,
     "odds": 3.0769230769230766,
-    "edge": 0.857,
-    "value": true,
     "score": "2:1",
     "result": "miss"
   },
@@ -856,8 +766,6 @@
     "confidence": 56,
     "modelProb": 0.556,
     "odds": 1.8333333333333335,
-    "edge": 0.066,
-    "value": true,
     "score": "1:5",
     "result": "miss"
   },
@@ -873,8 +781,6 @@
     "confidence": 63,
     "modelProb": 0.631,
     "odds": null,
-    "edge": null,
-    "value": false,
     "preseason": true,
     "score": "100:104",
     "result": "miss"

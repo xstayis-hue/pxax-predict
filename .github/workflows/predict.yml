@@ -31,6 +31,11 @@ jobs:
           PXAX_WORKER_URL: ${{ secrets.PXAX_WORKER_URL }}
           PXAX_ADMIN_KEY: ${{ secrets.PXAX_ADMIN_KEY }}
         run: node scripts/resolve-results.mjs
+      # Пейвол: value/edge/impliedProb и фраза «перевес модели» — платный сигнал PRO.
+      # Проверяем публичные файлы ДО коммита: если утечка вернулась, пайплайн падает
+      # и ничего не публикуется, вместо того чтобы молча выложить VIP-ставки.
+      - name: Проверить, что в публичных данных нет платного сигнала PRO
+        run: node scripts/check-public-feed.mjs
       - name: Commit data
         run: |
           git config user.name "pxax-bot"

@@ -118,7 +118,11 @@ for (const src of sources) {
         date: matchDate, id: p.id, kind: p.tier === 'pro' ? 'pro' : 'free',
         sport: p.sport, league: p.lgName, home: p.home, away: p.away,
         market: p.market, confidence: p.confidence,
-        modelProb: p.modelProb ?? null, odds: p.odds ?? null, edge: p.edge ?? null, value: !!p.value,
+        // modelProb нужен калибровке (Brier), а odds — трекеру ставок.
+        // edge и value не пишем: перевес над линией — это платный сигнал PRO,
+        // а results.json лежит в публичном репозитории. Внутри резолвера они
+        // по-прежнему есть (читаются из VIP-фида), просто не уходят в файл.
+        modelProb: p.modelProb ?? null, odds: p.odds ?? null,
         ...(preseason ? { preseason: true } : {}),
       };
 
