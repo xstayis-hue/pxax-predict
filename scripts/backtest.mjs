@@ -2,11 +2,19 @@
 // Честно: для каждого матча модель использует только то, что было доступно ДО матча —
 // форму команд (голы за/против в последних матчах той же лиги) и средний тотал лиги.
 // Без заглядывания в будущее: никаких будущих таблиц и линий.
+//
+// Важно: выбор рынка теперь идёт через ту же функцию selectionScore, что и в
+// генераторе (база — вероятность, edge — ограниченная добавка). До этого бэктест
+// ранжировал строго по вероятности, а генератор строго по edge — то есть
+// проверялась ДРУГАЯ модель, и его проходимость ничего не говорила о продакшне.
+// Линий (коэффициентов) в окне 90 дней у нас нет, поэтому edge здесь равен нулю
+// и selectionScore вырождается в чистую вероятность — но формула одна, и если
+// генератор снова начнёт выбирать по edge, это сразу станет видно из расхождения.
 // Вывод: data/backtest.json — проходимость «сигналов» (вероятность >= 55%, тот же порог,
 // что в production-модели) + Brier (1X2) по всем проанализированным матчам.
 // Запуск: ежедневно, .github/workflows/backtest.yml (ESPN отдаёт scoreboard по дням).
-import { writeFileSync, mkdirSync } from 'node:fs';
-import { scoreMatrix, outcomesFromMatrix } from './model.mjs';
+import { writeFileSync, mkdirSync, readFileSync } from 'node:fs';
+import { scoreMatrix, outcomesFromMatrix, selectionScore, homeAdvFromTotals } from './model.mjs';
 
 const LEAGUES = [
   { key: 'soccer/eng.1', name: 'АПЛ' },
@@ -20,7 +28,7 @@ const LEAGUES = [
 ];
 const WINDOW_DAYS = 90;
 const SIGNAL_MIN = 0.55; // порог сигнала — как в production-модели (FREE_MIN = 55%)
-const HOME_ADV = 1.15;   // домашний фактор, как в production-модели
+const HOME_ADV = 1.15;   // запасной домашний фактор, если по лиге мало матчей
 const K = 6;             // шринк, как в production-модели (футбол)
 const FORM_GAMES = 10;   // сколько последних матчей команды брать для формы
 
@@ -107,6 +115,14 @@ for (const lg of LEAGUES) {
   matches.sort((a, b) => a.date.localeCompare(b.date));
   const avgTotal = matches.reduce((a, m) => a + m.hs + m.as, 0) / matches.length;
   const clamp = (v) => Math.max(0.6, Math.min(1.55, v));
+  // домашнее преимущество лиги — тот же расчёт, что в генераторе. Здесь оно
+  // считается по тем же матчам окна (in-sample): это оценка сверху, но общая
+  // константа 1.15 на все лиги давала заметно кривее ожидания в MLS и Аргентине.
+  const lgHomeAdv = homeAdvFromTotals(
+    matches.reduce((a, m) => a + m.hs, 0),
+    matches.reduce((a, m) => a + m.as, 0),
+    matches.length,
+  ) || HOME_ADV;
 
   let analyzed = 0, signals = 0, hits = 0;
   for (const m of matches) {
@@ -118,14 +134,15 @@ for (const lg of LEAGUES) {
     const att = (f) => clamp(1 + ((f.gf / (avgTotal / 2)) - 1) * (f.gp / (f.gp + K)));
     const def = (f) => clamp(1 + ((f.ga / (avgTotal / 2)) - 1) * (f.gp / (f.gp + K)));
     const avg = (fh.gf + fh.ga + fa.gf + fa.ga) / 4;
-    let lh = avg * att(fh) * def(fa) * HOME_ADV;
+    let lh = avg * att(fh) * def(fa) * lgHomeAdv;
     let la = avg * att(fa) * def(fh);
     const anchor = avgTotal / 2;
     lh += (anchor - lh) * 0.5;
     la += (anchor - la) * 0.5;
 
     const oc = outcomesFromMatrix(scoreMatrix(lh, la));
-    // кандидаты — тот же набор рынков, что у production-модели без линий: максимум вероятности (>= 50%)
+    // кандидаты — тот же набор рынков, что у production-модели без линий;
+    // ранжирование через общую selectionScore (edge здесь нет -> чистая вероятность)
     const pool = [
       { m: 'П1', p: oc.p1 },
       { m: 'Х', p: oc.px },
@@ -135,7 +152,7 @@ for (const lg of LEAGUES) {
       { m: 'ТМ 2.5', p: oc.under },
     ].filter((c) => c.p >= 0.5);
     if (!pool.length) continue;
-    pool.sort((a, b) => b.p - a.p);
+    pool.sort((a, b) => selectionScore(b.p, null) - selectionScore(a.p, null) || b.p - a.p);
     const best = pool[0];
 
     analyzed++;

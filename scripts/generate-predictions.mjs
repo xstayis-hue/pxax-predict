@@ -8,7 +8,93 @@
 //  - читаем реальные коэффициенты ESPN (moneyline/total) и считаем value (edge);
 //  - free = самые надёжные прогнозы, pro = value-ставки (там где есть линия).
 import { writeFileSync, mkdirSync, readFileSync, existsSync } from 'node:fs';
-import { scoreMatrix, outcomesFromMatrix, outcomesFromNormal, xgBlend } from './model.mjs';
+import {
+  scoreMatrix, outcomesFromMatrix, outcomesFromNormal, xgBlend,
+  selectionScore, marketFamily, calibrateProbability, homeAdvFromTotals,
+} from './model.mjs';
+
+/* ---- калибровка: читаем посчитанное резолвером (data/calibration.json) ---- */
+// Резолвер считает Brier и корзины «предсказано -> фактически» по решённой
+// истории. Раньше файл только показывался в интерфейсе, а модель его
+// игнорировала — и продолжала недооценивать себя на 6–10 пунктов.
+// Пока файла нет или он помечен unreliable (меньше 20 наблюдений), поправка
+// просто не применяется — поведение остаётся прежним, ничего не ломается.
+const calibrationCal = (() => {
+  try {
+    const j = JSON.parse(readFileSync('data/calibration.json', 'utf8'));
+    return (j && typeof j === 'object') ? j : null;
+  } catch { return null; }
+})();
+const calibrationReliable = !!(calibrationCal && calibrationCal.reliable);
+// Резолвер строит корзины по всем записанным прогнозам; семейство рынка берём
+// по каждому решённому прогнозу из results.json — иначе сдвиг для П1/Х/П2
+// усреднялся бы вместе с тоталами, у которых смещение своё.
+const calibrationBuckets = (() => {
+  if (!calibrationReliable) return {};
+  let hist = [];
+  try { hist = JSON.parse(readFileSync('data/results.json', 'utf8')); } catch { hist = []; }
+  const BUCKETS = [[0.5, 0.6], [0.6, 0.7], [0.7, 0.8], [0.8, 1.01]];
+  const out = {};
+  for (const family of ['result', 'double', 'total']) {
+    const rows = hist.filter((x) => x && !x.preseason && (x.result === 'hit' || x.result === 'miss')
+      && Number.isFinite(Number(x.modelProb)) && marketFamily(x.market) === family);
+    out[family] = BUCKETS.map(([lo, hi]) => {
+      const b = rows.filter((x) => Number(x.modelProb) >= lo && Number(x.modelProb) < hi);
+      return { lo, hi, n: b.length, actual: b.length ? b.filter((x) => x.result === 'hit').length / b.length : null };
+    });
+  }
+  return out;
+})();
+function calibrationFor(market) {
+  const list = calibrationBuckets[marketFamily(market)];
+  if (!Array.isArray(list)) return null;
+  // средняя вероятность корзины не нужна: calibrateProbability строит поправку
+  // от своего аргумента (середины корзины), который берёт из lo/hi.
+  return list.find((b) => Number.isFinite(b.actual) && b.n > 0) ? list : null;
+}
+function calibrateToPercent(p, buckets, reliable) {
+  const raw = Number(p);
+  if (!Number.isFinite(raw)) return Math.round(raw * 100);
+  if (!reliable || !Array.isArray(buckets)) return Math.round(raw * 100);
+  const bucket = buckets.find((b) => raw >= b.lo && raw < b.hi) || null;
+  if (!bucket) return Math.round(raw * 100);
+  return Math.round(calibrateProbability(raw, bucket, true) * 100);
+}
+
+/* ---- домашний фактор по лигам ---- */
+// Раньше была одна константа 1.15 на всю футбольную лигу и 1.08 на «US».
+// Преимущество поля сильно разнится: в Аргентине и Бразилии (там худшая
+// проходимость в истории) оно одно, в MLS и топ-лигах — другое.
+// Считаем его из решённой истории: отношение голов хозяев к голам гостей
+// делится на «пополам за вычетом самого преимущества», иначе деление на два
+// возвращает 1.0 при идеально сбалансированной лиге.
+const DEFAULT_HOME_ADV = { soccer: 1.15, us: 1.08 };
+const leagueHomeAdv = (() => {
+  let hist = [];
+  try { hist = JSON.parse(readFileSync('data/results.json', 'utf8')); } catch { hist = []; }
+  const byLeague = new Map();
+  for (const x of hist) {
+    if (!x || x.preseason || !x.score || !x.lgKey) continue;
+    const m = /^(\d+)\s*:\s*(\d+)$/.exec(String(x.score));
+    if (!m) continue;
+    const hs = Number(m[1]), as = Number(m[2]);
+    if (!Number.isFinite(hs) || !Number.isFinite(as)) continue;
+    const g = byLeague.get(x.lgKey) || { home: 0, away: 0, n: 0 };
+    g.home += hs; g.away += as; g.n++;
+    byLeague.set(x.lgKey, g);
+  }
+  const out = {};
+  for (const [key, g] of byLeague) {
+    const adv = homeAdvFromTotals(g.home, g.away, g.n);
+    if (adv != null) out[key] = adv;
+  }
+  return out;
+})();
+function homeAdvFor(key, type) {
+  const computed = leagueHomeAdv[key];
+  if (Number.isFinite(computed)) return computed;
+  return DEFAULT_HOME_ADV[type] || DEFAULT_HOME_ADV.soccer;
+}
 
 const LEAGUES = [
   { key: 'soccer/eng.1', sport: '⚽', name: 'EPL', type: 'soccer' },
@@ -39,9 +125,6 @@ const LEAGUE_AVG_GOALS = {
   'soccer/ned.1': 3.1, 'soccer/por.1': 2.6, 'soccer/bra.1': 2.5, 'soccer/arg.1': 2.3,
   'soccer/usa.1': 2.9, 'soccer/mex.1': 2.7, 'soccer/uefa.champions': 2.9, 'soccer/uefa.europa': 2.8,
   'hockey/nhl': 6.0, 'basketball/nba': 224, // NBA — суммарные очки обеих команд
-};
-const HOME_ADV_GOALS = { // множитель ожидания хозяев
-  soccer: 1.15, us: 1.08,
 };
 // ожидаемый счёт для подписи (своя единица для каждого спорта)
 const SCORE_LABEL = { soccer: 'Ожидаемые голы', hockey: 'Ожидаемые шайбы', basketball: 'Ожидаемые очки' };
@@ -369,14 +452,17 @@ for (const lg of LEAGUES) {
       const as = stats?.get(String(away.team.id));
       let lh, la; // ожидаемые голы/шайбы/очки одной команды
       let statsUsed = false;
+      // домашнее преимущество: своё для лиги, если набралось достаточно
+      // решённых матчей, иначе общая константа по виду спорта
+      const HAG = homeAdvFor(lg.key, lg.type);
       if (hs && as) {
         const avg = (hs.avgFor + hs.avgAg + as.avgFor + as.avgAg) / 4;
-        lh = Math.max(0.2, avg * hs.att * as.def * HOME_ADV_GOALS[lg.type]);
+        lh = Math.max(0.2, avg * hs.att * as.def * HAG);
         la = Math.max(0.15, avg * as.att * hs.def);
         // сезонный ориентир лиги: сглаживает шумную таблицу начала сезона
         const anchor = avgTotal / 2;
         const pull = kind === 'basketball' ? 0.35 : 0.5;
-        lh = lh * (1 - pull) + anchor * pull * HOME_ADV_GOALS[lg.type];
+        lh = lh * (1 - pull) + anchor * pull * HAG;
         la = la * (1 - pull) + anchor * pull;
         statsUsed = true;
       } else {
@@ -447,17 +533,31 @@ for (const lg of LEAGUES) {
       }
       for (const c of cand) c.edge = edgeOf(c.p, c.i);
 
-      // лучший рынок: при наличии честной вероятности линии — максимальный edge;
-      // без линии — максимальная вероятность (не ниже 50%)
+      // Калибровка применяется ДО выбора рынка, чтобы карточка, порог
+      // уверенности и счётчики жили на одной шкале. Модель недооценивает себя на
+      // 6–10 пунктов (наблюдаемая доля заходов выше предсказанной).
+      // Значения edge остаются от исходной модели: перевес — свойство модели
+      // против линии, и раздувать его калибровкой нельзя.
+      cand.forEach(c => {
+        c.raw = c.p;
+        c.p = calibrateToPercent(c.p, calibrationFor(c.m), calibrationReliable) / 100;
+      });
+
+      // Выбор рынка: базой идёт вероятность, edge — ограниченная добавка.
+      // Раньше сортировка была строго по edge, и карточку всегда забирал самый
+      // несогласный с линией рынок — а это чаще всего ошибка модели, а не
+      // находка: в истории заходы с большим edge были хуже (80% против 53%).
       const withLine = cand.filter(c => c.i != null && c.p >= 0.45);
       const pool = withLine.length ? withLine : cand.filter(c => c.p >= 0.5);
       if (!pool.length) continue;
-      pool.sort((a, b) => (b.edge ?? -1) - (a.edge ?? -1) || b.p - a.p);
+      pool.sort((a, b) => selectionScore(b.p, b.edge) - selectionScore(a.p, a.edge)
+        || (b.edge ?? -1) - (a.edge ?? -1) || b.p - a.p);
       const best = pool[0];
       // второй по величине рынок — для карточки (например, тотал)
       const second = cand.filter(c => c.m !== best.m && c.p >= 0.5).sort((a, b) => b.p - a.p)[0];
 
-      // value-порог 5%: меньше — это шум, а не перевес (маржа линии уже снята devig)
+      // value-порог 5%: меньше — это шум, а не перевес (маржа линии уже снята devig).
+      // Как метка для PRO это по-прежнему осмысленно, но выбирать по ней рынок больше нельзя.
       const value = best.edge != null && best.edge > 0.05;
       cand.forEach(c => { c.edgePct = c.edge != null ? Math.round(c.edge * 100) : null; });
 

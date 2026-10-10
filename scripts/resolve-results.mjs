@@ -116,7 +116,10 @@ for (const src of sources) {
 
       const base = {
         date: matchDate, id: p.id, kind: p.tier === 'pro' ? 'pro' : 'free',
-        sport: p.sport, league: p.lgName, home: p.home, away: p.away,
+        // lgKey нужен домашнему фактору по лигам: он считается из решённой
+        // истории по лиге, а не одной константой на все лиги. Это не платный
+        // сигнал (лига видна в карточке), поэтому пишем и в публичные данные.
+        sport: p.sport, lgKey: p.lgKey, league: p.lgName, home: p.home, away: p.away,
         market: p.market, confidence: p.confidence,
         // modelProb нужен калибровке (Brier), а odds — трекеру ставок.
         // edge и value не пишем: перевес над линией — это платный сигнал PRO,

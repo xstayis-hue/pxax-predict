@@ -16,6 +16,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
+      - name: Тесты модели (выбор рынка, калибровка, домашний фактор)
+        run: node test/model.test.mjs
       - name: Generate predictions
         run: node scripts/generate-predictions.mjs
       # PRO-прогнозы уходят в KV воркера и в репозиторий не попадают (data/pro-feed.json
