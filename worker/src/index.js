@@ -38,6 +38,11 @@ const config = (env) => ({
   proDays: Number(env.PRO_DAYS) > 0 ? Math.round(Number(env.PRO_DAYS)) : 30,
   trialDays: Number(env.TRIAL_DAYS) >= 0 ? Math.round(Number(env.TRIAL_DAYS)) : 3,
   miniappUrl: env.MINIAPP_URL || '',
+  // SHA коммита, который CI передаёт при деплое (wrangler deploy --var BUILD:...).
+  // Нужен, чтобы точно знать, какой код сейчас в проде: дважды «оплата не
+  // работает» разбирались вслепую именно потому, что живой деплой нельзя было
+  // опознать. Локальный запуск без переменной отдаёт 'dev'.
+  build: env.BUILD || 'dev',
 });
 
 // ---------- Telegram API ----------
@@ -468,10 +473,10 @@ export default {
         price: cfg.price,
         days: cfg.proDays,
         storage: env.DB ? 'd1' : (env.USERS ? 'kv' : 'none'),
-        // Публичная проба: какой заголовок счёта строит именно этот деплой.
-        // Секретов не раскрывает, но сразу видно, доехал ли фикс длины title
-        // (Telegram принимает 1–32 символа). Без этого «оплата не работает»
-        // приходилось угадывать вслепую.
+        // Публичная опознавалка деплоя: какой код сейчас живой и какой заголовок
+        // счёта он строит. Секретов не раскрывает, но снимает угадывание
+        // «доехал ли фикс» — раньше это выяснялось только по повторным жалобам.
+        build: cfg.build,
         invoiceTitle: invoiceTitle(cfg.proDays),
         invoiceTitleLen: invoiceTitle(cfg.proDays).length,
       });
