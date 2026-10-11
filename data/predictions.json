@@ -1,15 +1,155 @@
 {
-  "date": "2026-10-11",
-  "generated": "2026-10-11T18:47:23.955Z",
+  "date": "2026-10-12",
+  "generated": "2026-10-11T23:36:12.046Z",
   "model": "pxax-v2 @ ESPN standings + odds",
-  "count": 2,
-  "proCount": 2,
-  "botdLegs": 0,
+  "count": 7,
+  "proCount": 4,
+  "botdLegs": 3,
   "thresholds": {
     "freeMin": 55,
     "proMin": 60
   },
   "predictions": [
+    {
+      "id": "401915417",
+      "lgKey": "soccer/uefa.champions",
+      "lgName": "Лига чемпионов",
+      "sport": "⚽",
+      "type": "soccer",
+      "home": "Arsenal",
+      "away": "Lille",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/359.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/166.png",
+      "time": "22:00 МСК",
+      "matchDate": "2026-10-13T19:00Z",
+      "market": "П1",
+      "confidence": 94,
+      "modelProb": 0.94,
+      "odds": 1.25,
+      "expected": {
+        "home": 2.9,
+        "away": 0
+      },
+      "markets": [
+        {
+          "market": "П1",
+          "prob": 94,
+          "odds": 1.25
+        },
+        {
+          "market": "ТБ 2.5",
+          "prob": 61,
+          "odds": 1.5714285714285714
+        },
+        {
+          "market": "ТМ 2.5",
+          "prob": 45,
+          "odds": 2.4
+        }
+      ],
+      "record": "1-0-0 / 0-0-1",
+      "note": "Ожидаемые голы: 2,90 : 0,00 (модель форма). Исходы: П1 94% · Х 6% · П2 0%. Модель даёт 94% на «П1». Дополнительно модель видит «ТБ 2.5» с вероятностью 61%."
+    },
+    {
+      "id": "401892490",
+      "lgKey": "hockey/nhl",
+      "lgName": "NHL",
+      "sport": "🏒",
+      "type": "us",
+      "home": "Montreal Canadiens",
+      "away": "Buffalo Sabres",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/mtl.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/buf.png",
+      "time": "01:30 МСК",
+      "matchDate": "2026-10-13T22:30Z",
+      "market": "П1",
+      "confidence": 62,
+      "modelProb": 0.62,
+      "odds": null,
+      "expected": {
+        "home": 3.39,
+        "away": 2.99
+      },
+      "markets": [
+        {
+          "market": "П1",
+          "prob": 62,
+          "odds": null
+        }
+      ],
+      "record": "2-2-1 / 2-3-0",
+      "note": "Ожидаемые шайбы: 3,39 : 2,99 (модель таблица лиги). Исходы: П1 56% · П2 43%. Модель даёт 62% на «П1». Травмы: Montreal Canadiens — Florian Xhekaj, Sam Montembeault, Oliver Kapanen; Buffalo Sabres — Jason Zucker, Alex Lyon, Conor Timmins."
+    },
+    {
+      "id": "401915418",
+      "lgKey": "soccer/uefa.champions",
+      "lgName": "Лига чемпионов",
+      "sport": "⚽",
+      "type": "soccer",
+      "home": "Lens",
+      "away": "Sporting CP",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/175.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/soccer/500/2250.png",
+      "time": "19:45 МСК",
+      "matchDate": "2026-10-13T16:45Z",
+      "market": "ТБ 2.5",
+      "confidence": 61,
+      "modelProb": 0.61,
+      "odds": 2.4,
+      "expected": {
+        "home": 1.52,
+        "away": 1.38
+      },
+      "markets": [
+        {
+          "market": "ТБ 2.5",
+          "prob": 61,
+          "odds": 2.4
+        },
+        {
+          "market": "Х2",
+          "prob": 53,
+          "odds": 1.5437500000000002
+        },
+        {
+          "market": "ТМ 2.5",
+          "prob": 45,
+          "odds": 1.5714285714285714
+        }
+      ],
+      "record": "1-0-0 / 1-0-0",
+      "note": "Ожидаемые голы: 1,52 : 1,38 (модель форма). Исходы: П1 41% · Х 25% · П2 35%. Модель даёт 61% на «ТБ 2.5». Дополнительно модель видит «Х2» с вероятностью 53%."
+    },
+    {
+      "id": "401892489",
+      "lgKey": "hockey/nhl",
+      "lgName": "NHL",
+      "sport": "🏒",
+      "type": "us",
+      "home": "Columbus Blue Jackets",
+      "away": "Florida Panthers",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/cbj.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/fla.png",
+      "time": "01:15 МСК",
+      "matchDate": "2026-10-13T22:15Z",
+      "market": "П1",
+      "confidence": 61,
+      "modelProb": 0.61,
+      "odds": null,
+      "expected": {
+        "home": 3.18,
+        "away": 2.87
+      },
+      "markets": [
+        {
+          "market": "П1",
+          "prob": 61,
+          "odds": null
+        }
+      ],
+      "record": "2-2-0 / 2-1-2",
+      "note": "Ожидаемые шайбы: 3,18 : 2,87 (модель таблица лиги). Исходы: П1 55% · П2 44%. Модель даёт 61% на «П1». Травмы: Florida Panthers — Brad Marchand (не выйдет), Aleksander Barkov, Jonah Gadjovich."
+    },
     {
       "id": "401892487",
       "lgKey": "hockey/nhl",
@@ -44,6 +184,41 @@
       ],
       "record": "3-1-1 / 5-1-0",
       "note": "Ожидаемые шайбы: 3,11 : 2,94 (модель таблица лиги). Исходы: П1 53% · П2 46%. Модель даёт 59% на «П1». Травмы: Minnesota Wild — Zach Bogosian, Marcus Foligno, Filip Gustavsson; Vegas Golden Knights — Lukas Cormier."
+    },
+    {
+      "id": "401892488",
+      "lgKey": "hockey/nhl",
+      "lgName": "NHL",
+      "sport": "🏒",
+      "type": "us",
+      "home": "Detroit Red Wings",
+      "away": "New Jersey Devils",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/det.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/nj.png",
+      "time": "01:00 МСК",
+      "matchDate": "2026-10-13T22:00Z",
+      "market": "П1",
+      "confidence": 59,
+      "modelProb": 0.59,
+      "odds": null,
+      "expected": {
+        "home": 3.14,
+        "away": 2.94
+      },
+      "markets": [
+        {
+          "market": "П1",
+          "prob": 59,
+          "odds": null
+        },
+        {
+          "market": "П2",
+          "prob": 46,
+          "odds": null
+        }
+      ],
+      "record": "1-3-1 / 2-2-0",
+      "note": "Ожидаемые шайбы: 3,14 : 2,94 (модель таблица лиги). Исходы: П1 53% · П2 46%. Модель даёт 59% на «П1». Травмы: Detroit Red Wings — J.T. Compher, Mason Appleton, Marco Kasper; New Jersey Devils — Nick Bjugstad, Connor Brown (не выйдет), Seamus Casey."
     },
     {
       "id": "401892485",

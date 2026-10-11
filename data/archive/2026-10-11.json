@@ -1,0 +1,84 @@
+{
+  "date": "2026-10-11",
+  "generated": "2026-10-11T18:47:23.955Z",
+  "model": "pxax-v2 @ ESPN standings + odds",
+  "count": 2,
+  "proCount": 2,
+  "botdLegs": 0,
+  "thresholds": {
+    "freeMin": 55,
+    "proMin": 60
+  },
+  "predictions": [
+    {
+      "id": "401892487",
+      "lgKey": "hockey/nhl",
+      "lgName": "NHL",
+      "sport": "🏒",
+      "type": "us",
+      "home": "Minnesota Wild",
+      "away": "Vegas Golden Knights",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/min.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/vgk.png",
+      "time": "03:00 МСК",
+      "matchDate": "2026-10-13T00:00Z",
+      "market": "П1",
+      "confidence": 59,
+      "modelProb": 0.59,
+      "odds": 1.847457627118644,
+      "expected": {
+        "home": 3.11,
+        "away": 2.94
+      },
+      "markets": [
+        {
+          "market": "П1",
+          "prob": 59,
+          "odds": 1.847457627118644
+        },
+        {
+          "market": "П2",
+          "prob": 46,
+          "odds": 1.9803921568627452
+        }
+      ],
+      "record": "3-1-1 / 5-1-0",
+      "note": "Ожидаемые шайбы: 3,11 : 2,94 (модель таблица лиги). Исходы: П1 53% · П2 46%. Модель даёт 59% на «П1». Травмы: Minnesota Wild — Zach Bogosian, Marcus Foligno, Filip Gustavsson; Vegas Golden Knights — Lukas Cormier."
+    },
+    {
+      "id": "401892485",
+      "lgKey": "hockey/nhl",
+      "lgName": "NHL",
+      "sport": "🏒",
+      "type": "us",
+      "home": "Buffalo Sabres",
+      "away": "Florida Panthers",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/buf.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/fla.png",
+      "time": "20:00 МСК",
+      "matchDate": "2026-10-12T17:00Z",
+      "market": "П1",
+      "confidence": 58,
+      "modelProb": 0.58,
+      "odds": 1.9523809523809523,
+      "expected": {
+        "home": 3.01,
+        "away": 2.92
+      },
+      "markets": [
+        {
+          "market": "П1",
+          "prob": 58,
+          "odds": 1.9523809523809523
+        },
+        {
+          "market": "П2",
+          "prob": 48,
+          "odds": 1.8695652173913042
+        }
+      ],
+      "record": "2-3-0 / 2-1-2",
+      "note": "Ожидаемые шайбы: 3,01 : 2,92 (модель таблица лиги). Исходы: П1 52% · П2 48%. Модель даёт 58% на «П1». Травмы: Buffalo Sabres — Jason Zucker, Alex Lyon, Conor Timmins; Florida Panthers — Brad Marchand (не выйдет), Aleksander Barkov, Jonah Gadjovich."
+    }
+  ]
+}
