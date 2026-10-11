@@ -2579,7 +2579,17 @@ async function goSubscribe() {
         tg.openTelegramLink(CONFIG.SUBSCRIBE_URL);
         return;
       }
-      if (!j.ok) toast(j.error === 'not_configured' ? 'Оплата ещё настраивается' : 'Не удалось выставить счёт, попробуй позже');
+      if (!j.ok) {
+        // Ошибку показываем по существу, а не одной фразой на все случаи.
+        // Раньше «не удалось выставить счёт» означало и битую сессию, и отказ
+        // Telegram, и неверный параметр — и по этой подписи нельзя было понять,
+        // что именно чинить. reason приходит от воркера (описание от Telegram).
+        console.warn('Invoice error:', j.error, j.reason || '');
+        if (j.error === 'not_configured') toast('Оплата ещё настраивается');
+        else if (j.error === 'bad_auth') toast('Сессия устарела — открой приложение заново');
+        else if (j.error === 'invoice_failed' && j.reason) toast('Счёт не создан: ' + String(j.reason).slice(0, 90));
+        else toast('Не удалось выставить счёт, попробуй позже');
+      }
     } catch (e) {
       console.warn('Payment error:', e);
       haptic('error');

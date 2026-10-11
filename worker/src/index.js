@@ -346,7 +346,13 @@ async function handleInvoice(request, env, cfg) {
   if (!user) return json({ ok: false, error: 'bad_auth' }, 401);
 
   const inv = await createInvoiceLink(cfg, user.id);
-  if (!inv.ok || !inv.result) return json({ ok: false, error: 'invoice_failed' }, 502);
+  // Отдаём причину отказа Telegram наружу в поле reason. Это не секрет и не
+  // внутренности: description вида «Bad Request: TITLE_TOO_LONG» — единственный
+  // способ отличить неверный токен от неверного параметра, не глядя в логи.
+  // Раньше ошибка терялась, и «оплата не работает» приходилось угадывать.
+  if (!inv.ok || !inv.result) {
+    return json({ ok: false, error: 'invoice_failed', reason: String(inv.description || 'no description') }, 502);
+  }
   const stored = await loadUser(env, user.id);
   await saveUser(env, user.id, { ...(stored || {}), name: user.first_name || (stored && stored.name) || '' });
   return json({ ok: true, invoiceUrl: inv.result, price: cfg.price, days: cfg.proDays });
@@ -457,6 +463,12 @@ export default {
         price: cfg.price,
         days: cfg.proDays,
         storage: env.DB ? 'd1' : (env.USERS ? 'kv' : 'none'),
+        // Публичная проба: какой заголовок счёта строит именно этот деплой.
+        // Секретов не раскрывает, но сразу видно, доехал ли фикс длины title
+        // (Telegram принимает 1–32 символа). Без этого «оплата не работает»
+        // приходилось угадывать вслепую.
+        invoiceTitle: invoiceTitle(cfg.proDays),
+        invoiceTitleLen: invoiceTitle(cfg.proDays).length,
       });
     }
     if (url.pathname === '/api/status' && request.method === 'GET') return handleStatus(request, env, cfg);
