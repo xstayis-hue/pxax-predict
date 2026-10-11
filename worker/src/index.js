@@ -68,8 +68,13 @@ export async function validateInitData(initData, botToken) {
     const params = new URLSearchParams(initData);
     const hash = params.get('hash');
     if (!hash) return null;
+    // В data-check-string входят ВСЕ полученные поля, кроме hash. Поле signature
+    // удалять нельзя: с 2024 Telegram кладёт его в initData, и оно участвует в
+    // подсчёте hash. Пока мы его вырезали, хеш не сходился НИКОГДА — любая
+    // оплата падала с bad_auth («Сессия устарела»), сколько ни переоткрывай
+    // приложение. Так же считают эталонные реализации: grammY берёт {hash, ...data}
+    // и signature оставляет в строке.
     params.delete('hash');
-    params.delete('signature'); // подпись для сторонних платформ — не входит в data_check_string
     const dataCheckString = [...params.entries()]
       .map(([k, v]) => `${k}=${v}`)
       .sort()

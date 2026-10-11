@@ -183,6 +183,39 @@ await test('валидный initData принимается, подделанн
   assert.equal(r2.status, 401);
 });
 
+/* Регрессия «Сессия устарела» на любой оплате: Telegram с 2024 кладёт в initData
+   поле signature, и оно ВХОДИТ в data_check_string для hash. Пока воркер его
+   вырезал, хеш не сходился никогда — ни один счёт не выставлялся, и переоткрытие
+   приложения не помогало. Тест берёт initData СО signature (как приходит из
+   Telegram) и требует, чтобы подпись принималась. */
+await test('initData с полем signature принимается (hash покрывает signature)', async () => {
+  const e = env();
+  const fields = {
+    auth_date: String(Math.floor(Date.now() / 1000)),
+    chat_instance: '1234567890123456789',
+    chat_type: 'private',
+    signature: 'Zm9vYmFyLXNpZ25hdHVyZS1iYXNlNjR1cmwtZXhhbXBsZQ',
+    user: JSON.stringify({ id: 9310, first_name: 'Тест', username: 'test' }),
+  };
+  const unsigned = new URLSearchParams(fields);
+  const dcs = [...unsigned.entries()].map(([k, v]) => `${k}=${v}`).sort().join('\n');
+  const secret = createHmac('sha256', 'WebAppData').update(BOT_TOKEN).digest();
+  unsigned.set('hash', createHmac('sha256', secret).update(dcs).digest('hex'));
+  const withSig = unsigned.toString();
+
+  const r = await call(worker, post('/api/trial', { initData: withSig }), e);
+  const j = await r.json();
+  assert.equal(r.status, 200, `signature-подпись должна приниматься: ${JSON.stringify(j)}`);
+  assert.equal(j.ok, true);
+});
+
+await test('initData без signature тоже принимается (старые клиенты)', async () => {
+  const e = env();
+  const r = await call(worker, post('/api/trial', { initData: initDataFor(9311) }), e);
+  assert.equal(r.status, 200);
+  assert.equal((await r.json()).ok, true);
+});
+
 await test('initData старше суток отклоняется', async () => {
   const old = signInitData({
     auth_date: String(Math.floor(Date.now() / 1000) - 90000),
