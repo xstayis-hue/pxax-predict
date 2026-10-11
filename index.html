@@ -46,8 +46,8 @@
   }
   /* Числа — главный герой продукта: табличные цифры, чтобы коэффициенты и проценты
      не «прыгали» при обновлении значений. */
-  .stat .v, .sg .v, .pick .v, .cmp .r, .streak .v, .h-item .o, .botd-sum .o,
-  .botd-leg .lg-o, .promo-box .code b, .line-chip b {
+  .stat .v, .sg .v, .vh-prob, .cmp .r, .streak .v, .h-item .o, .botd-sum .o,
+  .botd-leg .lg-o, .promo-box .code b, .line-chip b, .mm-prob {
     font-variant-numeric: tabular-nums; font-feature-settings:"tnum" 1;
   }
   /* Кегль: 11px — нижняя граница, мельче на телефоне не читается. Все значения
@@ -187,9 +187,6 @@
     padding:3px 8px; border-radius:12px; white-space:nowrap;
   }
   .p-body { padding: 16px 14px 4px; text-align:center; position:relative; z-index:1; }
-  .league-line { display:flex; align-items:center; justify-content:center; gap:7px; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); }
-  .lg-dot { width:6px; height:6px; border-radius:50%; background:var(--neon); box-shadow:0 0 8px var(--neon); flex:none; }
-  .pro-card .lg-dot { background:var(--gold); box-shadow:0 0 8px var(--gold); }
   .teams { display:flex; align-items:center; justify-content:center; gap:12px; margin-top:13px; }
   .team { flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; gap:7px; }
   .badge {
@@ -219,17 +216,79 @@
     background:rgba(0,229,255,.06); border:1px solid rgba(0,229,255,.18);
   }
   .pro-card .time-chip { background:rgba(255,201,60,.07); border-color:rgba(255,201,60,.22); }
-  .p-picks { display:flex; gap:10px; padding: 14px 16px 4px; }
-  .pick {
-    flex:1; background:var(--card2); border-radius:13px; padding:12px;
-    border:1px solid rgba(0,229,255,.2); text-align:center;
+  /* ---------- HERO-вердикт: рынок и вероятность в одном блоке со скосом ---------- */
+  /* Отдельная рамка со срезанным углом — «киберпанк» без фоновых сеток.
+     Неон для FREE, золото для PRO — как кант карточки. */
+  .verdict-hero {
+    position:relative; margin:14px 16px 0; padding:14px 15px 12px; z-index:1;
+    background: linear-gradient(135deg, rgba(0,229,255,.10), rgba(0,229,255,.03));
+    border:1px solid rgba(0,229,255,.34);
+    clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%);
+    box-shadow: 0 0 22px rgba(0,229,255,.10), inset 0 0 18px rgba(0,229,255,.05);
+    overflow:hidden; /* пробежка свечения не должна расширять блок */
   }
-  .pick .m { font-size:11px; color:var(--muted); letter-spacing:.06em; text-transform:uppercase; }
-  .pick .v { font-size:19px; font-weight:800; color:var(--neon); margin-top:3px; }
-  .pick.gold { border-color:rgba(255,201,60,.4); background:rgba(255,201,60,.07); }
-  .pick.gold .v { color:var(--gold); }
-  .pick.gold .v.unavailable { color:var(--muted); font-size:12px; }
-  .pick .sub { font-size:11px; color:var(--muted); margin-top:3px; }
+  .pro-card .verdict-hero {
+    background: linear-gradient(135deg, rgba(255,201,60,.12), rgba(255,201,60,.03));
+    border-color: rgba(255,201,60,.42);
+    box-shadow: 0 0 22px rgba(255,201,60,.12), inset 0 0 18px rgba(255,201,60,.05);
+  }
+  .vh-label {
+    font-size:10.5px; letter-spacing:.16em; text-transform:uppercase;
+    color:var(--muted); font-weight:700;
+  }
+  .pro-card .vh-label { color:rgba(255,201,60,.85); }
+  .vh-main { display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-top:5px; }
+  .vh-market { font-size:22px; font-weight:900; color:var(--neon); letter-spacing:.01em; line-height:1.1; text-shadow:0 0 14px rgba(0,229,255,.35); }
+  .pro-card .vh-market { color:var(--gold); text-shadow:0 0 14px rgba(255,201,60,.35); }
+  .vh-prob {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size:26px; font-weight:800; color:var(--text); flex:none;
+  }
+  .vh-bar { position:relative; height:6px; border-radius:5px; background:rgba(139,163,199,.15); overflow:hidden; margin-top:11px; }
+  .vh-bar i {
+    display:block; height:100%; width:0; border-radius:5px;
+    background: linear-gradient(90deg, #0090b3, var(--neon));
+    box-shadow: 0 0 10px rgba(0,229,255,.55);
+    transition: width 1.1s cubic-bezier(.22,1,.36,1);
+  }
+  .pro-card .vh-bar i { background:linear-gradient(90deg,var(--gold),#ffe08a); box-shadow:0 0 10px rgba(255,201,60,.6); }
+  /* свечение-пробежка по hero один раз при появлении карточки, затем статика */
+  .verdict-hero::after {
+    content:''; position:absolute; inset:0; pointer-events:none;
+    background: linear-gradient(115deg, transparent 35%, rgba(255,255,255,.16) 50%, transparent 65%);
+    transform: translateX(-120%); animation: vhSweep .75s ease-out .25s 1 both;
+  }
+  .pro-card .verdict-hero::after { background: linear-gradient(115deg, transparent 35%, rgba(255,255,255,.2) 50%, transparent 65%); }
+  @keyframes vhSweep { from { transform: translateX(-120%); } to { transform: translateX(120%); } }
+  /* плейсхолдеры заблокированного hero — той же геометрии, что реальный блок */
+  .locked-hero { background:rgba(139,163,199,.07); border-color:rgba(139,163,199,.16); box-shadow:none; }
+  .locked-hero::after { animation:none; }
+  .vh-ph-market { height:22px; width:46%; }
+  .vh-ph-prob { height:24px; width:64px; }
+  /* плейсхолдеры в hero идут в одну строку — сбрасываем общий .blur-отступ
+     (правило ниже по файлу, поэтому селектор специфичнее) */
+  .verdict-hero .vh-main .lock-ph + .lock-ph { margin-top:0; }
+  /* ---------- доп. рынки: свёрнуты, чтобы не спорить с вердиктом ---------- */
+  .more-markets { margin:10px 0 0; }
+  .more-markets > summary {
+    cursor:pointer; list-style:none; font-size:11.5px; font-weight:700;
+    color:var(--muted); padding:8px 12px; border-radius:11px;
+    background:rgba(139,163,199,.07); border:1px solid rgba(139,163,199,.16);
+    display:flex; align-items:center; gap:7px;
+  }
+  .more-markets > summary::-webkit-details-marker { display:none; }
+  .more-markets > summary::before { content:'＋'; color:var(--neon); font-weight:900; }
+  .more-markets[open] > summary::before { content:'−'; }
+  .pro-card .more-markets > summary::before { color:var(--gold); }
+  .mm-list { padding:6px 0 0; }
+  .mm-row {
+    display:flex; align-items:center; gap:10px; padding:8px 12px; border-radius:10px;
+    background:var(--card2); margin-top:6px; font-size:12px;
+  }
+  .mm-row .mm-name { flex:1; min-width:0; font-weight:700; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .mm-row .mm-prob { font-weight:800; color:var(--neon); }
+  .pro-card .mm-row .mm-prob { color:var(--gold); }
+  .mm-row .mm-odds { color:var(--muted); font-size:11px; }
   /* value-бейдж: модельная вероятность заметно выше линии */
   .value-badge {
     display:inline-flex; align-items:center; gap:4px; margin-left:auto;
@@ -256,16 +315,6 @@
     color:var(--muted); font-size:11px; font-weight:700; white-space:nowrap;
   }
   .sf-btn.on { border-color:var(--neon); color:var(--neon); background:rgba(0,229,255,.1); }
-  .conf { padding: 10px 18px 8px; }
-  .conf .lbl { display:flex; justify-content:space-between; font-size:11px; color:var(--muted); margin-bottom:6px; }
-  .conf .lbl b { color:var(--text); }
-  .bar { position:relative; height:7px; border-radius:6px; background:rgba(139,163,199,.15); overflow:hidden; }
-  .bar i {
-    display:block; height:100%; width:0; border-radius:6px;
-    background: linear-gradient(90deg, #0090b3, var(--neon));
-    transition: width 1.1s cubic-bezier(.22,1,.36,1);
-  }
-  .pro-card .bar i { background:linear-gradient(90deg,var(--gold),#ffe08a); box-shadow:0 0 10px rgba(255,201,60,.6); }
   .ai-note {
     margin: 4px 14px 14px; padding: 10px 12px;
     background: rgba(139,163,199,.06); border-radius:11px;
@@ -837,6 +886,24 @@
     background:rgba(255,201,60,.1); border:1px solid rgba(255,201,60,.28);
     border-radius:20px; font-size:11px; color:var(--gold); font-weight:700;
     letter-spacing:.06em;
+  }
+  /* ---------- узкие экраны и уважение к reduced-motion ---------- */
+  /* Hero на 320px: рынок и вероятность не влезают в строку рядом — кладём
+     процент под рынком слева, кегль уменьшаем, рамка становится ниже. */
+  @media (max-width:360px) {
+    .verdict-hero { margin:12px 12px 0; padding:12px 13px 11px; }
+    .vh-main { flex-direction:column; align-items:flex-start; gap:2px; }
+    .vh-market { font-size:19px; }
+    .vh-prob { font-size:23px; }
+    .line-chip { margin:10px 12px 0; }
+    .more-markets { margin:10px 12px 0; }
+    .ai-note { margin:4px 12px 14px; }
+  }
+  /* Кто просил не анимировать — не анимируем: пробежку убираем, полосы
+     заполняем сразу (без transition), скос оставляем (он статичен). */
+  @media (prefers-reduced-motion: reduce) {
+    .verdict-hero::after { animation: none; opacity:0; }
+    .vh-bar i { transition: none; }
   }
 </style>
 </head>
@@ -1686,14 +1753,29 @@ function slideHTML(p, unlocked, isPro, isHistory) {
       ${edge != null ? `<span class="edge ${edgeCls}">${edgeLabel} ${edgeTxt}</span>` : ''}
     </div>`;
   }
-  // дополнительные рынки модели (кроме основного прогноза)
+  // дополнительные рынки: спрятаны под раскрывашку, чтобы не спорить с вердиктом
   const others = (!isHistory && Array.isArray(p.markets))
-    ? p.markets.filter(m => m.market !== p.market).slice(0, 2) : [];
+    ? p.markets.filter(m => m.market !== p.market).slice(0, 3) : [];
   const extraMarkets = others.length
-    ? `<div class="p-picks" style="padding-top:0">${others.map(m =>
-        `<div class="pick"><div class="m">${m.market}</div><div class="v">${m.prob}%</div>${
-          m.odds ? `<div class="sub">кэф ${m.odds.toFixed(2)}</div>` : ''}</div>`).join('')}</div>`
+    ? `<details class="more-markets">
+        <summary>ещё ${others.length} ${others.length === 1 ? 'рынок' : 'рынка'} от ИИ</summary>
+        <div class="mm-list">${others.map(m =>
+          `<div class="mm-row"><span class="mm-name">${m.market}</span><span class="mm-prob">${m.prob}%</span>${
+            m.odds ? `<span class="mm-odds">кэф ${m.odds.toFixed(2)}</span>` : ''}</div>`).join('')}</div>
+      </details>`
     : '';
+  // HERO-вердикт — единственное место, куда должен падать взгляд: рынок и
+  // вероятность модели рядом. Блок отдельный (.verdict-hero), чтобы его скос,
+  // кант и свечение не зависели от остальной карточки.
+  const heroBlock = `
+          <div class="verdict-hero">
+            <div class="vh-label">Прогноз ИИ</div>
+            <div class="vh-main">
+              <div class="vh-market">${p.market}</div>
+              <div class="vh-prob">${p.confidence}%</div>
+            </div>
+            <div class="vh-bar"><i data-w="${p.confidence}"></i></div>
+          </div>`;
   // Заблокированная карточка: сам прогноз (рынок, кэф, перевес, разбор) в разметку
   // не попадает — вместо него обезличенные плейсхолдеры. До этого контент размывался
   // CSS-фильтром, и в кадре до/во время применения blur VIP-ставка читалась.
@@ -1703,8 +1785,14 @@ function slideHTML(p, unlocked, isPro, isHistory) {
           <span class="ai-tag pro">${ic('diamond')} Pro AI</span>
         </div>
         <div class="p-body">
-          <div class="league-line"><span class="lg-dot"></span>${p.league}</div>
-          <div class="lock-ph lp-title"></div>
+          <div class="verdict-hero locked-hero">
+            <div class="vh-label">Прогноз ИИ</div>
+            <div class="vh-main">
+              <div class="lock-ph vh-ph-market"></div>
+              <div class="lock-ph vh-ph-prob"></div>
+            </div>
+            <div class="vh-bar"><i data-w="62"></i></div>
+          </div>
           <div class="lock-ph lp-teams"></div>
           <div class="lock-ph lp-line"></div>
           <div class="lock-ph lp-note"></div>
@@ -1717,7 +1805,6 @@ function slideHTML(p, unlocked, isPro, isHistory) {
             ${valBadge}
           </div>
           <div class="p-body">
-            <div class="league-line"><span class="lg-dot"></span>${p.league}</div>
             <div class="teams">
               <div class="team">
                 ${teamBadge(p.homeLogo, p.sport)}
@@ -1731,19 +1818,10 @@ function slideHTML(p, unlocked, isPro, isHistory) {
             </div>
             <div class="time-chip">${ic('clock')} ${isHistory ? 'вчера · ' : ''}${mdi.chip}${p.time}</div>
           </div>
-          <div class="p-picks">
-            <div class="pick">
-              <div class="m">прогноз</div>
-              <div class="v">${p.market}</div>
-            </div>
-          </div>
-          ${extraMarkets}
+          ${heroBlock}
           ${lineChip}
+          ${extraMarkets}
           <div class="bet-wrap">${betBtn(p) + myBetBtn(p, isHistory)}</div>
-          <div class="conf">
-            <div class="lbl"><span>уверенность ИИ</span><b>${p.confidence}%</b></div>
-            <div class="bar"><i data-w="${p.confidence}"></i></div>
-          </div>
           <div class="ai-note"><b>${isPro ? 'Pro-разбор:' : 'Разбор ИИ:'}</b> ${p.note}</div>
           `;
   return `
@@ -1928,9 +2006,9 @@ function render() {
   renderProfileExtras(statsAll);
   renderMyBets();
 
-  // полосы уверенности
+  // полосы уверенности (в hero-вердикте)
   requestAnimationFrame(() => requestAnimationFrame(() => {
-    document.querySelectorAll('.bar i').forEach(i => i.style.width = i.dataset.w + '%');
+    document.querySelectorAll('.vh-bar i').forEach(i => i.style.width = i.dataset.w + '%');
   }));
   tickFresh();
 }
