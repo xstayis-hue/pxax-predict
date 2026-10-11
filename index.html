@@ -155,11 +155,22 @@
   }
   .pro-card::before { background: linear-gradient(90deg, var(--gold), rgba(255,201,60,0) 70%); }
   /* водяной знак вида спорта */
+  /* Эмодзи, а не штриховая иконка: у глифа есть собственный цвет, форма и
+     объём, из-за чего фон читается как «3D-наклейка», а не как контур.
+     Штриховая иконка одним цветом сливалась с неоновой рамкой карточки.
+     Размер задаётся font-size (глиф масштабируется сам), currentColor
+     подставляется, но эмодзи его игнорирует — поэтому цвет не приписываем. */
   .wm {
-    position:absolute; right:-14px; bottom:-24px; font-size:110px;
-    opacity:.05; pointer-events:none; user-select:none; z-index:0;
+    position:absolute; right:-14px; bottom:-24px; font-size:104px;
+    line-height:1; opacity:.16; pointer-events:none; user-select:none; z-index:0;
+    font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+    filter: saturate(.9);
   }
-  .wm .ic { stroke-width:1.1; }
+  .pro-card .wm { opacity:.2; }
+  /* Водяной знак — позиционированный слой, а контент карточки идёт в потоке:
+     без этого эмодзи рисовалось ПОВЕРХ текста разбора (позиционированные
+     элементы красятся после потока). Поднимаем контент над знаком. */
+  .p-card > .blur { position:relative; z-index:1; }
   .p-top {
     display:flex; align-items:center; gap:8px;
     padding:11px 14px; font-size:11px; color:var(--muted);
@@ -1241,6 +1252,9 @@ const SPORTS = {
 };
 function sportIcon(s) { return ic(SPORTS[s] ? SPORTS[s][0] : 'trophy'); }
 function sportName(s) { return SPORTS[s] ? SPORTS[s][1] : 'Спорт'; }
+// эмодзи вида спорта — только для водяного знака на карточке (3D-эффект фона);
+// в интерфейсе остаётся штриховая иконка: эмодзи там выглядит наклейкой
+function sportEmoji(s) { return SPORTS[s] ? s : '🏆'; }
 
 /* Тактильный отклик: на ощупь Mini App отличается от веб-страницы не меньше, чем
    визуально. На старых клиентах HapticFeedback отсутствует — глушим. */
@@ -1828,7 +1842,7 @@ function slideHTML(p, unlocked, isPro, isHistory) {
     <div class="slide ${unlocked ? '' : 'locked'}">
       <div class="p-card ${isPro ? 'pro-card' : ''}">
         ${res}
-        <div class="wm">${sportIcon(p.sport)}</div>
+        <div class="wm" aria-hidden="true">${sportEmoji(p.sport)}</div>
         <div class="blur">${unlocked ? openBody : maskedBody}
         </div>
         ${unlocked ? '' : `
