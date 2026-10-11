@@ -1,6 +1,6 @@
 {
   "date": "2026-10-11",
-  "generated": "2026-10-10T23:27:04.336Z",
+  "generated": "2026-10-11T05:34:54.646Z",
   "model": "pxax-v2 @ ESPN standings + odds",
   "count": 4,
   "proCount": 1,
@@ -25,20 +25,20 @@
       "market": "П2",
       "confidence": 58,
       "modelProb": 0.58,
-      "odds": 1.6024096385542168,
+      "odds": 1.5555555555555556,
       "expected": {
-        "home": 2.86,
-        "away": 3.31
+        "home": 2.82,
+        "away": 3.37
       },
       "markets": [
         {
           "market": "П2",
           "prob": 58,
-          "odds": 1.6024096385542168
+          "odds": 1.5555555555555556
         }
       ],
-      "record": "0-4-2 / 3-1-1",
-      "note": "Ожидаемые шайбы: 2,86 : 3,31 (модель таблица лиги). Исходы: П1 43% · П2 56%. Модель даёт 58% на «П2». Линия 1,60 примерно совпадает с моделью. Травмы: Philadelphia Flyers — Travis Konecny (не выйдет), Nikita Grebenkin, Rasmus Ristolainen; Carolina Hurricanes — Alexander Nikishin (не выйдет), Seth Jarvis."
+      "record": "0-4-2 / 4-1-1",
+      "note": "Ожидаемые шайбы: 2,82 : 3,37 (модель таблица лиги). Исходы: П1 42% · П2 57%. Модель даёт 58% на «П2». Линия 1,56 примерно совпадает с моделью. Травмы: Philadelphia Flyers — Travis Konecny (не выйдет), Nikita Grebenkin, Rasmus Ristolainen; Carolina Hurricanes — Alexander Nikishin (не выйдет), Seth Jarvis."
     },
     {
       "id": "401892482",
@@ -57,8 +57,8 @@
       "modelProb": 0.57,
       "odds": 1.4587155963302751,
       "expected": {
-        "home": 3.3,
-        "away": 3.1
+        "home": 3.29,
+        "away": 3.09
       },
       "markets": [
         {
@@ -73,7 +73,42 @@
         }
       ],
       "record": "3-1-0 / 3-2-0",
-      "note": "Ожидаемые шайбы: 3,30 : 3,10 (модель таблица лиги). Исходы: П1 53% · П2 46%. Модель даёт 57% на «П1». Линия 1,46 примерно совпадает с моделью. Травмы: Washington Capitals — Pierre-Luc Dubois, Matt Roy, Patrick Thomas; Seattle Kraken — Jacob Melanson, Ryan Lindgren, Jake O'Brien."
+      "note": "Ожидаемые шайбы: 3,29 : 3,09 (модель таблица лиги). Исходы: П1 53% · П2 46%. Модель даёт 57% на «П1». Линия 1,46 примерно совпадает с моделью. Травмы: Washington Capitals — Pierre-Luc Dubois, Matt Roy, Patrick Thomas; Seattle Kraken — Jacob Melanson, Ryan Lindgren, Jake O'Brien."
+    },
+    {
+      "id": "401892487",
+      "lgKey": "hockey/nhl",
+      "lgName": "NHL",
+      "sport": "🏒",
+      "type": "us",
+      "home": "Minnesota Wild",
+      "away": "Vegas Golden Knights",
+      "homeLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/min.png",
+      "awayLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/vgk.png",
+      "time": "03:00 МСК",
+      "matchDate": "2026-10-13T00:00Z",
+      "market": "П1",
+      "confidence": 57,
+      "modelProb": 0.57,
+      "odds": null,
+      "expected": {
+        "home": 3.11,
+        "away": 2.94
+      },
+      "markets": [
+        {
+          "market": "П1",
+          "prob": 57,
+          "odds": null
+        },
+        {
+          "market": "П2",
+          "prob": 46,
+          "odds": null
+        }
+      ],
+      "record": "3-1-1 / 5-1-0",
+      "note": "Ожидаемые шайбы: 3,11 : 2,94 (модель таблица лиги). Исходы: П1 53% · П2 46%. Модель даёт 57% на «П1». Травмы: Minnesota Wild — Marcus Foligno (не выйдет), Zach Bogosian (не выйдет), Filip Gustavsson; Vegas Golden Knights — Victor Olofsson (не выйдет), Lukas Cormier."
     },
     {
       "id": "401892485",
@@ -92,8 +127,8 @@
       "modelProb": 0.56,
       "odds": null,
       "expected": {
-        "home": 3.04,
-        "away": 2.97
+        "home": 3.01,
+        "away": 2.92
       },
       "markets": [
         {
@@ -107,43 +142,8 @@
           "odds": null
         }
       ],
-      "record": "2-2-0 / 2-0-2",
-      "note": "Ожидаемые шайбы: 3,04 : 2,97 (модель таблица лиги). Исходы: П1 51% · П2 48%. Модель даёт 56% на «П1». Травмы: Buffalo Sabres — Jason Zucker, Alex Lyon, Conor Timmins; Florida Panthers — Brad Marchand (не выйдет), Aleksander Barkov, Jonah Gadjovich."
-    },
-    {
-      "id": "401892486",
-      "lgKey": "hockey/nhl",
-      "lgName": "NHL",
-      "sport": "🏒",
-      "type": "us",
-      "home": "New Jersey Devils",
-      "away": "Ottawa Senators",
-      "homeLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/nj.png",
-      "awayLogo": "https://a.espncdn.com/i/teamlogos/nhl/500/scoreboard/ott.png",
-      "time": "02:00 МСК",
-      "matchDate": "2026-10-12T23:00Z",
-      "market": "П1",
-      "confidence": 55,
-      "modelProb": 0.55,
-      "odds": null,
-      "expected": {
-        "home": 3.07,
-        "away": 3.09
-      },
-      "markets": [
-        {
-          "market": "П1",
-          "prob": 55,
-          "odds": null
-        },
-        {
-          "market": "П2",
-          "prob": 49,
-          "odds": null
-        }
-      ],
-      "record": "2-2-0 / 3-1-0",
-      "note": "Ожидаемые шайбы: 3,07 : 3,09 (модель таблица лиги). Исходы: П1 50% · П2 49%. Модель даёт 55% на «П1». Травмы: New Jersey Devils — Nick Bjugstad, Connor Brown (не выйдет), Seamus Casey; Ottawa Senators — Cameron Crotty (не выйдет), Jake Sanderson (не выйдет), William Eklund."
+      "record": "2-3-0 / 2-1-2",
+      "note": "Ожидаемые шайбы: 3,01 : 2,92 (модель таблица лиги). Исходы: П1 52% · П2 48%. Модель даёт 56% на «П1». Травмы: Buffalo Sabres — Jason Zucker, Alex Lyon, Conor Timmins; Florida Panthers — Eetu Luostarinen, Brad Marchand (не выйдет), Aleksander Barkov."
     }
   ]
 }
