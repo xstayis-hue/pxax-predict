@@ -217,12 +217,23 @@ export const applyPayment = (user, chargeId, stars, days, now = new Date()) => {
 /* ---------- счёт ---------- */
 export const invoicePayload = (uid, nonce) => `pro_${uid}_${nonce}`;
 
+/* Заголовок счёта. Telegram требует 1–32 СИМВОЛА на title, и при нарушении
+   createInvoiceLink падает с ok:false — наружу это выходило как «Не удалось
+   выставить счёт, попробуй позже», хотя дело было ровно в длине строки:
+   «PRO-подписка PXAXBET2016 AI на 30 дней» — 38 символов.
+   Собираем коротко и обрезаем с запасом, чтобы смена PRO_DAYS не сломала оплату. */
+export const invoiceTitle = (days) =>
+  `PRO PXAXBET2016 · ${days} дн.`.slice(0, 32);
+
 const createInvoiceLink = async (cfg, uid) => {
   const nonce = crypto.randomUUID().slice(0, 8);
   return tgApi(cfg.token, 'createInvoiceLink', {
-    title: `PRO-подписка PXAXBET2016 AI на ${cfg.proDays} дней`,
+    title: invoiceTitle(cfg.proDays),
     description: `Доступ к VIP-прогнозам Pro-ИИ на ${cfg.proDays} дней. Оплата Stars — разовая, не автопродление.`,
     payload: invoicePayload(uid, nonce),
+    // Для Stars провайдер не нужен, но документация просит передавать пустую
+    // строку явно — не полагаемся на то, что отсутствие поля равнозначно.
+    provider_token: '',
     currency: 'XTR',
     prices: [{ label: `PRO на ${cfg.proDays} дней`, amount: cfg.price }],
   });
@@ -411,9 +422,10 @@ async function handleWebhook(request, env, cfg, secretFromPath) {
   } else if (text.startsWith('/subscribe')) {
     const inv = await tgApi(cfg.token, 'sendInvoice', {
       chat_id: chatId,
-      title: `PRO-подписка PXAXBET2016 AI на ${cfg.proDays} дней`,
+      title: invoiceTitle(cfg.proDays),
       description: `Доступ к VIP-прогнозам Pro-ИИ на ${cfg.proDays} дней`,
       payload: invoicePayload(chatId, crypto.randomUUID().slice(0, 8)),
+      provider_token: '',
       currency: 'XTR',
       prices: [{ label: `PRO на ${cfg.proDays} дней`, amount: cfg.price }],
     });

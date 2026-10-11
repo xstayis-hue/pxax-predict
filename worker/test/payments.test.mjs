@@ -114,6 +114,63 @@ await test('health отдаёт цену и сроки из vars', async () => {
   assert.equal(j.ready, true);
 });
 
+/* Telegram принимает title счёта длиной 1–32 символа. Заголовок
+   «PRO-подписка PXAXBET2016 AI на 30 дней» — 38 символов, из-за чего
+   createInvoiceLink отвечал ok:false и оплата падала с «Не удалось выставить
+   счёт». Тест держит лимит: смена названия или PRO_DAYS не должна его пробить. */
+await test('заголовок счёта укладывается в лимит Telegram (32 символа)', async () => {
+  const { invoiceTitle } = mod;
+  for (const days of [3, 30, 90, 365, 1000]) {
+    const t = invoiceTitle(days);
+    assert.ok(t.length >= 1 && t.length <= 32, `title ${days} дн. = ${t.length} символов: ${t}`);
+    assert.ok(t.includes(String(days)), `в заголовке нет срока: ${t}`);
+  }
+});
+
+await test('createInvoiceLink получает короткий заголовок и Stars-цену', async () => {
+  const e = env();
+  const calls = [];
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = async (url, init) => {
+    const body = JSON.parse(init.body);
+    calls.push({ url: String(url), method: String(url).split('/').pop(), body });
+    // отвечаем как Telegram на createInvoiceLink
+    if (String(url).endsWith('/createInvoiceLink')) return new Response(JSON.stringify({ ok: true, result: 'https://t.me/invoice/test' }), { headers: { 'Content-Type': 'application/json' } });
+    return new Response(JSON.stringify({ ok: true }), { headers: { 'Content-Type': 'application/json' } });
+  };
+  try {
+    const r = await call(worker, post('/api/invoice', { initData: initDataFor(9301) }), e);
+    const j = await r.json();
+    assert.equal(r.status, 200, JSON.stringify(j));
+    assert.equal(j.ok, true);
+    assert.equal(j.invoiceUrl, 'https://t.me/invoice/test');
+    const inv = calls.find(c => c.method === 'createInvoiceLink');
+    assert.ok(inv, 'createInvoiceLink не вызывался');
+    assert.equal(inv.body.currency, 'XTR');
+    assert.equal(inv.body.provider_token, '', 'для Stars provider_token должен быть пустой строкой');
+    assert.ok(inv.body.title.length <= 32, `title ${inv.body.title.length} символов`);
+    assert.equal(inv.body.prices.length, 1);
+    assert.equal(inv.body.prices[0].amount, 777);
+    assert.ok(Buffer.byteLength(inv.body.payload) <= 128, 'payload больше 128 байт');
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+});
+
+await test('если Telegram отверг счёт — воркер отдаёт invoice_failed', async () => {
+  const e = env();
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = async () => new Response(JSON.stringify({ ok: false, description: 'Bad Request: TITLE_TOO_LONG' }), { headers: { 'Content-Type': 'application/json' } });
+  try {
+    const r = await call(worker, post('/api/invoice', { initData: initDataFor(9302) }), e);
+    const j = await r.json();
+    assert.equal(r.status, 502);
+    assert.equal(j.error, 'invoice_failed');
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+});
+
 await test('валидный initData принимается, подделанный — нет', async () => {
   const e = env();
   const good = initDataFor(555);
