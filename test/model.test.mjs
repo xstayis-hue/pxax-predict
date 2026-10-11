@@ -3,7 +3,7 @@
 // поэтому гоняются в CI на каждый push.
 //
 // Запуск: node test/model.test.mjs
-import { selectionScore, marketFamily, calibratedRate, calibrateProbability, homeAdvFromTotals, CALIBRATION_MAX_SHIFT } from '../scripts/model.mjs';
+import { selectionScore, marketFamily, calibratedRate, calibrateProbability, homeAdvFromTotals, recentForm, CALIBRATION_MAX_SHIFT } from '../scripts/model.mjs';
 
 const results = [];
 const check = (name, cond, extra = '') => results.push(`${cond ? 'PASS' : 'FAIL'} — ${name}${extra ? `  [${extra}]` : ''}`);
@@ -68,6 +68,30 @@ check('H2: сбалансированная выборка даёт 1.125 при
 check('H3: равенство голов -> ровно 1.0', approx(homeAdvFromTotals(300, 300, 100), 1.0, 1e-9));
 check('H4: нулевые счета не делятся на ноль', homeAdvFromTotals(0, 0, 100) === null);
 check('H5: множитель зажат сверху 1.35', homeAdvFromTotals(900, 100, 100) === 1.35, String(homeAdvFromTotals(900, 100, 100)));
+
+/* ---- окно формы xG (регрессия: бралось начало сезона, а не последние матчи) ---- */
+// 7 матчей по возрастанию даты; матч-цель позже всех.
+const season = [
+  { ms: 10, xg: 0.3, xga: 1.5 }, { ms: 20, xg: 0.4, xga: 1.4 }, { ms: 30, xg: 1.6, xga: 1.0 },
+  { ms: 40, xg: 1.0, xga: 1.0 }, { ms: 50, xg: 1.1, xga: 1.1 }, { ms: 60, xg: 1.7, xga: 0.9 },
+  { ms: 70, xg: 1.8, xga: 0.8 },
+];
+const rf = recentForm(season, 100, 5);
+// Берём МАТЧИ 30..70 (последние 5), а не 10..50 — иначе это форма начала сезона.
+check('R1: форма — последние 5 матчей, не первые',
+  approx(rf.xf, (1.6 + 1.0 + 1.1 + 1.7 + 1.8) / 5, 1e-9), `xf=${rf.xf.toFixed(3)}`);
+check('R2: n=5, xG против тоже из последних пяти',
+  rf.n === 5 && approx(rf.xa, (1.0 + 1.0 + 1.1 + 0.9 + 0.8) / 5, 1e-9), `xa=${rf.xa.toFixed(3)}`);
+// Порядок в источнике не влияет: перемешиваем и получаем то же среднее.
+const shuffled = [...season].sort((a, b) => b.ms - a.ms);
+check('R3: порядок источника не важен', approx(recentForm(shuffled, 100, 5).xf, rf.xf, 1e-9));
+// Матчи позже даты прогноза не подглядываются (нет lookahead’а).
+// При matchMs=45 в истории остаются только ms 10..40 — матч ms=50 не должен попасть.
+check('R4: матчи после даты прогноза не учитываются',
+  approx(recentForm(season, 45, 5).xf, (0.3 + 0.4 + 1.6 + 1.0) / 4, 1e-9),
+  `xf=${recentForm(season, 45, 5).xf.toFixed(3)}`);
+check('R5: меньше трёх сыгранных — null', recentForm(season, 25, 5) === null);
+check('R6: пустая история — null', recentForm(null, 100, 5) === null);
 
 console.log(results.join('\n'));
 const failed = results.filter((r) => r.startsWith('FAIL'));

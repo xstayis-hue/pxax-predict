@@ -46,8 +46,27 @@ export function outcomesFromNormal(lh, la, totalLine) {
   return { p1, px: 0, p2, over, under, p1h: null, p2h: null };
 }
 
-// xG-форма (Understat): множители к ожидаемым голам.
-// t = {xf, xa}: средние xG за/против за последние 5 сыгранных матчей команды;
+// Последние n сыгранных матчей строго до матча -> средние xG за/против.
+// Порядок в источнике не важен: сортируем по времени и берём хвост. Раньше
+// генератор делал slice(0, 5) по массиву, который Understat отдаёт по
+// возрастанию даты, — то есть брал ПЕРВЫЕ пять матчей сезона и называл это
+// «формой». Для матча в марте «форма» была из августа–сентября.
+export function recentForm(hist, matchMs, n = 5) {
+  if (!Array.isArray(hist)) return null;
+  const before = hist
+    .filter((h) => h && Number.isFinite(h.ms) && h.ms < matchMs)
+    .sort((a, b) => a.ms - b.ms);
+  if (before.length < 3) return null; // мало сыгранного — форма не считается
+  const last = before.slice(-n);
+  return {
+    n: last.length,
+    xf: last.reduce((a, h) => a + h.xg, 0) / last.length,
+    xa: last.reduce((a, h) => a + h.xga, 0) / last.length,
+  };
+}
+
+// xG-форма: множители к ожидаемым голам.
+// t = {xf, xa}: средние xG за/против за последние n сыгранных матчей команды;
 // L = {lf, la}: те же средние по лиге в том же окне.
 // Форму учитываем лишь наполовину (итого до ~10% к ожиданию): таблица лиги остаётся основой, xG — поправка.
 // att: форма атаки (xf выше лиги -> >1), def: «продуваемость» (xa выше лиги -> >1, то есть хуже).

@@ -9,7 +9,7 @@
 //  - free = самые надёжные прогнозы, pro = value-ставки (там где есть линия).
 import { writeFileSync, mkdirSync, readFileSync, existsSync } from 'node:fs';
 import {
-  scoreMatrix, outcomesFromMatrix, outcomesFromNormal, xgBlend,
+  scoreMatrix, outcomesFromMatrix, outcomesFromNormal, xgBlend, recentForm,
   selectionScore, marketFamily, calibrateProbability, homeAdvFromTotals,
 } from './model.mjs';
 
@@ -212,51 +212,85 @@ async function leagueStats(key, type) {
   } catch (e) { return null; }
 }
 
-// ---------- Understat xG: форма последних 5 игр для футбола ----------
-// ключ ESPN -> slug Understat. Поддерживаются только лиги, которые реально есть на Understat;
-// остальные (2-е дивизионы, еврокубки, MLS, Лига MX, Бразилия, Аргентина и т.д.)
-// остаются на гoал-форме из таблиц ESPN — это не ошибка, а fallback.
-const XG_LEAGUES = {
-  'soccer/eng.1': 'EPL', 'soccer/esp.1': 'La_Liga', 'soccer/ita.1': 'Serie_A',
-  'soccer/ger.1': 'Bundesliga', 'soccer/fra.1': 'Ligue_1',
+// ---------- xG-форма: поправка на ожидаемые голы для футбола ----------
+// Источники xG. У каждого — свой список лиг:
+//   understat — топ-5 европейских лиг; asa — MLS.
+// Остальные (2-е дивизионы, еврокубки, Лига MX, Бразилия, Аргентина) пока
+// остаются на гoал-форме из таблиц ESPN — это не ошибка, а осознанный fallback:
+// источник добавляется только вместе с проверкой матчинга имён (MLS ниже),
+// иначе xG применится к чужим командам и станет хуже, чем его отсутствие.
+const XG_PROVIDERS = {
+  'soccer/eng.1': { src: 'understat', slug: 'EPL' },
+  'soccer/esp.1': { src: 'understat', slug: 'La_Liga' },
+  'soccer/ita.1': { src: 'understat', slug: 'Serie_A' },
+  'soccer/ger.1': { src: 'understat', slug: 'Bundesliga' },
+  'soccer/fra.1': { src: 'understat', slug: 'Ligue_1' },
+  'soccer/usa.1': { src: 'asa', slug: 'mls' },
 };
 const normName = (s) => String(s || '').toLowerCase().normalize('NFD')
   .replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9 ]/g, '').replace(/\s+/g, ' ').trim();
-// названия Understat иногда короче ESPN-имени (Wolves vs Wolverhampton Wanderers и т.п.)
-// ключ — нормализованное ESPN-имя, значение — нормализованный заголовок Understat
+// Названия в источниках sometimes короче/иные, чем ESPN-имя (Wolves vs
+// Wolverhampton Wanderers) — проверено сопоставлением всех команд каждой лиги.
+// Ключ — нормализованное ESPN-имя, значение — нормализованное имя в источнике xG.
 const XG_NAME_ALIAS = {
   'rb leipzig': 'rasenballsport leipzig',
   'athletic bilbao': 'athletic club',
   'wolverhampton wanderers': 'wolves',
   'hull city': 'hull',
+  // Бундеслига: ESPN даёт номерные/полные имена, Understat — короткие
+  '1 fc union berlin': 'union berlin',
+  'borussia monchengladbach': 'borussia mgladbach',
+  'hamburg sv': 'hamburger sv',
+  // Ligue 1: ESPN добавляет инициалы/полные формы, Understat — обиходные
+  'aj auxerre': 'auxerre',
+  'paris saintgermain': 'paris saint germain',
+  'stade rennais': 'rennes',
+  // MLS: ESPN и American Soccer Analysis называют клубы по-разному
+  'lafc': 'los angeles fc',
+  'portland timbers': 'portland timbers fc',
+  'red bull new york': 'new york red bulls',
+  'vancouver whitecaps': 'vancouver whitecaps fc',
 };
 // ESPN часто даёт префиксы клубов («AFC Bournemouth», «AS Roma») — срезаем их и ищем снова
 const XG_STRIP_TOKENS = ['afc', 'cfc', 'cf', 'fc', 'sc', 'sv', 'as', 'ssc', 'tsg', 'vfb'];
-// Фетчим данные лиги один раз: Map(нормализованное название -> {title, hist: [{ms, xg, xga}]})
-// hist содержит только завершённые матчи (без lookahead’а по дате).
-async function leagueXg(key) {
-  const slug = XG_LEAGUES[key];
-  if (!slug) return null;
+// кладём команду в Map под её именем и под ESPN-алиасом (если он задан)
+function xgAdd(out, title, hist) {
+  const key = normName(title);
+  if (!key) return;
+  const entry = { title, hist };
+  if (!out.has(key)) out.set(key, entry);
+  const alias = XG_NAME_ALIAS[key];
+  if (alias && !out.has(alias)) out.set(alias, entry);
+}
+// Map(нормализованное название -> {title, hist: [{ms, xg, xga}]}); hist — только
+// завершённые матчи, без lookahead’а по дате (сам отбор делает recentForm).
+function xgMapFor(key) {
+  const prov = XG_PROVIDERS[key];
+  if (!prov) return Promise.resolve(null);
+  const load = prov.src === 'asa' ? asaLeagueXg(prov.slug) : understatLeagueXg(prov.slug);
+  return load
+    .then((out) => {
+      if (!out) return null;
+      if (out.size < 4) { console.warn('xg: мало команд в', key, out.size); return null; }
+      return out;
+    })
+    .catch((e) => { console.warn('xg skip:', key, String(e)); return null; });
+}
+async function understatLeagueXg(slug) {
   const d = new Date(Date.now() + 3 * 3600e3);
   // сезон топ-5 лиг начинается в июле: июль+ -> текущий год, иначе -> предыдущий
   const season = d.getUTCMonth() >= 6 ? d.getUTCFullYear() : d.getUTCFullYear() - 1;
-  let j;
-  try {
-    const res = await fetch(`https://understat.com/getLeagueData/${slug}/${season}`, {
-      headers: {
-        ...UA,
-        'Accept': 'application/json, text/javascript, */*; q=0.01',
-        'X-Requested-With': 'XMLHttpRequest',
-        'Referer': `https://understat.com/league/${slug}/${season}`,
-      },
-      signal: AbortSignal.timeout(25000),
-    });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    j = await res.json();
-  } catch (e) {
-    console.warn('understat skip:', key, String(e));
-    return null;
-  }
+  const res = await fetch(`https://understat.com/getLeagueData/${slug}/${season}`, {
+    headers: {
+      ...UA,
+      'Accept': 'application/json, text/javascript, */*; q=0.01',
+      'X-Requested-With': 'XMLHttpRequest',
+      'Referer': `https://understat.com/league/${slug}/${season}`,
+    },
+    signal: AbortSignal.timeout(25000),
+  });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const j = await res.json();
   const out = new Map();
   for (const t of Object.values(j.teams || {})) {
     const hist = (t.history || [])
@@ -264,58 +298,81 @@ async function leagueXg(key) {
       .map(h => ({ ms: new Date(String(h.date).replace(' ', 'T')).getTime(), xg: Number(h.xG), xga: Number(h.xGA) }))
       .filter(h => Number.isFinite(h.ms));
     if (!hist.length) continue;
-    const m = { title: t.title, hist };
-    const k = normName(t.title);
-    if (k && !out.has(k)) out.set(k, m);
-    const alias = XG_NAME_ALIAS[k];
-    if (alias && !out.has(alias)) out.set(alias, m);
+    xgAdd(out, t.title, hist);
   }
-  if (out.size < 4) { console.warn('understat: мало команд в', key, out.size); return null; }
   return out;
+}
+// MLS: American Soccer Analysis отдаёт xG по каждому матчу сезона (открытый API).
+async function asaLeagueXg(slug) {
+  const year = new Date(Date.now() + 3 * 3600e3).getUTCFullYear();
+  const base = `https://app.americansocceranalysis.com/api/v1/${slug}`;
+  const get = async (url, ms) => {
+    const r = await fetch(url, { headers: UA, signal: AbortSignal.timeout(ms) });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  };
+  const [teams, games] = await Promise.all([
+    get(`${base}/teams`, 20000),
+    get(`${base}/games/xgoals?season_name=${year}`, 25000),
+  ]);
+  const nameById = new Map((teams || []).map(t => [String(t.team_id), t.team_name]));
+  const histById = new Map();
+  for (const g of games || []) {
+    const ms = new Date(String(g.date_time_utc || '').replace(' ', 'T').replace(' UTC', 'Z')).getTime();
+    const hg = Number(g.home_team_xgoals), ag = Number(g.away_team_xgoals);
+    if (!Number.isFinite(ms) || !Number.isFinite(hg) || !Number.isFinite(ag)) continue;
+    const h = String(g.home_team_id), a = String(g.away_team_id);
+    if (!histById.has(h)) histById.set(h, []);
+    if (!histById.has(a)) histById.set(a, []);
+    histById.get(h).push({ ms, xg: hg, xga: ag });
+    histById.get(a).push({ ms, xg: ag, xga: hg });
+  }
+  const out = new Map();
+  for (const [id, hist] of histById) {
+    const title = nameById.get(id);
+    if (title && hist.length) xgAdd(out, title, hist);
+  }
+  return out;
+}
+// Сопоставление ESPN-имени команды с записью в Map источника xG.
+// Порядок: точное совпадение -> явный алиас -> совпадение по префиксу
+// («Leeds» vs «Leeds United») -> срез клубного префикса («AFC Bournemouth»).
+function xgMatchName(map, name) {
+  const e = normName(name);
+  if (!e || !map) return null;
+  if (map.has(e)) return map.get(e);
+  const alias = XG_NAME_ALIAS[e];
+  if (alias && map.has(alias)) return map.get(alias);
+  // префикс: любая сторона короче; берём самое длинное совпадение
+  const scan = (s) => {
+    let best = null;
+    for (const [u, m] of map) {
+      if (u.length < 5 || s.length < 5) continue;
+      if (s.startsWith(u) || u.startsWith(s)) {
+        const len = Math.min(s.length, u.length);
+        if (!best || len > best.len) best = { m, len };
+      }
+    }
+    return best ? best.m : null;
+  };
+  let hit = scan(e);
+  if (hit) return hit;
+  const parts = e.split(' ');
+  while (parts.length > 1 && XG_STRIP_TOKENS.includes(parts[0])) {
+    parts.shift();
+    const s = parts.join(' ');
+    if (map.has(s)) return map.get(s);
+    hit = scan(s);
+    if (hit) return hit;
+  }
+  return null;
 }
 // Последние 5 завершённых игр перед матчем -> {xf, xa}; плюс средние по лиге {lf, la}.
 function xgForm(map, espnNames, matchIso) {
   const matchMs = new Date(matchIso).getTime();
-  const pick = (name) => {
-    const e = normName(name);
-    if (!e || !map) return null;
-    if (map.has(e)) return map.get(e);
-    const alias = XG_NAME_ALIAS[e];
-    if (alias && map.has(alias)) return map.get(alias);
-    // префикс: любая сторона короче («Leeds» vs «Leeds United»); берём самое длинное совпадение
-    const scan = (s) => {
-      let best = null;
-      for (const [u, m] of map) {
-        if (u.length < 5 || s.length < 5) continue;
-        if (s.startsWith(u) || u.startsWith(s)) {
-          const len = Math.min(s.length, u.length);
-          if (!best || len > best.len) best = { m, len };
-        }
-      }
-      return best ? best.m : null;
-    };
-    let hit = scan(e);
-    if (hit) return hit;
-    // срезаем клубные префиксы ESPN-имени: «AFC Bournemouth» -> «Bournemouth», «AS Roma» -> «Roma»
-    const parts = e.split(' ');
-    while (parts.length > 1 && XG_STRIP_TOKENS.includes(parts[0])) {
-      parts.shift();
-      const s = parts.join(' ');
-      if (map.has(s)) return map.get(s);
-      hit = scan(s);
-      if (hit) return hit;
-    }
-    return null;
-  };
-  const snap = (m) => {
-    if (!m) return null;
-    const hist = m.hist.filter(h => h.ms < matchMs);
-    if (hist.length < 3) return null; // мало сыгранного — форма не считается
-    const last5 = hist.slice(0, 5);
-    return { n: last5.length, xf: last5.reduce((a, h) => a + h.xg, 0) / last5.length, xa: last5.reduce((a, h) => a + h.xga, 0) / last5.length };
-  };
-  const home = snap(pick(espnNames[0]));
-  const away = snap(pick(espnNames[1]));
+  const snap = (m) => recentForm(m && m.hist, matchMs, 5);
+  const home = snap(xgMatchName(map, espnNames[0]));
+  const away = snap(xgMatchName(map, espnNames[1]));
   if (!home || !away) return null;
   // лига — по тем же последним 5 матчам всех команд (в этом же окне, без lookahead’а)
   const league = [];
@@ -432,7 +489,7 @@ for (const lg of LEAGUES) {
       events = await scoreboard(lg.key);
     }
     const stats = await leagueStats(lg.key, lg.type);
-    const xgMap = lg.type === 'soccer' ? await leagueXg(lg.key) : null;
+    const xgMap = lg.type === 'soccer' ? await xgMapFor(lg.key) : null;
     const injMap = await leagueInjuries(lg.key);
     let taken = 0;
     for (const e of events) {
