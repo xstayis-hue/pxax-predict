@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-10T07:07:19.078Z",
+  "generated": "2026-10-11T07:13:36.104Z",
   "windowDays": 90,
   "leagues": [
     "АПЛ",
@@ -11,60 +11,60 @@
     "Аргентина",
     "MLS"
   ],
-  "matches": 627,
-  "signals": 606,
-  "hits": 367,
-  "hitRate": 0.606,
-  "brier": 0.6482,
+  "matches": 671,
+  "signals": 654,
+  "hits": 403,
+  "hitRate": 0.616,
+  "brier": 0.6476,
   "signalThreshold": 0.55,
   "byLeague": {
     "АПЛ": {
-      "matches": 40,
-      "signals": 40,
-      "hits": 26,
-      "rate": 0.65
+      "matches": 46,
+      "signals": 46,
+      "hits": 32,
+      "rate": 0.696
     },
     "Ла Лига": {
-      "matches": 58,
-      "signals": 58,
-      "hits": 39,
-      "rate": 0.672
+      "matches": 62,
+      "signals": 62,
+      "hits": 43,
+      "rate": 0.694
     },
     "Серия A": {
-      "matches": 40,
-      "signals": 39,
-      "hits": 25,
-      "rate": 0.641
+      "matches": 43,
+      "signals": 42,
+      "hits": 27,
+      "rate": 0.643
     },
     "Бундеслига": {
-      "matches": 28,
-      "signals": 28,
-      "hits": 21,
-      "rate": 0.75
+      "matches": 34,
+      "signals": 34,
+      "hits": 25,
+      "rate": 0.735
     },
     "Лига 1": {
-      "matches": 37,
-      "signals": 37,
-      "hits": 21,
-      "rate": 0.568
-    },
-    "Бразилия · Серия A": {
-      "matches": 102,
-      "signals": 95,
-      "hits": 51,
+      "matches": 42,
+      "signals": 41,
+      "hits": 22,
       "rate": 0.537
     },
+    "Бразилия · Серия A": {
+      "matches": 104,
+      "signals": 100,
+      "hits": 53,
+      "rate": 0.53
+    },
     "Аргентина": {
-      "matches": 153,
-      "signals": 148,
-      "hits": 79,
-      "rate": 0.534
+      "matches": 157,
+      "signals": 152,
+      "hits": 83,
+      "rate": 0.546
     },
     "MLS": {
-      "matches": 169,
-      "signals": 161,
-      "hits": 105,
-      "rate": 0.652
+      "matches": 183,
+      "signals": 177,
+      "hits": 118,
+      "rate": 0.667
     }
   },
   "note": "Бэктест модели по реальным прошедшим результативам: только форма до матча + средний тотал лиги, без заглядывания в будущее и без линий"
