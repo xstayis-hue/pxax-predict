@@ -659,6 +659,56 @@
     background:rgba(139,163,199,.06); border:1px solid rgba(139,163,199,.18); color:#8fa3c0; }
   .pre-note .ic { width:13px; height:13px; vertical-align:-2px; margin-right:3px; }
 
+  /* ---------- банк бота (раздел в разработке) ---------- */
+  .bank-off { display:inline-block; margin-top:8px; font-size:11px; color:var(--muted); }
+  .bk-top { display:flex; gap:12px; align-items:stretch; margin:2px 16px 0; }
+  .bk-bal {
+    flex:1.1; background:var(--card); border-radius:var(--radius); padding:13px 15px;
+    border:1px solid rgba(0,229,255,.2);
+  }
+  .bk-lbl { font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); }
+  .bk-num { font-size:30px; font-weight:900; margin-top:4px; line-height:1; font-variant-numeric:tabular-nums; }
+  .bk-num span { font-size:13px; font-weight:700; opacity:.7; }
+  .bk-num.up { color:var(--ok); } .bk-num.down { color:var(--warn); }
+  .bk-num.locked-num { color:var(--muted); letter-spacing:.16em; }
+  .bk-sub { font-size:11px; color:var(--muted); margin-top:5px; }
+  .bk-kpis { flex:1; display:grid; grid-template-columns:1fr 1fr; gap:7px; }
+  .bk-kpi {
+    background:var(--card); border-radius:12px; padding:8px 9px; text-align:center;
+    border:1px solid rgba(139,163,199,.14);
+  }
+  .bk-kpi b { display:block; font-size:15px; color:var(--neon); font-variant-numeric:tabular-nums; }
+  .bk-kpi span { font-size:10.5px; color:var(--muted); }
+  .bk-chart { margin:12px 16px 0; background:var(--card); border-radius:14px; padding:10px 8px 6px; border:1px solid rgba(139,163,199,.12); }
+  .bk-chart svg { display:block; width:100%; height:76px; }
+  .bk-base { stroke:rgba(139,163,199,.3); stroke-width:1; stroke-dasharray:4 4; }
+  .bk-line { fill:none; stroke-width:2.2; stroke-linejoin:round; stroke-linecap:round; }
+  .bk-line.up { stroke:var(--ok); filter:drop-shadow(0 0 6px rgba(0,230,118,.5)); }
+  .bk-line.down { stroke:var(--warn); filter:drop-shadow(0 0 6px rgba(255,82,82,.5)); }
+  .bk-note { margin:10px 16px 0; font-size:11px; line-height:1.55; color:var(--muted); }
+  .bank-warn {
+    margin:9px 16px 0; padding:9px 11px; border-radius:11px; font-size:11.5px; line-height:1.5;
+    background:rgba(255,201,60,.07); border:1px solid rgba(255,201,60,.28); color:#e3cf9a;
+  }
+  .bank-warn .ic { width:13px; height:13px; vertical-align:-2px; margin-right:4px; }
+  .bk-pro {
+    margin:2px 16px 0; padding:11px 14px; border-radius:12px; display:flex; justify-content:space-between;
+    align-items:center; gap:10px; background:var(--card); border:1px solid rgba(255,201,60,.28); font-size:12px;
+  }
+  .bk-pro b { color:var(--gold); font-size:13px; font-variant-numeric:tabular-nums; }
+  .bk-list { margin:2px 16px 0; display:flex; flex-direction:column; gap:6px; }
+  .bk-row {
+    display:flex; align-items:center; gap:8px; padding:8px 11px; border-radius:10px;
+    background:var(--card); border-left:3px solid transparent; font-size:11.5px;
+  }
+  .bk-row.hit { border-left-color:var(--ok); } .bk-row.miss { border-left-color:var(--warn); }
+  .bk-row .bk-d { color:var(--muted); font-variant-numeric:tabular-nums; flex:none; }
+  .bk-row .bk-m { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .bk-row .bk-k { color:var(--neon); font-weight:700; flex:none; }
+  .bk-row .bk-o { color:var(--muted); font-variant-numeric:tabular-nums; flex:none; }
+  .bk-row .bk-r { flex:none; font-weight:800; }
+  .bk-row.hit .bk-r { color:var(--ok); } .bk-row.miss .bk-r { color:var(--warn); }
+
   /* ---------- profile ---------- */
   .prof-head { display:flex; align-items:center; gap:13px; padding: 14px 16px; }
   .avatar {
@@ -1134,6 +1184,14 @@
   </div>
 </main>
 
+<!-- ================= БАНК БОТА (раздел в разработке) =================
+     Вкладки пока нет (CONFIG.BANK_ENABLED=false), раздел открывается только
+     вручную для теста. Содержимое рисует renderBank(). -->
+<main id="view-bank" class="view">
+  <div class="section-title" id="bankTitle"><svg class="ic"><use href="#i-coin"/></svg> Банк бота · условные единицы</div>
+  <div id="bankBody"></div>
+</main>
+
 <!-- ================= PROFILE ================= -->
 <main id="view-profile" class="view">
   <div class="prof-head" style="background:var(--card);margin:14px 16px 0;border-radius:var(--radius);border:1px solid rgba(0,229,255,.14)">
@@ -1324,6 +1382,17 @@ const CONFIG = {
   // Минимум решённых прогнозов у каждого вида, чтобы сравнивать Базовый и VIP.
   // Меньше — разница объясняется случайностью, и писать «заходят чаще» нельзя.
   MIN_CMP_N: 20,
+  // --- банк бота (раздел в разработке, ещё не открыт) ---
+  // Считается по data/results.json: плоская ставка на каждый сигнал с линией.
+  // Пока BANK_ENABLED=false — вкладки нет вовсе и прямой переход на view-bank
+  // ничего не открывает. Раздел сначала обкатываем на своих (тест в браузере,
+  // сравнение с бэктестом), и только потом включаем флагом.
+  BANK_ENABLED: false,
+  BANK_START: 1000,   // стартовый баланс, условные единицы
+  BANK_STAKE: 10,     // размер ставки, условные единицы (плоская схема)
+  // Ниже этого числа ставок банк не публикуем даже у себя: на коротком отрезке
+  // итог целиком в разбросе, и цифра вводит в заблуждение.
+  BANK_MIN_BETS: 40,
   // --- партнёрская программа ---
   PARTNER_URL: 'https://r1wjvzfr.life/?p=gfuv',
   PROMO: 'PXAXBET2026',
@@ -1615,6 +1684,153 @@ function myBetStats() {
     rows: done.slice(-12).reverse(),
   };
 }
+/* ================= БАНК БОТА (в разработке) =================
+   Считает, как выглядел бы счёт бота, если на каждый решённый сигнал с линией
+   ставить одинаковую сумму (условные единицы). Переиспользует логику личного
+   трекера (myBetStats): win = stake·(кэф−1), miss = −stake, push = 0.
+   Ставки без линии в счёт не идут — им нельзя приписать результат, и они
+   честно показываются отдельным числом.
+
+   Раздел ещё не открыт (CONFIG.BANK_ENABLED=false): вкладки нет, прямой переход
+   на view-bank закрыт. Смысл держать код здесь — обкатать на своих данных, прежде
+   чем показывать людям. */
+function bankRoll(kind) {
+  const start = CONFIG.BANK_START, stake = CONFIG.BANK_STAKE;
+  const rows = (REAL.results || []).filter(r =>
+    !r.preseason && (kind ? r.kind === kind : true) && (r.result === 'hit' || r.result === 'miss'));
+  const dated = rows.filter(r => r.date).sort((a, b) => a.date.localeCompare(b.date) || String(a.id).localeCompare(String(b.id)));
+  let bank = start, peak = start, maxDD = 0, wins = 0, losses = 0, staked = 0, noOdds = 0;
+  const series = [{ date: dated[0]?.date || '', bank: start }];
+  for (const r of dated) {
+    const odds = Number(r.odds);
+    if (!(odds > 1)) { noOdds++; continue; }
+    if (r.result === 'hit') { bank += stake * (odds - 1); wins++; }
+    else { bank -= stake; losses++; }
+    staked += stake;
+    peak = Math.max(peak, bank);
+    maxDD = Math.max(maxDD, peak - bank);
+    if (series[series.length - 1].date !== r.date) series.push({ date: r.date, bank: +bank.toFixed(2) });
+    else series[series.length - 1].bank = +bank.toFixed(2);
+  }
+  const decided = wins + losses;
+  const days = new Set(dated.filter(r => Number(r.odds) > 1).map(r => r.date)).size;
+  return {
+    start, stake, bets: decided, noOdds, wins, losses, days,
+    bank: +bank.toFixed(2),
+    profit: +(bank - start).toFixed(2),
+    growth: +(((bank / start) - 1) * 100).toFixed(1),
+    roi: staked ? +(((bank - start) / staked) * 100).toFixed(1) : null,
+    maxDD: +maxDD.toFixed(2),
+    maxDDPct: peak ? +((maxDD / peak) * 100).toFixed(1) : null,
+    rate: decided ? Math.round(wins / decided * 100) : null,
+    series,
+    recent: [...dated].filter(r => Number(r.odds) > 1).reverse().slice(0, 20),
+    trusted: decided >= CONFIG.BANK_MIN_BETS,
+  };
+}
+function renderBank() {
+  const host = document.getElementById('bankBody');
+  if (!host) return;
+  // Раздел закрыт для всех до отдельного решения: показываем внутреннюю
+  // заглушку с честной причиной, а не пустой экран.
+  if (!CONFIG.BANK_ENABLED) {
+    host.innerHTML = `<div class="empty"><span class="i">${ic('lock')}</span>
+      Раздел в разработке.<br>Собираем историю ставок, чтобы банк был честным с первого показа.<br>
+      <span class="bank-off">Пока недоступно даже подписчикам — включим, когда сами убедимся, что считает верно.</span></div>`;
+    return;
+  }
+  const b = bankRoll(null);
+  const proB = bankRoll('pro');
+  if (!b.bets) {
+    host.innerHTML = `<div class="empty"><span class="i">${ic('chart')}</span>Пока нет ставок с линией — банк начнёт считаться, как только сыграют первые матчи с кэфом.</div>`;
+    return;
+  }
+  // Раздел задуман для подписчиков PRO. Когда флаг включат, без подписки видно
+  // только витрину: баланс и график под замком, история ставок не рендерится —
+  // как и в остальном приложении, платный контент в DOM не попадает.
+  const pro = store.pro;
+  if (!pro) {
+    host.innerHTML = `
+      <div class="bk-top">
+        <div class="bk-bal">
+          <div class="bk-lbl">Баланс бота</div>
+          <div class="bk-num locked-num">· · ·</div>
+          <div class="bk-sub">старт ${b.start} у.е. · схема ${b.stake} у.е. на сигнал</div>
+        </div>
+        <div class="bk-kpis">
+          <div class="bk-kpi"><b>${b.bets}</b><span>ставок</span></div>
+          <div class="bk-kpi"><b>${b.days}</b><span>дней</span></div>
+        </div>
+      </div>
+      <div class="paywall-cta">
+        <h3><svg class="ic"><use href="#i-lock"/></svg> Банк бота — в PRO</h3>
+        <p>Подписчик видит счёт бота, кривую баланса и каждую прошедшую ставку: на что ставил, с каким кэфом и чем закончилось.</p>
+        <button class="btn-sub plan-price" data-open="bank" onclick="goSubscribe()">Оформить PRO · 777 <svg class="ic"><use href="#i-star"/></svg> / 30 дней</button>
+      </div>
+      <div class="bk-note">Условные единицы. Это не деньги и не платёжное средство. Прошлые результаты не гарантируют будущих. 18+.</div>`;
+    return;
+  }
+  const sign = b.profit >= 0 ? '+' : '';
+  const cls = b.profit >= 0 ? 'good' : 'neutral';
+  const pcls = proB.profit >= 0 ? 'good' : 'neutral';
+  // график: нормализуем серию в точки SVG
+  const W = 300, H = 76;
+  const vals = b.series.map(s => s.bank);
+  const lo = Math.min(...vals, b.start), hi = Math.max(...vals, b.start);
+  const span = (hi - lo) || 1;
+  const pts = b.series.map((s, i) => {
+    const x = b.series.length > 1 ? (i / (b.series.length - 1)) * W : W;
+    const y = H - ((s.bank - lo) / span) * (H - 8) - 4;
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(' ');
+  const baseY = H - ((b.start - lo) / span) * (H - 8) - 4;
+  const rows = b.recent.map(r => {
+    const hit = r.result === 'hit';
+    return `<div class="bk-row ${hit ? 'hit' : 'miss'}">
+      <span class="bk-d">${r.date.slice(5)}</span>
+      <span class="bk-m">${r.home} — ${r.away}</span>
+      <span class="bk-k">${r.market}</span>
+      <span class="bk-o">${Number(r.odds).toFixed(2)}</span>
+      <span class="bk-r">${hit ? 'зашло' : 'мимо'}</span>
+    </div>`;
+  }).join('');
+  host.innerHTML = `
+    <div class="bk-top">
+      <div class="bk-bal">
+        <div class="bk-lbl">Баланс бота</div>
+        <div class="bk-num ${b.profit >= 0 ? 'up' : 'down'}">${b.bank.toFixed(0)} <span>у.е.</span></div>
+        <div class="bk-sub">старт ${b.start} · ${sign}${b.growth}%</div>
+      </div>
+      <div class="bk-kpis">
+        <div class="bk-kpi"><b>${b.rate}%</b><span>заходов</span></div>
+        <div class="bk-kpi"><b>${b.roi == null ? '—' : (b.roi > 0 ? '+' : '') + b.roi + '%'}</b><span>ROI</span></div>
+        <div class="bk-kpi"><b>${b.bets}</b><span>ставок</span></div>
+        <div class="bk-kpi"><b>${b.days}</b><span>дней</span></div>
+      </div>
+    </div>
+    <div class="bk-chart">
+      <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">
+        <line x1="0" y1="${baseY.toFixed(1)}" x2="${W}" y2="${baseY.toFixed(1)}" class="bk-base"/>
+        <polyline points="${pts}" class="bk-line ${b.profit >= 0 ? 'up' : 'down'}"/>
+      </svg>
+    </div>
+    <div class="bk-note">Схема: плоская ставка ${b.stake} у.е. на каждый сигнал с линией. Ставки без линии (${b.noOdds}) в счёт не идут. Макс. просадка ${b.maxDD} у.е. (${b.maxDDPct}% от пика).</div>
+    ${b.trusted ? '' : `<div class="bank-warn">${ic('eye')} Пока ${b.bets} ${plural(b.bets, 'ставка', 'ставки', 'ставок')} — этого мало, чтобы судить о результате: разброс на такой выборке больше самого итога. Цифра честная, но ещё не показательна.</div>`}
+    <div class="section-title">${ic('diamond')} Банк Pro-ИИ · отдельный отбор</div>
+    <div class="bk-pro ${pcls}">
+      <span>${proB.bets} ставок · ${proB.rate == null ? '—' : proB.rate + '%'} заходов</span>
+      <b>${proB.bank.toFixed(0)} у.е. (${proB.profit >= 0 ? '+' : ''}${proB.growth}%)</b>
+    </div>
+    <div class="section-title">История ставок бота</div>
+    <div class="bk-list">${rows}</div>
+    <div class="bk-note">Условные единицы. Это не деньги и не платёжное средство. Ставки на спорт — риск; прошлые результаты не гарантируют будущих. 18+.</div>`;
+}
+// блокируем прямой переход на закрытый раздел
+function openBankIfEnabled() {
+  if (!CONFIG.BANK_ENABLED) { toast('Раздел в разработке — откроем позже'); return false; }
+  return true;
+}
+
 // кнопка «Я поставил» на карточках — делегирование (колонда пересобирается)
 document.addEventListener('click', (e) => {
   const el = e.target.closest('.mybet-btn');
@@ -2019,6 +2235,7 @@ function render() {
 
   renderProfileExtras(statsAll);
   renderMyBets();
+  renderBank();
 
   // полосы уверенности (в hero-вердикте)
   requestAnimationFrame(() => requestAnimationFrame(() => {
