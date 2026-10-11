@@ -709,6 +709,33 @@
   .bk-row .bk-r { flex:none; font-weight:800; }
   .bk-row.hit .bk-r { color:var(--ok); } .bk-row.miss .bk-r { color:var(--warn); }
 
+  /* кнопка «Банк бота» в разделе PRO (видна только подписчику) */
+  #bankCta { padding: 12px 16px 0; }
+  .bank-cta {
+    width:100%; display:flex; align-items:center; gap:12px; text-align:left;
+    padding:13px 14px; cursor:pointer; border-radius:var(--radius);
+    background: linear-gradient(135deg, rgba(255,201,60,.10), rgba(255,201,60,.02));
+    border:1px solid rgba(255,201,60,.34); color:var(--text);
+    font-family:inherit; transition: transform .12s ease;
+  }
+  .bank-cta:not(.soon):active { transform: scale(.985); }
+  .bank-cta .bc-ico {
+    flex:none; width:38px; height:38px; border-radius:12px; display:flex; align-items:center; justify-content:center;
+    background:rgba(255,201,60,.12); border:1px solid rgba(255,201,60,.3); color:var(--gold); font-size:19px;
+  }
+  .bank-cta .bc-txt { flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
+  .bank-cta .bc-txt b { font-size:13.5px; font-weight:800; color:var(--gold); }
+  .bank-cta .bc-txt span { font-size:11px; color:var(--muted); }
+  .bank-cta .bc-go { flex:none; display:flex; color:var(--gold); }
+  .bank-cta .bc-soon {
+    flex:none; font-size:10.5px; font-weight:800; letter-spacing:.08em; text-transform:uppercase;
+    color:#0a0d16; background:linear-gradient(135deg,var(--gold),#ffe08a);
+    padding:3px 8px; border-radius:9px;
+  }
+  /* Недоступная кнопка: приглушена, но ОЧЕВИДНА — человек видит, что она будет.
+     cursor:not-allowed и без :active-отклика: нажимать нечего, и это честно. */
+  .bank-cta.soon { cursor:not-allowed; opacity:.72; border-style:dashed; }
+
   /* ---------- profile ---------- */
   .prof-head { display:flex; align-items:center; gap:13px; padding: 14px 16px; }
   .avatar {
@@ -1120,6 +1147,11 @@
     <button class="btn-trial" id="btnTrialPro" style="display:none" onclick="startTrial()"><svg class="ic"><use href="#i-gift"/></svg> Попробовать бесплатно · <span class="trial-days">3</span> дн.</button>
     <button class="btn-sub plan-price" data-open="pro" onclick="goSubscribe()">Оформить PRO · 777 <svg class="ic"><use href="#i-star"/></svg> / 30 дней</button>
   </div>
+
+  <!-- Банк бота: виден только подписчику Pro. Пока раздел не готов, кнопка
+       не нажимается и честно помечена «скоро» — но человек её видит и знает,
+       что она появится у него же, а не у кого-то другого. Рисуется в render(). -->
+  <div id="bankCta"></div>
 
   
   <div class="footer">
@@ -1830,6 +1862,37 @@ function openBankIfEnabled() {
   if (!CONFIG.BANK_ENABLED) { toast('Раздел в разработке — откроем позже'); return false; }
   return true;
 }
+/* Кнопка «Банк бота» в разделе PRO. Видна только подписчику: до покупки её нет
+   вовсе (иначе это реклама закрытого раздела неплательщику). Пока раздел в
+   разработке — кнопка не нажимается и помечена «скоро»: подписчик видит, что она
+   у него появится, и понимает, что приложение развивается. Как только
+   CONFIG.BANK_ENABLED станет true, та же кнопка начнёт открывать раздел. */
+function renderBankCta() {
+  const host = document.getElementById('bankCta');
+  if (!host) return;
+  if (!store.pro) { host.innerHTML = ''; return; }
+  const soon = !CONFIG.BANK_ENABLED;
+  host.innerHTML = `
+    <button class="bank-cta ${soon ? 'soon' : ''}" ${soon ? 'disabled aria-disabled="true"' : `onclick="openBank()"`}>
+      <span class="bc-ico"><svg class="ic"><use href="#i-coin"/></svg></span>
+      <span class="bc-txt">
+        <b>Банк бота</b>
+        <span>${soon ? 'Считаем историю · откроется скоро' : 'Счёт, кривая баланса и все ставки'}</span>
+      </span>
+      ${soon
+        ? `<span class="bc-soon">скоро</span>`
+        : `<span class="bc-go"><svg class="ic"><use href="#i-arrowright"/></svg></span>`}
+    </button>`;
+}
+function openBank() {
+  if (!openBankIfEnabled()) return;
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-bank').classList.add('active');
+  renderBank();
+  haptic();
+  window.scrollTo(0, 0);
+}
 
 // кнопка «Я поставил» на карточках — делегирование (колонда пересобирается)
 document.addEventListener('click', (e) => {
@@ -2236,6 +2299,7 @@ function render() {
   renderProfileExtras(statsAll);
   renderMyBets();
   renderBank();
+  renderBankCta();
 
   // полосы уверенности (в hero-вердикте)
   requestAnimationFrame(() => requestAnimationFrame(() => {
