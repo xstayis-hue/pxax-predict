@@ -1027,6 +1027,22 @@
   },
   {
     "date": "2026-10-11",
+    "id": "401892483",
+    "kind": "free",
+    "sport": "🏒",
+    "lgKey": "hockey/nhl",
+    "league": "NHL",
+    "home": "New York Rangers",
+    "away": "Vancouver Canucks",
+    "market": "П1",
+    "confidence": 59,
+    "modelProb": 0.588,
+    "odds": 1.4,
+    "score": "6:2",
+    "result": "hit"
+  },
+  {
+    "date": "2026-10-11",
     "id": "761854",
     "kind": "pro",
     "sport": "⚽",
@@ -1103,6 +1119,22 @@
     "modelProb": 0.624,
     "odds": 1.5173387096774194,
     "score": "1:1",
+    "result": "hit"
+  },
+  {
+    "date": "2026-10-12",
+    "id": "401876947",
+    "kind": "pro",
+    "sport": "⚽",
+    "lgKey": "soccer/mex.1",
+    "league": "Лига MX",
+    "home": "Pumas UNAM",
+    "away": "Cruz Azul",
+    "market": "ТБ 2.5",
+    "confidence": 61,
+    "modelProb": 0.61,
+    "odds": 1.6896551724137931,
+    "score": "3:3",
     "result": "hit"
   }
 ]
