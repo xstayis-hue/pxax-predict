@@ -23,7 +23,7 @@ const JSON_HEADERS = { 'Content-Type': 'application/json; charset=utf-8', 'Cache
 const cors = () => ({
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Headers': 'Content-Type, X-Telegram-Init-Data',
 });
 
 const json = (body, status = 200) =>
@@ -262,17 +262,33 @@ const parsePayload = (payload) => {
 async function handlePro(request, env, cfg) {
   if (!cfg.token) return json({ ok: false, error: 'not_configured' }, 503);
   const url = new URL(request.url);
-  const initData = url.searchParams.get('initData') || request.headers.get('X-Telegram-Init-Data') || '';
+  const initData = request.headers.get('X-Telegram-Init-Data') || '';
   const user = await validateInitData(initData, cfg.token);
   if (!user) return json({ ok: false, error: 'bad_auth' }, 401);
 
   const stored = await loadUser(env, user.id);
   if (!isPro(stored)) return json({ ok: false, error: 'no_subscription', pro: false }, 403);
 
-  const today = new Date(Date.now() + 3 * 3600e3).toISOString().slice(0, 10); // день по МСК
-  const feed = await getProFeed(env, today);
-  if (!feed) return json({ ok: true, pro: true, date: today, count: 0, botd: null, predictions: [] });
-  return json({ ok: true, pro: true, ...feed });
+  const today = new Date(Date.now() + 3 * 3600e3).toISOString().slice(0, 10);
+  const yesterday = new Date(Date.now() + 3 * 3600e3 - 86400e3).toISOString().slice(0, 10);
+  const currentMs = Date.now();
+  const generatedAt = feed => new Date(feed?.generated || '').getTime();
+  let feed = await getProFeed(env, today);
+  if (!feed || !Number.isFinite(generatedAt(feed)) || currentMs - generatedAt(feed) > 6 * 3600e3) {
+    const previous = await getProFeed(env, yesterday);
+    if (previous) feed = previous;
+  }
+  if (!feed) return json({ ok: false, pro: true, error: 'feed_unavailable', date: today }, 503);
+  const generated = generatedAt(feed);
+  const feedDate = String(feed.date || '');
+  const todayMs = new Date(`${today}T00:00:00Z`).getTime();
+  const feedMs = new Date(`${feedDate}T00:00:00Z`).getTime();
+  const age = currentMs - generated;
+  if (!Number.isFinite(generated) || generated > currentMs + 5 * 60 * 1000 || age > 8 * 3600e3 || Math.abs(todayMs - feedMs) > 86400e3) {
+    return json({ ok: false, pro: true, error: 'feed_stale', date: feed.date }, 503);
+  }
+  const freshness = feedDate === today && age <= 6 * 3600e3 ? 'fresh' : 'grace';
+  return json({ ok: true, pro: true, freshness, ...feed });
 }
 
 async function handleProFeedAdmin(request, env, cfg) {
@@ -288,8 +304,24 @@ async function handleProFeedAdmin(request, env, cfg) {
   }
   // POST — заливка фида генератором (из CI, ключом админа)
   const body = await request.json().catch(() => null);
-  if (!body || !body.date || !Array.isArray(body.predictions)) {
+  if (!body || !/^\d{4}-\d{2}-\d{2}$/.test(body.date) || !Array.isArray(body.predictions)
+    || !Number.isFinite(new Date(body.generated || '').getTime())
+    || new Date(body.generated).getTime() > Date.now() + 5 * 60 * 1000
+    || Date.now() - new Date(body.generated).getTime() > 8 * 3600e3) {
     return json({ error: 'bad_feed' }, 400);
+  }
+  const today = new Date(Date.now() + 3 * 3600e3).toISOString().slice(0, 10);
+  const yesterday = new Date(Date.now() + 3 * 3600e3 - 86400e3).toISOString().slice(0, 10);
+  if (![today, yesterday].includes(body.date)) return json({ error: 'stale_feed_date' }, 400);
+  const ids = body.predictions.map(p => String(p.id ?? ''));
+  if (ids.some(id => !id) || new Set(ids).size !== ids.length) return json({ error: 'duplicate_prediction_ids' }, 400);
+  if (!body.targets || !body.shortfall || Number(body.targets.pro) !== 3
+    || Number(body.shortfall.pro) !== Math.max(0, 3 - body.predictions.length)
+    || Number(body.targets.free) !== 3 || Number(body.shortfall.free) < 0) {
+    return json({ error: 'bad_quota_metadata' }, 400);
+  }
+  if (body.predictions.length > 3 || body.predictions.some(p => Number(p.confidence) < 60 || p.value !== true)) {
+    return json({ error: 'unqualified_pro_prediction' }, 400);
   }
   // в VIP-фиде не должно быть бесплатных прогнозов: иначе он утечёт целиком
   const leaked = body.predictions.filter(p => p.tier && p.tier !== 'pro');
@@ -315,7 +347,7 @@ async function handleStatus(request, env, cfg) {
   const uid = url.searchParams.get('uid') || '';
   const user = uid ? await loadUser(env, uid) : null;
   // историю платежей отдаём только владельцу: иначе статус любого uid перебирается
-  const auth = await validateInitData(url.searchParams.get('initData') || '', cfg.token);
+  const auth = await validateInitData(request.headers.get('X-Telegram-Init-Data') || '', cfg.token);
   const own = !!(auth && String(auth.id) === String(uid));
   return json({
     pro: isPro(user),
@@ -331,7 +363,7 @@ async function handleStatus(request, env, cfg) {
 async function handleTrial(request, env, cfg) {
   if (!cfg.token) return json({ ok: false, error: 'not_configured' }, 503);
   const body = await request.json().catch(() => ({}));
-  const user = await validateInitData(body.initData, cfg.token);
+  const user = await validateInitData(request.headers.get('X-Telegram-Init-Data') || '', cfg.token);
   if (!user) return json({ ok: false, error: 'bad_auth' }, 401);
 
   const stored = await loadUser(env, user.id);
@@ -352,7 +384,7 @@ async function handleTrial(request, env, cfg) {
 async function handleInvoice(request, env, cfg) {
   if (!cfg.token) return json({ ok: false, error: 'not_configured' }, 503);
   const body = await request.json().catch(() => ({}));
-  const user = await validateInitData(body.initData, cfg.token);
+  const user = await validateInitData(request.headers.get('X-Telegram-Init-Data') || '', cfg.token);
   if (!user) return json({ ok: false, error: 'bad_auth' }, 401);
 
   const inv = await createInvoiceLink(cfg, user.id);
@@ -385,8 +417,10 @@ async function handleWebhook(request, env, cfg, secretFromPath) {
   const pcq = update.pre_checkout_query;
   if (pcq) {
     const parsed = parsePayload(pcq.invoice_payload);
+    const ownerId = pcq.from?.id;
     const ok =
       !!parsed &&
+      String(parsed.uid) === String(ownerId) &&
       pcq.currency === 'XTR' &&
       Number(pcq.total_amount) === cfg.price;
     await tgApi(cfg.token, 'answerPreCheckoutQuery', {
@@ -405,9 +439,10 @@ async function handleWebhook(request, env, cfg, secretFromPath) {
   if (pay) {
     const parsed = parsePayload(pay.invoice_payload);
     const chatId = msg.chat && msg.chat.id;
+    const payerId = msg.from && msg.from.id;
     const amount = Number(pay.total_amount);
-    if (!parsed || pay.currency !== 'XTR' || amount !== cfg.price) {
-      console.error('payment does not match an order', pay.invoice_payload, amount);
+    if (!parsed || String(parsed.uid) !== String(payerId) || String(payerId) !== String(chatId) || pay.currency !== 'XTR' || amount !== cfg.price) {
+      console.error('payment does not match an order', pay.telegram_payment_charge_id, amount);
       return new Response('ok');
     }
     const stored = await loadUser(env, chatId);
@@ -463,7 +498,7 @@ export default {
     const cfg = config(env);
     const url = new URL(request.url);
 
-    if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors() });
+  if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors() });
 
     if (url.pathname === '/health') {
       return json({

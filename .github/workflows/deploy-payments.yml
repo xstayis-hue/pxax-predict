@@ -24,6 +24,7 @@ jobs:
         with:
           node-version: 24
       - run: node worker/test/payments.test.mjs
+      - run: node test/daily-tiers.test.mjs
 
   deploy:
     name: Деплой воркера

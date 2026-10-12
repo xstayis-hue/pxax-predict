@@ -127,6 +127,27 @@ await test('заголовок счёта укладывается в лимит
   }
 });
 
+await test('единый контракт initData проходит CORS и поддерживается оплатой/триалом', async () => {
+  const e = env();
+  const preflight = await call(worker, new Request('https://px.example.test/api/invoice', {
+    method: 'OPTIONS',
+    headers: { Origin: 'https://app.example.test', 'Access-Control-Request-Method': 'POST', 'Access-Control-Request-Headers': 'content-type,x-telegram-init-data' },
+  }), e);
+  assert.equal(preflight.status, 204);
+  assert.match(preflight.headers.get('Access-Control-Allow-Headers') || '', /X-Telegram-Init-Data/i);
+
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = async () => new Response(JSON.stringify({ ok: true, result: 'https://t.me/invoice/test' }), { headers: { 'Content-Type': 'application/json' } });
+  try {
+    const invoice = await call(worker, post('/api/invoice', {}, { 'X-Telegram-Init-Data': initDataFor(2222) }), e);
+    assert.equal(invoice.status, 200);
+  } finally { globalThis.fetch = realFetch; }
+  const trial = await call(worker, post('/api/trial', {}, { 'X-Telegram-Init-Data': initDataFor(2223) }), e);
+  assert.equal(trial.status, 200);
+  const oldBodyContract = await call(worker, post('/api/trial', { initData: initDataFor(2224) }), e);
+  assert.equal(oldBodyContract.status, 401);
+});
+
 await test('createInvoiceLink получает короткий заголовок и Stars-цену', async () => {
   const e = env();
   const calls = [];
@@ -139,7 +160,7 @@ await test('createInvoiceLink получает короткий заголово
     return new Response(JSON.stringify({ ok: true }), { headers: { 'Content-Type': 'application/json' } });
   };
   try {
-    const r = await call(worker, post('/api/invoice', { initData: initDataFor(9301) }), e);
+    const r = await call(worker, post('/api/invoice', {}, { 'X-Telegram-Init-Data': initDataFor(9301) }), e);
     const j = await r.json();
     assert.equal(r.status, 200, JSON.stringify(j));
     assert.equal(j.ok, true);
@@ -162,7 +183,7 @@ await test('если Telegram отверг счёт — воркер отдаё�
   const realFetch = globalThis.fetch;
   globalThis.fetch = async () => new Response(JSON.stringify({ ok: false, description: 'Bad Request: TITLE_TOO_LONG' }), { headers: { 'Content-Type': 'application/json' } });
   try {
-    const r = await call(worker, post('/api/invoice', { initData: initDataFor(9302) }), e);
+    const r = await call(worker, post('/api/invoice', {}, { 'X-Telegram-Init-Data': initDataFor(9302) }), e);
     const j = await r.json();
     assert.equal(r.status, 502);
     assert.equal(j.error, 'invoice_failed');
@@ -174,12 +195,12 @@ await test('если Telegram отверг счёт — воркер отдаё�
 await test('валидный initData принимается, подделанный — нет', async () => {
   const e = env();
   const good = initDataFor(555);
-  const r1 = await call(worker, post('/api/trial', { initData: good }), e);
+  const r1 = await call(worker, post('/api/trial', {}, { 'X-Telegram-Init-Data': good }), e);
   assert.equal(r1.status, 200);
   assert.equal((await r1.json()).ok, true);
 
   const tampered = good.replace('auth_date', 'auth_dat3');
-  const r2 = await call(worker, post('/api/trial', { initData: tampered }), env());
+  const r2 = await call(worker, post('/api/trial', {}, { 'X-Telegram-Init-Data': tampered }), env());
   assert.equal(r2.status, 401);
 });
 
@@ -203,7 +224,7 @@ await test('initData с полем signature принимается (hash пок
   unsigned.set('hash', createHmac('sha256', secret).update(dcs).digest('hex'));
   const withSig = unsigned.toString();
 
-  const r = await call(worker, post('/api/trial', { initData: withSig }), e);
+  const r = await call(worker, post('/api/trial', {}, { 'X-Telegram-Init-Data': withSig }), e);
   const j = await r.json();
   assert.equal(r.status, 200, `signature-подпись должна приниматься: ${JSON.stringify(j)}`);
   assert.equal(j.ok, true);
@@ -211,7 +232,7 @@ await test('initData с полем signature принимается (hash пок
 
 await test('initData без signature тоже принимается (старые клиенты)', async () => {
   const e = env();
-  const r = await call(worker, post('/api/trial', { initData: initDataFor(9311) }), e);
+  const r = await call(worker, post('/api/trial', {}, { 'X-Telegram-Init-Data': initDataFor(9311) }), e);
   assert.equal(r.status, 200);
   assert.equal((await r.json()).ok, true);
 });
@@ -221,42 +242,78 @@ await test('initData старше суток отклоняется', async () =
     auth_date: String(Math.floor(Date.now() / 1000) - 90000),
     user: JSON.stringify({ id: 777, first_name: 'Старый' }),
   });
-  const r = await call(worker, post('/api/trial', { initData: old }), env());
+  const r = await call(worker, post('/api/trial', {}, { 'X-Telegram-Init-Data': old }), env());
   assert.equal(r.status, 401);
 });
 
 await test('повторный триал не выдаётся: активный PRO и уже использованный триал', async () => {
   const e = env();
   const d = initDataFor(1001);
-  const first = await (await call(worker, post('/api/trial', { initData: d }), e)).json();
+  const first = await (await call(worker, post('/api/trial', {}, { 'X-Telegram-Init-Data': d }), e)).json();
   assert.equal(first.ok, true);
   // пока триал действует, пользователь уже PRO — второй раз не начисляем
-  const again = await (await call(worker, post('/api/trial', { initData: d }), e)).json();
+  const again = await (await call(worker, post('/api/trial', {}, { 'X-Telegram-Init-Data': d }), e)).json();
   assert.equal(again.reason, 'active');
   // после истечения триала флаг trial не даёт взять его снова
   const u = await getU(e, 1001);
   u.until = new Date(Date.now() - 86400000).toISOString();
   await putU(e, 1001, u);
-  const expired = await (await call(worker, post('/api/trial', { initData: d }), e)).json();
+  const expired = await (await call(worker, post('/api/trial', {}, { 'X-Telegram-Init-Data': d }), e)).json();
   assert.equal(expired.reason, 'used');
 });
 
 await test('статус отдаёт pro/until/цену, чужой uid не видит историю платежей', async () => {
   const e = env();
-  await call(worker, post('/api/trial', { initData: initDataFor(2002) }), e);
-  const own = new URL('https://px.example.test/api/status');
-  own.searchParams.set('uid', '2002');
-  own.searchParams.set('initData', initDataFor(2002));
-  const j1 = await (await call(worker, new Request(own), e)).json();
+  await call(worker, post('/api/trial', {}, { 'X-Telegram-Init-Data': initDataFor(2002) }), e);
+  const own = new URL('https://px.example.test/api/status?uid=2002');
+  const j1 = await (await call(worker, new Request(own, { headers: { 'X-Telegram-Init-Data': initDataFor(2002) } }), e)).json();
   assert.equal(j1.pro, true);
   assert.equal(j1.price, 777);
 
-  const other = new URL('https://px.example.test/api/status');
-  other.searchParams.set('uid', '2002');
-  other.searchParams.set('initData', initDataFor(9999));
-  const j2 = await (await call(worker, new Request(other), e)).json();
+  const other = new URL('https://px.example.test/api/status?uid=2002');
+  const j2 = await (await call(worker, new Request(other, { headers: { 'X-Telegram-Init-Data': initDataFor(9999) } }), e)).json();
   assert.equal(j2.pro, true);
   assert.deepEqual(j2.payments, []);
+});
+
+await test('pre-checkout сверяет плательщика с владельцем invoice', async () => {
+  const e = env();
+  const calls = [];
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = async (url, init) => {
+    calls.push({ method: String(url).split('/').pop(), body: JSON.parse(init.body) });
+    return new Response(JSON.stringify({ ok: true }), { headers: { 'Content-Type': 'application/json' } });
+  };
+  try {
+    const update = {
+      pre_checkout_query: {
+        id: 'pcq-1', from: { id: 5005 }, currency: 'XTR', total_amount: 777,
+        invoice_payload: 'pro_5004_abcdef12',
+      },
+    };
+    await call(worker, new Request('https://px.example.test/tg/' + e.WEBHOOK_SECRET, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(update),
+    }), e);
+    const answer = calls.find(c => c.method === 'answerPreCheckoutQuery')?.body;
+    assert.equal(answer?.ok, false);
+  } finally { globalThis.fetch = realFetch; }
+});
+
+await test('оплата отклоняется, если владелец invoice не совпадает с плательщиком', async () => {
+  const e = env();
+  const body = {
+    update_id: 3,
+    message: {
+      chat: { id: 4005 }, from: { id: 4005 },
+      successful_payment: { currency: 'XTR', total_amount: 777, invoice_payload: 'pro_4004_abcdef12', telegram_payment_charge_id: 'charge-owner-mismatch' },
+    },
+  };
+  const r = await call(worker, new Request('https://px.example.test/tg/' + e.WEBHOOK_SECRET, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+  }), e);
+  assert.equal(r.status, 200);
+  assert.equal(await getU(e, 4004), null);
+  assert.equal(await getU(e, 4005), null);
 });
 
 await test('успешная оплата продлевает срок и не повторяется', async () => {
@@ -324,11 +381,12 @@ await test('админ-сводка требует ключ', async () => {
 /* ---------- VIP-фид: главное — без подписки прогнозы не отдаются ---------- */
 
 const todayMsk = () => new Date(Date.now() + 3 * 3600e3).toISOString().slice(0, 10);
+const quotaMeta = (count, freeCount = 0) => ({ targets: { free: 3, pro: 3 }, shortfall: { free: Math.max(0, 3 - freeCount), pro: Math.max(0, 3 - count) } });
 
 await test('VIP-фид не отдаётся без подписки и без валидного initData', async () => {
   const e = env();
   // кладём фид так, как это делает CI
-  const feed = { date: todayMsk(), predictions: [{ id: '1', market: 'П1', tier: 'pro' }], botd: null };
+  const feed = { date: todayMsk(), generated: new Date().toISOString(), count: 1, ...quotaMeta(1), predictions: [{ id: '1', market: 'П1', tier: 'pro', confidence: 65, value: true }], botd: null };
   await putFeed(e, todayMsk(), feed);
 
   // без initData
@@ -336,23 +394,23 @@ await test('VIP-фид не отдаётся без подписки и без �
   assert.equal(r1.status, 401);
 
   // с валидным initData, но без подписки
-  const r2 = await call(worker, new Request('https://px.example.test/api/pro?initData=' + encodeURIComponent(initDataFor(6001))), e);
+  const r2 = await call(worker, new Request('https://px.example.test/api/pro', { headers: { 'X-Telegram-Init-Data': initDataFor(6001) } }), e);
   assert.equal(r2.status, 403);
   assert.equal((await r2.json()).error, 'no_subscription');
 
   // подписки нет, и в ответе нет ни одного прогноза
-  const text = await (await call(worker, new Request('https://px.example.test/api/pro?initData=' + encodeURIComponent(initDataFor(6001))), e)).text();
+  const text = await (await call(worker, new Request('https://px.example.test/api/pro', { headers: { 'X-Telegram-Init-Data': initDataFor(6001) } }), e)).text();
   assert.ok(!text.includes('П1'), 'в отказе не должно быть данных фида');
 });
 
 await test('VIP-фид отдаётся подписчику', async () => {
   const e = env();
-  const feed = { date: todayMsk(), predictions: [{ id: '2', market: 'ТБ 2.5', tier: 'pro' }], botd: { legs: [1, 2] } };
+  const feed = { date: todayMsk(), generated: new Date().toISOString(), count: 1, ...quotaMeta(1), predictions: [{ id: '2', market: 'ТБ 2.5', tier: 'pro', confidence: 65, value: true }], botd: { legs: [1, 2] } };
   await putFeed(e, todayMsk(), feed);
   // сначала активируем подписку тем же пользователем
-  await call(worker, post('/api/trial', { initData: initDataFor(6002) }), e);
+  await call(worker, post('/api/trial', {}, { 'X-Telegram-Init-Data': initDataFor(6002) }), e);
 
-  const r = await call(worker, new Request('https://px.example.test/api/pro?initData=' + encodeURIComponent(initDataFor(6002))), e);
+  const r = await call(worker, new Request('https://px.example.test/api/pro', { headers: { 'X-Telegram-Init-Data': initDataFor(6002) } }), e);
   assert.equal(r.status, 200);
   const j = await r.json();
   assert.equal(j.ok, true);
@@ -361,10 +419,43 @@ await test('VIP-фид отдаётся подписчику', async () => {
   assert.deepEqual(j.botd, { legs: [1, 2] });
 });
 
+await test('PRO feed reports unavailable and stale data instead of empty success', async () => {
+  const e = env();
+  const init = initDataFor(6500);
+  const missing = await call(worker, new Request('https://px.example.test/api/pro', { headers: { 'X-Telegram-Init-Data': init } }), e);
+  assert.equal(missing.status, 403);
+  await call(worker, post('/api/trial', {}, { 'X-Telegram-Init-Data': init }), e);
+  const absent = await call(worker, new Request('https://px.example.test/api/pro', { headers: { 'X-Telegram-Init-Data': init } }), e);
+  assert.equal(absent.status, 503);
+  assert.equal((await absent.json()).error, 'feed_unavailable');
+  const yesterday = new Date(Date.now() + 3 * 3600e3 - 86400e3).toISOString().slice(0, 10);
+  await putFeed(e, yesterday, { date: yesterday, generated: new Date().toISOString(), count: 1, ...quotaMeta(1), predictions: [{ id: 'yesterday-live', tier: 'pro', confidence: 65, value: true }] });
+  const grace = await call(worker, new Request('https://px.example.test/api/pro', { headers: { 'X-Telegram-Init-Data': init } }), e);
+  assert.equal(grace.status, 200);
+  const graceBody = await grace.json();
+  assert.equal(graceBody.freshness, 'grace');
+  assert.equal(graceBody.predictions[0].id, 'yesterday-live');
+
+  const stale = await call(worker, post('/api/admin/pro-feed?key=admin-key', { date: yesterday, generated: new Date(Date.now() - 9 * 3600e3).toISOString(), predictions: [] }), e);
+  assert.equal(stale.status, 400);
+
+  await putFeed(e, yesterday, { date: yesterday, generated: new Date(Date.now() - 9 * 3600e3).toISOString(), predictions: [] });
+  const staleRead = await call(worker, new Request('https://px.example.test/api/pro', { headers: { 'X-Telegram-Init-Data': init } }), e);
+  assert.equal(staleRead.status, 503);
+  assert.equal((await staleRead.json()).error, 'feed_stale');
+});
+
+await test('VIP auth принимается только из заголовка, query string не поддерживается', async () => {
+  const e = env();
+  await putFeed(e, todayMsk(), { date: todayMsk(), generated: new Date().toISOString(), predictions: [{ id: 'header-only', tier: 'pro', confidence: 65, value: true }] });
+  const r = await call(worker, new Request('https://px.example.test/api/pro?initData=' + encodeURIComponent(initDataFor(6999))), e);
+  assert.equal(r.status, 401);
+});
+
 await test('залить фид можно только с админ-ключом, и только PRO-прогнозы', async () => {
   const e = env();
   const url = 'https://px.example.test/api/admin/pro-feed?key=admin-key';
-  const good = { date: todayMsk(), predictions: [{ id: '3', tier: 'pro' }] };
+  const good = { date: todayMsk(), generated: new Date().toISOString(), count: 1, ...quotaMeta(1), predictions: [{ id: '3', tier: 'pro', confidence: 65, value: true }] };
 
   const noKey = await call(worker, new Request('https://px.example.test/api/admin/pro-feed?key=wrong', {
     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(good),
@@ -374,12 +465,18 @@ await test('залить фид можно только с админ-ключо
   const post = (body) => new Request(url, {
     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
   });
+  const duplicateId = await call(worker, post({ date: todayMsk(), generated: new Date().toISOString(), ...quotaMeta(2), predictions: [{ id: 'same', tier: 'pro' }, { id: 'same', tier: 'pro' }, { id: 'third', tier: 'pro' }] }), e);
+  assert.equal(duplicateId.status, 400);
+  assert.equal((await duplicateId.json()).error, 'duplicate_prediction_ids');
+  const staleDay = await call(worker, post({ date: new Date(Date.now() + 3 * 3600e3 - 2 * 86400e3).toISOString().slice(0, 10), generated: new Date().toISOString(), predictions: [] }), e);
+  assert.equal(staleDay.status, 400);
+
   const ok = await call(worker, post(good), e);
   assert.equal(ok.status, 200);
   assert.equal((await ok.json()).count, 1);
 
   // фид с бесплатным прогнозом не принимаем: иначе VIP-файл утечёт целиком
-  const bad = await call(worker, post({ date: todayMsk(), predictions: [{ id: '4', tier: 'free' }] }), e);
+  const bad = await call(worker, post({ date: todayMsk(), generated: new Date().toISOString(), ...quotaMeta(1), predictions: [{ id: '4', tier: 'free', confidence: 65, value: true }] }), e);
   assert.equal(bad.status, 400);
   assert.equal((await bad.json()).error, 'feed_contains_free');
 
@@ -391,8 +488,8 @@ await test('залить фид можно только с админ-ключо
 
 await test('без подписки /api/pro не отдаёт даже число прогнозов', async () => {
   const e = env();
-  await putFeed(e, todayMsk(), { date: todayMsk(), predictions: [{ id: '5', tier: 'pro' }, { id: '6', tier: 'pro' }] });
-  const r = await call(worker, new Request('https://px.example.test/api/pro?initData=' + encodeURIComponent(initDataFor(6003))), e);
+  await putFeed(e, todayMsk(), { date: todayMsk(), generated: new Date().toISOString(), count: 2, ...quotaMeta(2), predictions: [{ id: '5', tier: 'pro', confidence: 65, value: true }, { id: '6', tier: 'pro', confidence: 65, value: true }] });
+  const r = await call(worker, new Request('https://px.example.test/api/pro', { headers: { 'X-Telegram-Init-Data': initDataFor(6003) } }), e);
   const body = await r.text();
   assert.equal(r.status, 403);
   assert.ok(!/predictions/.test(body), 'отказ не должен содержать поле predictions');
@@ -408,9 +505,9 @@ await test('D1: триал, оплата и VIP-фид работают на D1-
 
   // триал пишется и читается
   const d = initDataFor(7101);
-  const tr = await (await call(worker, post('/api/trial', { initData: d }), e)).json();
+  const tr = await (await call(worker, post('/api/trial', {}, { 'X-Telegram-Init-Data': d }), e)).json();
   assert.equal(tr.ok, true);
-  const st = await (await call(worker, new Request('https://px.example.test/api/status?uid=7101&initData=' + encodeURIComponent(d)), e)).json();
+  const st = await (await call(worker, new Request('https://px.example.test/api/status?uid=7101', { headers: { 'X-Telegram-Init-Data': d } }), e)).json();
   assert.equal(st.pro, true);
   assert.equal(st.trialUsed, true);
 
@@ -433,29 +530,29 @@ await test('D1: триал, оплата и VIP-фид работают на D1-
   assert.equal(u2.payments.length, 1);
 
   // VIP-фид: кладём и достаём подписчиком
-  await putFeed(e, todayMsk(), { date: todayMsk(), predictions: [{ id: '9', market: 'Х2', tier: 'pro' }] });
-  const got = await (await call(worker, new Request('https://px.example.test/api/pro?initData=' + encodeURIComponent(d)), e)).json();
+  await putFeed(e, todayMsk(), { date: todayMsk(), generated: new Date().toISOString(), count: 1, ...quotaMeta(1), predictions: [{ id: '9', market: 'Х2', tier: 'pro', confidence: 65, value: true }] });
+  const got = await (await call(worker, new Request('https://px.example.test/api/pro', { headers: { 'X-Telegram-Init-Data': d } }), e)).json();
   assert.equal(got.ok, true);
   assert.equal(got.predictions[0].id, '9');
 });
 
 await test('D1: VIP-фид по-прежнему закрыт для неподписчика', async () => {
   const e = envD1();
-  await putFeed(e, todayMsk(), { date: todayMsk(), predictions: [{ id: '10', market: 'П1', tier: 'pro' }] });
-  const r = await call(worker, new Request('https://px.example.test/api/pro?initData=' + encodeURIComponent(initDataFor(7202))), e);
+  await putFeed(e, todayMsk(), { date: todayMsk(), generated: new Date().toISOString(), count: 1, ...quotaMeta(1), predictions: [{ id: '10', market: 'П1', tier: 'pro', confidence: 65, value: true }] });
+  const r = await call(worker, new Request('https://px.example.test/api/pro', { headers: { 'X-Telegram-Init-Data': initDataFor(7202) } }), e);
   assert.equal(r.status, 403);
 });
 
 await test('D1: старые дни фида вычищаются, свежие остаются', async () => {
   const e = envD1();
   const day = (n) => new Date(Date.now() + 3 * 3600e3 - n * 86400e3).toISOString().slice(0, 10);
-  await putFeed(e, day(0), { date: day(0), predictions: [{ id: 'today', tier: 'pro' }] });
+  await putFeed(e, day(0), { date: day(0), generated: new Date().toISOString(), predictions: [{ id: 'today', tier: 'pro', confidence: 65, value: true }] });
   await putFeed(e, day(20), { date: day(20), predictions: [{ id: 'old', tier: 'pro' }] });
   // заливка нового дня запускает уборку
   const url = 'https://px.example.test/api/admin/pro-feed?key=admin-key';
   await call(worker, new Request(url, {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ date: day(1), predictions: [{ id: 'yesterday', tier: 'pro' }] }),
+    body: JSON.stringify({ date: day(1), generated: new Date().toISOString(), targets: { free: 3, pro: 3 }, shortfall: { free: 0, pro: 2 }, predictions: [{ id: 'yesterday', tier: 'pro', confidence: 65, value: true }] }),
   }), e);
   assert.ok(await getFeed(e, day(0)), 'сегодняшний фид должен остаться');
   assert.ok(await getFeed(e, day(1)), 'вчерашний фид должен остаться');

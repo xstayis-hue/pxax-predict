@@ -1,4 +1,4 @@
-name: daily-backtest
+name: archived-production-backtest
 on:
   schedule:
     - cron: '10 1 * * *' # ежедневно, 04:10 МСК, вне пика (бэктест — ~720 запросов к ESPN, чаще не нужно)
@@ -13,7 +13,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Бэктест модели по последним 90 дням
+      - name: Оценка архивных production-прогнозов
         run: node scripts/backtest.mjs
       - name: Commit data
         run: |

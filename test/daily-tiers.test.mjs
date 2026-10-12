@@ -1,0 +1,31 @@
+import assert from 'node:assert/strict';
+import { assignDailyTiers } from '../scripts/daily-tiers.mjs';
+import { normalizeScoreProbabilities, applySoccerLowScoreGuard } from '../scripts/score-adjustments.mjs';
+import { clampExpectedGoals } from '../scripts/model.mjs';
+
+const scores = normalizeScoreProbabilities({ p1: 0, px: 0.06, p2: 0.94, over: 0.61, under: 0.45 });
+assert.ok(Math.abs(scores.p1 + scores.px + scores.p2 - 1) < 1e-12);
+assert.ok(Math.abs(scores.over + scores.under - 1) < 1e-12);
+assert.ok(scores.over >= 0 && scores.over <= 1 && scores.under >= 0 && scores.under <= 1);
+assert.deepEqual(applySoccerLowScoreGuard({ p1: 0, px: 0.06, p2: 0.94, over: 0.61, under: 0.45 }, 0.35, 0.35).p1, 0.03);
+assert.deepEqual(clampExpectedGoals(0, 2.9, 'soccer'), [0.35, 2.9]);
+assert.deepEqual(clampExpectedGoals(90, 0, 'soccer'), [4.5, 0.35]);
+assert.deepEqual(clampExpectedGoals(10, -3, 'hockey'), [7, 1]);
+assert.deepEqual(clampExpectedGoals(220, 0, 'basketball'), [175, 60]);
+
+const valid = Array.from({ length: 6 }, (_, i) => ({ id: `valid${i}`, confidence: 66 - i, value: i < 3, edge: 0.13 - i * 0.01 }));
+const slots = assignDailyTiers(valid);
+assert.equal(slots.free.length, 3);
+assert.equal(slots.pro.length, 3);
+assert.deepEqual(slots.shortfall, { free: 0, pro: 0 });
+assert.equal(new Set([...slots.free, ...slots.pro].map(p => p.id)).size, 6);
+assert.ok(slots.pro.every(p => p.value && p.confidence >= 60));
+const noValues = assignDailyTiers(valid.map(p => ({ ...p, value: false })));
+assert.equal(noValues.free.length, 3);
+assert.equal(noValues.pro.length, 0);
+assert.deepEqual(noValues.shortfall, { free: 0, pro: 3 });
+const tooFew = assignDailyTiers(valid.slice(0, 4));
+assert.deepEqual(tooFew.shortfall, { free: 0, pro: 2 });
+const weak = assignDailyTiers([{ id: 'weak', confidence: 54, value: true }]);
+assert.deepEqual(weak.shortfall, { free: 3, pro: 3 });
+console.log('14 score and 3+3 allocation checks passed');

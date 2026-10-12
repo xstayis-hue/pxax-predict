@@ -7,6 +7,7 @@
 // Поддерживает рынки: П1, Х, П2, Х2, ТБ/ТМ (любая линия), Ф1/Ф2 -1.5.
 // Сохраняет модельную вероятность, коэффициент и перевес — для калибровки.
 import { writeFileSync, readFileSync, existsSync, readdirSync } from 'node:fs';
+import { gradeMarket } from './settlement.mjs';
 
 const UA = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36' };
 const mskNow = Date.now() + 3 * 3600e3;
@@ -25,28 +26,9 @@ async function fetchJson(url, tries = 3) {
   }
 }
 
-// рынок -> вердикт по счёту. Возвращает 'hit' | 'miss' | null (незнакомый рынок)
-function grade(market, hs, as) {
-  const m = (market || '').trim();
-  const total = (prefix) => {
-    const num = Number(m.replace(',', '.').match(/(\d+(?:\.\d+)?)/)?.[1]);
-    if (!Number.isFinite(num)) return null;
-    return prefix === 'over' ? hs + as > num : hs + as < num;
-  };
-  switch (m) {
-    case 'П1': return hs > as ? 'hit' : 'miss';
-    case 'П2': return as > hs ? 'hit' : 'miss';
-    case 'Х': return hs === as ? 'hit' : 'miss';
-    case 'Х2': return as >= hs ? 'hit' : 'miss';
-    case '1Х': return hs >= as ? 'hit' : 'miss';
-    case 'Ф1 -1.5': return hs - as >= 2 ? 'hit' : 'miss';
-    case 'Ф2 -1.5': return as - hs >= 2 ? 'hit' : 'miss';
-    default: {
-      if (/^ТБ/i.test(m)) { const r = total('over'); return r == null ? null : (r ? 'hit' : 'miss'); }
-      if (/^ТМ/i.test(m)) { const r = total('under'); return r == null ? null : (r ? 'hit' : 'miss'); }
-      return null;
-    }
-  }
+// рынок -> результат расчёта и доходность при наличии сохранённого decimal odds.
+function grade(market, hs, as, odds) {
+  return gradeMarket(market, hs, as, odds);
 }
 
 // собираем файлы с прогнозами (текущий + архив)
@@ -141,8 +123,15 @@ for (const src of sources) {
       const hs = Number(H?.score), as = Number(A?.score);
       if (isNaN(hs) || isNaN(as)) continue;
 
-      const r = grade(p.market, hs, as);
-      results.push({ ...base, score: `${hs}:${as}`, result: r || 'push' });
+      const settlement = grade(p.market, hs, as, p.odds);
+      if (!settlement) continue;
+      results.push({
+        ...base,
+        score: `${hs}:${as}`,
+        result: settlement.result,
+        ...(settlement?.profitUnits != null ? { profitUnits: settlement.profitUnits } : {}),
+        ...(settlement?.parts ? { settlementParts: settlement.parts } : {}),
+      });
     } catch (err) {
       console.warn('skip', p.id, String(err));
     }

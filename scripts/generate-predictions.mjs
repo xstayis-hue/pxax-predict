@@ -9,9 +9,14 @@
 //  - free = самые надёжные прогнозы, pro = value-ставки (там где есть линия).
 import { writeFileSync, mkdirSync, readFileSync, existsSync } from 'node:fs';
 import {
-  scoreMatrix, outcomesFromMatrix, outcomesFromNormal, xgBlend, recentForm,
+  scoreMatrix, outcomesFromMatrix, outcomesFromNormal, xgBlend, recentForm, smoothedRecordWinRate,
   selectionScore, marketFamily, calibrateProbability, homeAdvFromTotals,
+  isValidBasketballTotalLine,
+  clampExpectedGoals,
 } from './model.mjs';
+import { applySoccerLowScoreGuard } from './score-adjustments.mjs';
+import { normalizeScoreProbabilities } from './score-adjustments.mjs';
+import { assignDailyTiers, FREE_MIN_CONFIDENCE, PRO_MIN_CONFIDENCE } from './daily-tiers.mjs';
 
 /* ---- калибровка: читаем посчитанное резолвером (data/calibration.json) ---- */
 // Резолвер считает Brier и корзины «предсказано -> фактически» по решённой
@@ -128,7 +133,7 @@ const LEAGUE_AVG_GOALS = {
 };
 // ожидаемый счёт для подписи (своя единица для каждого спорта)
 const SCORE_LABEL = { soccer: 'Ожидаемые голы', hockey: 'Ожидаемые шайбы', basketball: 'Ожидаемые очки' };
-const WINDOW_MIN_H = 6, WINDOW_MAX_H = 48, PER_LEAGUE = 6;
+const WINDOW_MIN_H = 1, WINDOW_MAX_H = 72;
 const UA = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36' };
 const mskNow = Date.now() + 3 * 3600e3;
 const dateStr = new Date(mskNow).toISOString().slice(0, 10);
@@ -440,7 +445,8 @@ function parseOdds(comp) {
   if (!o) return null;
   const ml = (side) => americanToDecimal(o.moneyline?.[side]?.close?.odds ?? o.moneyline?.[side]?.open?.odds);
   const dec = { home: ml('home'), draw: ml('draw'), away: ml('away') };
-  const totalLine = Number(o.overUnder) || null;
+  const rawTotalLine = Number(o.overUnder);
+  const totalLine = Number.isFinite(rawTotalLine) && rawTotalLine > 0 ? rawTotalLine : null;
   const over = americanToDecimal(o.total?.over?.close?.odds ?? o.total?.over?.open?.odds);
   const under = americanToDecimal(o.total?.under?.close?.odds ?? o.total?.under?.open?.odds);
   dec.over = over; dec.under = under;
@@ -476,24 +482,16 @@ const preds = [];
 let skippedPreseason = 0;
 for (const lg of LEAGUES) {
   try {
-    let events;
-    if (lg.type === 'us') {
-      const m = new Map();
-      for (const e of [
-        ...(await scoreboard(lg.key)),
-        ...(await scoreboard(lg.key, ymd(Date.now() + 3 * 3600e3))),
-        ...(await scoreboard(lg.key, ymd(Date.now() + 3 * 3600e3 + 86400e3))),
-      ]) m.set(String(e.id), e);
-      events = [...m.values()];
-    } else {
-      events = await scoreboard(lg.key);
+    const eventsById = new Map();
+    const baseDate = Date.now() + 3 * 3600e3;
+    for (const offset of [-86400e3, 0, 86400e3, 2 * 86400e3]) {
+      for (const e of await scoreboard(lg.key, ymd(baseDate + offset))) eventsById.set(String(e.id), e);
     }
+    const events = [...eventsById.values()];
     const stats = await leagueStats(lg.key, lg.type);
     const xgMap = lg.type === 'soccer' ? await xgMapFor(lg.key) : null;
     const injMap = await leagueInjuries(lg.key);
-    let taken = 0;
     for (const e of events) {
-      if (taken >= PER_LEAGUE) break;
       const t = new Date(e.date).getTime();
       if (t < Date.now() + WINDOW_MIN_H * 3600e3 || t > Date.now() + WINDOW_MAX_H * 3600e3) continue;
       const comp = e.competitions?.[0];
@@ -512,7 +510,7 @@ for (const lg of LEAGUES) {
       // домашнее преимущество: своё для лиги, если набралось достаточно
       // решённых матчей, иначе общая константа по виду спорта
       const HAG = homeAdvFor(lg.key, lg.type);
-      if (hs && as) {
+      if (hs && as && hs.gp >= 3 && as.gp >= 3) {
         const avg = (hs.avgFor + hs.avgAg + as.avgFor + as.avgAg) / 4;
         lh = Math.max(0.2, avg * hs.att * as.def * HAG);
         la = Math.max(0.15, avg * as.att * hs.def);
@@ -527,13 +525,13 @@ for (const lg of LEAGUES) {
         const rec = c => { const s = c.records?.[0]?.summary; if (!s) return null; const p = s.split('-').map(Number); return p.some(isNaN) ? null : p; };
         const rh = rec(home), ra = rec(away);
         if (!rh || !ra) continue;
-        const winRate = (p, soccer) => { const [w, d = 0, l] = p; const g = w + d + l; return g ? (soccer ? (3 * w + d) / (3 * g) : w / g) : 0.5; };
+        const winRate = (record, soccer) => smoothedRecordWinRate(record, soccer) ?? 0.5;
         const ph = winRate(rh, kind === 'soccer'), pa = winRate(ra, kind === 'soccer');
         const share = (ph * 1.1) / (ph * 1.1 + pa);
         lh = avgTotal * share; la = avgTotal * (1 - share);
       }
 
-      // xG-форма Understat: поправка к ожиданию по последним 5 завершённым матчам (без lookahead’а)
+
       let xgInfo = null;
       if (kind === 'soccer' && xgMap) {
         const xf = xgForm(xgMap, [home.team.displayName, away.team.displayName], e.date);
@@ -546,11 +544,12 @@ for (const lg of LEAGUES) {
         }
       }
 
+      [lh, la] = clampExpectedGoals(lh, la, kind);
       const odds = parseOdds(comp);
       let oc;
       if (kind === 'basketball') {
-        // очки — почти непрерывная величина: нормальное приближение вместо дискретного распределения
-        oc = outcomesFromNormal(lh, la, odds?.totalLine || 224);
+        // Не вычисляем рынок тотала по фиктивной линии: она должна прийти от букмекера.
+        oc = outcomesFromNormal(lh, la, odds?.totalLine ?? null);
       } else {
         const mtx = scoreMatrix(lh, la);
         oc = outcomesFromMatrix(mtx);
@@ -562,7 +561,8 @@ for (const lg of LEAGUES) {
           oc.px = 0;
         }
       }
-      const totalLine = odds?.totalLine || 2.5;
+      const totalLine = odds?.totalLine ?? null;
+      oc = kind === 'soccer' ? applySoccerLowScoreGuard(oc, lh, la) : normalizeScoreProbabilities(oc);
 
       // собираем кандидатов рынков: {m, p, dec, i}
       // клиент сравнивает модельную вероятность с честной (devig) вероятностью линии
@@ -585,8 +585,8 @@ for (const lg of LEAGUES) {
         // баскетбол: тотал по линии ESPN, если она есть
         cand.push({ m: 'П1', p: oc.p1, dec: odds?.dec.home, i: imp?.p1 });
         cand.push({ m: 'П2', p: oc.p2, dec: odds?.dec.away, i: imp?.p2 });
-        if (oc.over != null && odds?.dec.over) cand.push({ m: `ТБ ${totalLine}`, p: oc.over, dec: odds.dec.over, i: imp?.over });
-        if (oc.under != null && odds?.dec.under) cand.push({ m: `ТМ ${totalLine}`, p: oc.under, dec: odds.dec.under, i: imp?.under });
+        if (oc.over != null && isValidBasketballTotalLine(totalLine, odds?.dec.over, odds?.dec.under)) cand.push({ m: `ТБ ${totalLine}`, p: oc.over, dec: odds.dec.over, i: imp?.over });
+        if (oc.under != null && isValidBasketballTotalLine(totalLine, odds?.dec.over, odds?.dec.under)) cand.push({ m: `ТМ ${totalLine}`, p: oc.under, dec: odds.dec.under, i: imp?.under });
       }
       for (const c of cand) c.edge = edgeOf(c.p, c.i);
 
@@ -664,7 +664,6 @@ for (const lg of LEAGUES) {
         record: `${homeRec} / ${awayRec}`,
         note,
       });
-      taken++;
     }
   } catch (err) {
     console.warn('league skip:', lg.key, String(err));
@@ -686,7 +685,8 @@ if (!preds.length) {
 if (existsSync('data/predictions.json')) {
   try {
     const old = JSON.parse(readFileSync('data/predictions.json', 'utf8'));
-    if (old.date && old.date !== dateStr) {
+    // Снимок предыдущего выпуска нужен для аудита и не редактируется при повторном запуске.
+    if (old.date && old.date !== dateStr && !existsSync(`data/archive/${old.date}.json`)) {
       mkdirSync('data/archive', { recursive: true });
       writeFileSync(`data/archive/${old.date}.json`, JSON.stringify(old, null, 2));
       console.log(`archived predictions for ${old.date}`);
@@ -694,28 +694,16 @@ if (existsSync('data/predictions.json')) {
   } catch (e) { console.warn('archive skip:', String(e)); }
 }
 
-// порог уверенности: ниже него прогноз не показываем вовсе.
-// free — не ниже 55%, pro (value) — не ниже 60%: слабые сигналы только портят доверие.
-const FREE_MIN = 55, PRO_MIN = 60;
-const pool = preds.filter(p => p.confidence >= FREE_MIN);
-if (!pool.length) {
-  console.error(`FAIL: 0 predictions with confidence >= ${FREE_MIN}% — все сигналы ниже порога. Прежние данные не тронуты.`);
+// Кандидаты берутся только из реальных событий и проходят исходные confidence-пороги.
+const FREE_MIN = FREE_MIN_CONFIDENCE, PRO_MIN = PRO_MIN_CONFIDENCE;
+const assignment = assignDailyTiers(preds);
+const free = assignment.free;
+const pro = assignment.pro;
+const final = [...free, ...pro].sort((a, b) => b.confidence - a.confidence);
+if (!final.length) {
+  console.error('FAIL: no real predictions met the confidence threshold; previous feeds remain untouched.');
   process.exit(1);
 }
-
-// тарификация: PRO = value-ставки (реальный перевес над линией), FREE = самые надёжные.
-// в PRO попадают только value-ставки с уверенностью >= PRO_MIN; остальное — бесплатно.
-const valueBets = pool.filter(p => p.value && p.confidence >= PRO_MIN).sort((a, b) => b.edge - a.edge);
-const proCount = Math.min(5, Math.max(2, Math.round(pool.length * 0.4)));
-const proIds = new Set(valueBets.slice(0, proCount).map(p => p.id));
-// если value-ставок мало — добираем самыми уверенными (но не ниже PRO_MIN)
-for (const p of pool.filter(p => !proIds.has(p.id) && p.confidence >= PRO_MIN).sort((a, b) => b.confidence - a.confidence)) {
-  if (proIds.size >= proCount) break;
-  proIds.add(p.id);
-}
-const final = pool
-  .map(p => ({ ...p, tier: proIds.has(p.id) ? 'pro' : 'free' }))
-  .sort((a, b) => b.confidence - a.confidence);
 
 // «Ставка дня» (PRO): экспресс из 2–3 сильных сигналов.
 // Условия честности: только уверенность >= 70% у каждой ноги, минимум 2 ноги.
@@ -749,8 +737,6 @@ mkdirSync('data', { recursive: true });
 // (scripts/publish-pro.mjs), а оттуда его получает подписчик по initData.
 // Раньше всё лежало в одном публичном файле вместе с tier, и весь VIP-контент
 // скачивался curl-ом без подписки.
-const free = final.filter(p => p.tier === 'free');
-const pro = final.filter(p => p.tier === 'pro');
 // в публичном файле поле tier не пишем вовсе: там только free, а само поле
 // подсказывало бы, что бывают и другие уровни.
 // Публичная запись: платный сигнал PRO — это сравнение модели с линией.
@@ -781,6 +767,8 @@ writeFileSync('data/predictions.json', JSON.stringify({
   proCount: pro.length,          // только число: сколько сигналов Pro-ИИ сегодня
   botdLegs: botd ? botd.legs.length : 0, // тоже только число — для пейвол-тизера
   thresholds: { freeMin: FREE_MIN, proMin: PRO_MIN },
+  targets: assignment.targets,
+  shortfall: assignment.shortfall,
   predictions: free.map(publicFree),
 }, null, 2));
 
@@ -788,10 +776,12 @@ writeFileSync('data/pro-feed.json', JSON.stringify({
   date: dateStr,
   generated: new Date().toISOString(),
   count: pro.length,
+  targets: assignment.targets,
+  shortfall: assignment.shortfall,
   botd,
   predictions: pro,
 }, null, 2));
 
-console.log(`OK: ${final.length} predictions (pro=${pro.length}, free=${free.length}, value=${final.filter(p => p.value).length}${botd ? `, bet-of-the-day: ${botd.legs.length} legs @ ${botd.combinedOdds}` : ''}) for ${dateStr} [free>=${FREE_MIN}%, pro>=${PRO_MIN}%]`
+console.log(`OK: ${final.length} real predictions (pro=${pro.length}, free=${free.length}, shortfall free=${assignment.shortfall.free}, pro=${assignment.shortfall.pro}, value=${final.filter(p => p.value).length}${botd ? `, bet-of-the-day: ${botd.legs.length} legs @ ${botd.combinedOdds}` : ''}) for ${dateStr} [free>=${FREE_MIN}%, pro>=${PRO_MIN}%]`
   + `; публично free=${free.length}, PRO уходит в data/pro-feed.json`);
 if (skippedPreseason) console.log(`preseason skipped: ${skippedPreseason} матчей (модель считает только регулярный сезон)`);

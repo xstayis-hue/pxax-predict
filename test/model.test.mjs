@@ -3,7 +3,7 @@
 // поэтому гоняются в CI на каждый push.
 //
 // Запуск: node test/model.test.mjs
-import { selectionScore, marketFamily, calibratedRate, calibrateProbability, homeAdvFromTotals, recentForm, CALIBRATION_MAX_SHIFT } from '../scripts/model.mjs';
+import { selectionScore, marketFamily, calibratedRate, calibrateProbability, homeAdvFromTotals, recentForm, CALIBRATION_MAX_SHIFT, smoothedRecordWinRate } from '../scripts/model.mjs';
 
 const results = [];
 const check = (name, cond, extra = '') => results.push(`${cond ? 'PASS' : 'FAIL'} — ${name}${extra ? `  [${extra}]` : ''}`);
@@ -92,6 +92,9 @@ check('R4: матчи после даты прогноза не учитываю
   `xf=${recentForm(season, 45, 5).xf.toFixed(3)}`);
 check('R5: меньше трёх сыгранных — null', recentForm(season, 25, 5) === null);
 check('R6: пустая история — null', recentForm(null, 100, 5) === null);
+check('G1: свежий пониженный коэффициент сглаживает экстремальный рекорд', smoothedRecordWinRate([1, 0, 0], true) < 0.75);
+check('G2: баскетбольный рекорд сглаживается к 0.5 на малой выборке', smoothedRecordWinRate([1, 0, 0], false) < 0.65);
+check('G3: нулевой рекорд не даёт оценки силы', smoothedRecordWinRate([0, 0, 0], false) === null);
 
 console.log(results.join('\n'));
 const failed = results.filter((r) => r.startsWith('FAIL'));

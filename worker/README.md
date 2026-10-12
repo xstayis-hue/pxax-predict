@@ -20,9 +20,10 @@ Cloudflare CLI: деплой либо из CI, либо одной команд�
 | Метод | Путь | Назначение |
 |---|---|---|
 | GET | `/health` | Готовность, наличие секретов, текущая цена и срок |
-| GET | `/api/status?uid=&initData=` | Статус PRO, `until`, цена, сроки, история платежей (только владельцу) |
-| POST | `/api/trial` | Активировать пробные 3 дня (`{ initData }`) |
-| POST | `/api/invoice` | Ссылка на счёт Stars для `Telegram.WebApp.openInvoice` |
+| GET | `/api/status?uid=` (заголовок `X-Telegram-Init-Data`) | Статус PRO, `until`, цена, сроки, история платежей (только владельцу) |
+| GET | `/api/pro` (заголовок `X-Telegram-Init-Data`) | VIP-прогнозы только подписчику; отсутствующий или устаревший фид возвращает 503 |
+| POST | `/api/trial` (заголовок `X-Telegram-Init-Data`) | Активировать пробные 3 дня |
+| POST | `/api/invoice` (заголовок `X-Telegram-Init-Data`) | Ссылка на счёт Stars для `Telegram.WebApp.openInvoice` |
 | POST | `/tg/<WEBHOOK_SECRET>` | Вебхук Telegram (`message`, `pre_checkout_query`) |
 | GET | `/api/admin/stats?key=` | Сводка: всего пользователей, активных PRO, использован ли триал |
 

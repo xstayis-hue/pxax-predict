@@ -14,18 +14,26 @@ const key = process.env.PXAX_ADMIN_KEY || '';
 const file = process.env.PXAX_PRO_FEED || 'data/pro-feed.json';
 
 if (!url || !key) {
-  console.log('publish-pro: PXAX_WORKER_URL/PXAX_ADMIN_KEY не заданы — VIP-фид не публикуется');
-  console.log('(в CI это значит, что секреты не настроены; локально — что воркер не подключён)');
-  process.exit(0); // не валим пайплайн: генерация данных важнее публикации
+  console.error('publish-pro: PXAX_WORKER_URL/PXAX_ADMIN_KEY обязательны — VIP-фид не публикуется');
+  process.exit(1);
 }
 if (!existsSync(file)) {
-  console.log(`publish-pro: ${file} нет — публиковать нечего`);
-  process.exit(0);
+  console.error(`publish-pro: ${file} отсутствует — VIP-фид не публикуется`);
+  process.exit(1);
 }
 
 const feed = JSON.parse(readFileSync(file, 'utf8'));
-if (!feed.date || !Array.isArray(feed.predictions)) {
-  console.error('publish-pro: в фиде нет date/predictions');
+const today = new Date(Date.now() + 3 * 3600e3).toISOString().slice(0, 10);
+const yesterday = new Date(Date.now() + 3 * 3600e3 - 86400e3).toISOString().slice(0, 10);
+const generated = new Date(feed.generated || '').getTime();
+if (!feed.date || ![today, yesterday].includes(feed.date) || !Array.isArray(feed.predictions)
+  || !Number.isFinite(generated) || generated > Date.now() + 5 * 60 * 1000 || Date.now() - generated > 8 * 3600e3) {
+  console.error(`publish-pro: invalid or stale real feed for ${today}`);
+  process.exit(1);
+}
+const ids = feed.predictions.map(p => String(p.id ?? ''));
+if (ids.some(id => !id) || new Set(ids).size !== ids.length) {
+  console.error('publish-pro: prediction IDs must be present and unique');
   process.exit(1);
 }
 // страховка от утечки: в VIP-фиде не должно быть бесплатных прогнозов
@@ -34,16 +42,32 @@ if (leaked.length) {
   console.error(`publish-pro: в фиде ${leaked.length} не-PRO прогнозов — не публикую`);
   process.exit(1);
 }
+if (!feed.targets || !feed.shortfall || Number(feed.targets.pro) !== 3
+  || Number(feed.shortfall.pro) !== Math.max(0, 3 - feed.predictions.length)
+  || Number(feed.targets.free) !== 3) {
+  console.error('publish-pro: PRO target metadata is inconsistent');
+  process.exit(1);
+}
+if (feed.predictions.length > 3 || feed.predictions.some(p => Number(p.confidence) < 60 || p.value !== true)) {
+  console.error('publish-pro: PRO feed must contain at most three qualified value predictions (confidence >= 60%)');
+  process.exit(1);
+}
 
 const res = await fetch(`${url}/api/admin/pro-feed?key=${encodeURIComponent(key)}`, {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify(feed),
+  signal: AbortSignal.timeout(20000),
 });
 
 const body = await res.text();
 if (!res.ok) {
   console.error(`publish-pro: HTTP ${res.status} — ${body.slice(0, 300)}`);
+  process.exit(1);
+}
+const published = JSON.parse(body);
+if (!published.ok || published.date !== feed.date || published.count !== feed.predictions.length) {
+  console.error('publish-pro: подтверждение публикации не совпало с отправленным фидом');
   process.exit(1);
 }
 console.log(`publish-pro: OK — ${feed.predictions.length} VIP-прогнозов за ${feed.date} загружено в хранилище воркера`);

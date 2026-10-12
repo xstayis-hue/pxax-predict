@@ -41,9 +41,33 @@ export function outcomesFromNormal(lh, la, totalLine) {
   const total = lh + la, sdTot = 17;
   const p1 = 1 - normCdf(0, diff, sdDiff); // ничьих в НБА не бывает
   const p2 = 1 - p1;
-  const over = totalLine ? 1 - normCdf(totalLine, total, sdTot) : null;
-  const under = totalLine && over != null ? 1 - over : null;
+  const validLine = Number.isFinite(Number(totalLine)) && Number(totalLine) > 0;
+  const over = validLine ? 1 - normCdf(Number(totalLine), total, sdTot) : null;
+  const under = over != null ? 1 - over : null;
   return { p1, px: 0, p2, over, under, p1h: null, p2h: null };
+}
+
+export function isValidBasketballTotalLine(line, overOdds, underOdds) {
+  const total = Number(line);
+  const over = Number(overOdds), under = Number(underOdds);
+  return Number.isFinite(total) && total >= 130 && total <= 330
+    && Number.isFinite(over) && over > 1
+    && Number.isFinite(under) && under > 1;
+}
+
+export function clampExpectedGoals(lh, la, kind) {
+  const max = kind === 'soccer' ? 4.5 : kind === 'hockey' ? 7 : 175;
+  const min = kind === 'soccer' ? 0.35 : kind === 'hockey' ? 1 : 60;
+  return [Math.max(min, Math.min(max, lh)), Math.max(min, Math.min(max, la))];
+}
+
+export function smoothedRecordWinRate(record, soccer = false, priorGames = 6) {
+  if (!Array.isArray(record)) return null;
+  const [w = 0, d = 0, l = 0] = record.map(Number);
+  const games = w + d + l;
+  if (![w, d, l, games].every(Number.isFinite) || games <= 0) return null;
+  const observed = soccer ? (3 * w + d) / (3 * games) : w / games;
+  return 0.5 + (observed - 0.5) * (games / (games + priorGames));
 }
 
 // Последние n сыгранных матчей строго до матча -> средние xG за/против.
@@ -163,4 +187,3 @@ export function homeAdvFromTotals(homeGoals, awayGoals, games, minGames = MIN_HO
   if (!Number.isFinite(adv)) return null;
   return Math.max(1.0, Math.min(1.35, adv));
 }
-

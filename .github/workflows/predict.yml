@@ -18,10 +18,22 @@ jobs:
           node-version: 24
       - name: Тесты модели (выбор рынка, калибровка, домашний фактор)
         run: node test/model.test.mjs
+      - name: Settlement и проверка NBA totals
+        run: node test/settlement.test.mjs
+      - name: Bounds ожидаемого счёта
+        run: node test/score-bounds.test.mjs
+      - name: Архивная оценка production-прогнозов
+        run: node test/backtest.test.mjs
+      - name: Тест целевых минимумов 3+3 без синтетики
+        run: node test/daily-tiers.test.mjs
+      - name: Тесты платежей и защиты фидов
+        run: node worker/test/payments.test.mjs
       - name: Generate predictions
         run: node scripts/generate-predictions.mjs
       # PRO-прогнозы уходят в KV воркера и в репозиторий не попадают (data/pro-feed.json
       # в .gitignore): иначе VIP-контент скачивался бы curl-ом без подписки.
+      - name: Verify real public and PRO feeds agree
+        run: node scripts/check-daily-feeds.mjs
       - name: Publish VIP feed to worker KV
         env:
           PXAX_WORKER_URL: ${{ secrets.PXAX_WORKER_URL }}
