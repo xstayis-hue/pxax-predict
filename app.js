@@ -1,4 +1,5 @@
 /* ================= Telegram SDK ================= */
+const { quotaStatus, visibleHistoryCount } = window.PxaxHistoryUi;
 const tg = window.Telegram?.WebApp;
 const isTg = !!tg;
 if (tg) { try { tg.expand(); tg.disableVerticalSwipes?.(); tg.setHeaderColor?.('#0a0d16'); tg.setBackgroundColor?.('#0a0d16'); } catch(e) {} }
@@ -39,6 +40,17 @@ const REAL = { loaded: false, status: 'loading', error: null, proError: null, da
 // отпечатки загруженных файлов — чтобы автообновление не перерисовывало UI, когда данные не изменились
 let feedFingerprint = null, resultsFp = null, backtestFp = null, proFp = null;
 function resultsFingerprint(j) { return j.map(r => r.id + '|' + r.result).join(';'); }
+function dailyProCount(feed, predictions, freshness) {
+  if (freshness !== 'fresh' || !Array.isArray(feed?.predictions)) return 0;
+  const ids = new Set(feed.predictions.map(p => String(p.id)));
+  const visibleIds = new Set((predictions || []).map(p => String(p.id)));
+  return [...ids].filter(id => visibleIds.has(id)).length;
+}
+function historyCountForFilter(filter) {
+  return visibleHistoryCount(REAL.results,
+    filter,
+    dayKey(new Date(Date.now() - CONFIG.STAT_DAYS * 86400000)));
+}
 function feedFresh(d) {
   const generated = new Date(d?.generated || '').getTime();
   const age = Date.now() - generated;
@@ -47,8 +59,9 @@ function feedFresh(d) {
   const priorDay = Number.isFinite(feedDay) && todayDay - feedDay === 86400e3;
   if (!Array.isArray(d?.predictions) || !d?.date || !Number.isFinite(generated) || generated > Date.now() + 5 * 60 * 1000
     || age > 30 * 3600 * 1000 || (d.date !== today && !priorDay)) return null;
-  if (d.date === today && age <= 6 * 3600 * 1000) return 'fresh';
-  return 'grace';
+  if (d.date !== today) return 'grace';
+  if (age > 6 * 3600 * 1000) return 'grace';
+  return 'fresh';
 }
 function availablePredictions(predictions) {
   const now = Date.now();
@@ -74,16 +87,20 @@ async function loadReal() {
     REAL.lastUpdate = d.generated || null;
     if (freshness) {
       REAL.status = freshness;
-      REAL.feedTargets = d.targets || { free: CONFIG.FREE_DAILY, pro: CONFIG.PRO_DAILY };
-      REAL.feedShortfall = d.shortfall || {
-        free: Math.max(0, (d.targets?.free ?? CONFIG.FREE_DAILY) - availablePredictions(d.predictions.filter(p => !p.tier || p.tier === 'free')).length),
-        pro: Math.max(0, (d.targets?.pro ?? CONFIG.PRO_DAILY) - (Number(d.proCount) || 0)),
+      REAL.feedTargets = { free: 3, pro: 3 };
+      const visibleFree = availablePredictions(d.predictions.filter(p => !p.tier || p.tier === 'free'));
+      const visibleProFromPublic = availablePredictions(d.proPredictions || []);
+      const reportedProCount = dailyProCount(d, visibleProFromPublic, freshness);
+      REAL.feedShortfall = {
+        free: Math.max(0, 3 - Math.min(3, visibleFree.length)),
+        pro: Math.max(0, 3 - reportedProCount),
       };
-      REAL.error = freshness === 'grace' ? `Показываем последний реальный выпуск за ${d.date}; ждём сегодняшнее обновление.` : null;
+      REAL.error = freshness === 'grace' ? `Показываем предыдущий реальный выпуск за ${d.date}; ждём сегодняшний обновлённый выпуск.` : null;
       REAL.date = d.date;
-      REAL.free = availablePredictions(d.predictions.filter(p => !p.tier || p.tier === 'free'));
-      REAL.proCount = Number(d.proCount) || 0;
-      proTotalToday = freshness === 'fresh' ? REAL.proCount : 0;
+      REAL.free = visibleFree;
+      REAL.pro = visibleProFromPublic;
+      REAL.proCount = reportedProCount;
+      proTotalToday = REAL.proCount;
       REAL.botdLegs = Number(d.botdLegs) || 0;
     } else {
       REAL.status = 'stale';
@@ -224,6 +241,9 @@ function collectStats(days, onlyKind) {
 }
 /* ================= user state ================= */
 let statFilter = 'all'; // all | free | pro
+let historyVisibleCount = 20;
+const HISTORY_PAGE_SIZE = 20;
+let historyFingerprint = null;
 let sportFilter = 'all'; // all | вид спорта из данных
 function applySportFilter(list) {
   if (sportFilter === 'all') return list;
@@ -773,6 +793,7 @@ let freeDeckObj, proDeckObj;
 
 function render() {
   const pro = store.pro;
+  const isFreshFeed = REAL.status === 'fresh';
   document.getElementById('subBadge').className = 'sub-badge ' + (pro ? 'pro' : 'free');
   document.getElementById('subBadge').textContent = pro ? 'pro' : 'free';
   document.getElementById('profSub').textContent = pro ? 'PRO активна' : 'нет';
@@ -812,7 +833,9 @@ function render() {
   const cEl = document.getElementById('collectChip');
   if (cEl) cEl.hidden = true;
   document.getElementById('statFree').textContent = freeToday.length;
-  document.getElementById('statProCnt').textContent = proTotalToday;
+  const quotaTarget = REAL.feedTargets?.pro ?? CONFIG.PRO_DAILY;
+  const proQuotaFeedCount = isFreshFeed ? Math.min(quotaTarget, proTotalToday) : null;
+  document.getElementById('statProCnt').textContent = isFreshFeed ? quotaStatus(proQuotaFeedCount, quotaTarget) : '—';
   document.getElementById('hHits').textContent = hasReal ? statsView.hits : '—';
   document.getElementById('hMiss').textContent = hasReal ? statsView.miss : '—';
   document.getElementById('hRate').textContent = hasReal ? statsView.rate + '%' : '—';
@@ -821,8 +844,11 @@ function render() {
   document.getElementById('pMiss').textContent = hasReal ? statsAll.miss : '—';
   document.getElementById('pRate').textContent = hasReal ? statsAll.rate + '%' : '—';
   // динамические счётчики вместо захардкоженных
-  document.getElementById('payProTitle').innerHTML = `${ic('diamond')} Доступно ${proTotalToday} реальных PRO-сигналов`;
-  document.getElementById('proCnt').textContent = `${proTotalToday} реальных PRO-сигналов на сегодня`;
+  document.getElementById('payProTitle').innerHTML = `${ic('diamond')} PRO сегодня · ${isFreshFeed ? quotaStatus(proQuotaFeedCount, quotaTarget) : REAL.status === 'legacy' ? 'legacy · цель не подтверждена' : 'квота обновляется'}`;
+  document.getElementById('proCnt').textContent = isFreshFeed
+    ? `PRO сегодня · ${quotaStatus(proQuotaFeedCount, quotaTarget)}`
+    : REAL.status === 'legacy' ? 'Старый выпуск · квота 3+3 не указана'
+      : 'Сегодняшняя PRO-квота ещё не загружена';
   renderBetOfTheDay();
 
   // колоды (+ честные пустые состояния, если матчей в окне нет)
@@ -851,23 +877,25 @@ function render() {
     const target = REAL.feedTargets || { free: CONFIG.FREE_DAILY, pro: CONFIG.PRO_DAILY };
     const miss = (REAL.feedShortfall?.pro ?? Math.max(0, target.pro - proTotalToday));
     const reason = REAL.proError || REAL.error || (REAL.status === 'fresh'
-      ? `${proTotalToday} из цели ${target.pro}; ${miss} недостаёт после фильтра качества.`
+      ? `Сегодня ${quotaStatus(Math.min(3, proTotalToday), target.pro)} после фильтров качества.`
       : 'PRO-фид ещё обновляется.');
     pt.innerHTML = `<div class="empty" style="margin:0">${ic(REAL.proError ? 'x' : 'diamond')} ${reason}</div>`;
     document.getElementById('proNav').innerHTML = '';
   }
-  const freshFeed = REAL.status === 'fresh';
-  const isFreshFeed = freshFeed;
   const target = REAL.feedTargets || { free: CONFIG.FREE_DAILY, pro: CONFIG.PRO_DAILY };
   const shortfall = REAL.feedShortfall || { free: Math.max(0, target.free - freeToday.length), pro: Math.max(0, target.pro - proTotalToday) };
+  const availableHistory = historyCountForFilter(statFilter);
+  const historyCount = document.getElementById('historyCount');
+  if (historyCount) historyCount.textContent = `${availableHistory} результатов за ${CONFIG.STAT_DAYS} дней`;
   document.getElementById('paywallCta').style.display = (pro || !proTotalToday) ? 'none' : 'block';
   document.getElementById('proPaywall').style.display = (pro || !proTotalToday) ? 'none' : 'block';
   const payProTitle = document.getElementById('payProTitle');
-  if (shortfall.pro > 0 && isFreshFeed) payProTitle.textContent = `Сегодня ${proTotalToday} PRO из цели ${target.pro} · сигналов меньше из-за фильтра качества`;
+  if (shortfall.pro > 0 && isFreshFeed) payProTitle.textContent = `PRO сегодня · ${quotaStatus(proQuotaFeedCount, quotaTarget)} после фильтра качества`;
   const proCountLabel = document.getElementById('proCnt');
   if (proCountLabel) proCountLabel.textContent = isFreshFeed
-    ? `${proTotalToday} из ${target.pro} PRO на сегодня`
-    : `${proTotalToday} PRO-прогнозов в последнем реальном выпуске`;
+    ? `PRO сегодня · ${quotaStatus(proQuotaFeedCount, quotaTarget)}`
+    : REAL.status === 'legacy' ? 'Данные старого формата; ожидается новая квота'
+      : 'Сегодняшняя PRO-квота ещё не загружена';
 
   // статистика прошедших прогнозов
   const hEl = document.getElementById('historyList');
@@ -892,17 +920,39 @@ function render() {
     // «7 дней» расходилась бы с верхними счётчиками за 14 дней
     const cutoff = dayKey(new Date(Date.now() - CONFIG.STAT_DAYS * 86400000));
     const rows = REAL.results
-      // preseason-матчи в списке не показываем: это не работа модели, и они
-      // портили бы впечатление от проходимости (в статистику они тоже не идут)
       .filter(r => r.date >= cutoff && kinds.includes(r.kind) && !r.preseason)
       .sort((a, b) => b.date.localeCompare(a.date));
-    for (const r of rows) {
-      const cls = r.result === 'hit' ? 'hit' : r.result === 'miss' ? 'miss' : 'push';
-      const label = ic(r.result === 'hit' ? 'check' : r.result === 'miss' ? 'x' : 'clock');
+    const nextHistoryFingerprint = `${statFilter}:${rows.map(r => `${r.id}:${r.date}:${r.result}`).join('|')}`;
+    if (historyFingerprint !== nextHistoryFingerprint) {
+      historyFingerprint = nextHistoryFingerprint;
+      historyVisibleCount = HISTORY_PAGE_SIZE;
+    }
+    const visibleRows = rows.slice(0, historyVisibleCount);
+    for (const r of visibleRows) {
+      const cls = r.result === 'hit' || r.result === 'half_win' ? 'hit' : r.result === 'miss' || r.result === 'half_loss' ? 'miss' : 'push';
+      const label = ic(r.result === 'hit' || r.result === 'half_win' ? 'check' : r.result === 'miss' || r.result === 'half_loss' ? 'x' : 'clock');
       addH(r.home, r.away,
         `${sportIcon(r.sport)} ${r.league} · <span class="${r.kind === 'pro' ? 'pro' : 'ai'}">${r.kind === 'pro' ? 'Pro AI' : 'AI'}</span> · ${r.market} · счёт ${r.score}`,
         cls, label, pro || r.kind === 'free');
     }
+    const pager = document.getElementById('historyPager');
+    const more = document.getElementById('historyMore');
+    const less = document.getElementById('historyLess');
+    if (pager) pager.hidden = rows.length <= HISTORY_PAGE_SIZE;
+    if (more) {
+      more.hidden = historyVisibleCount >= rows.length;
+      more.textContent = `Показать ещё ${Math.min(HISTORY_PAGE_SIZE, Math.max(0, rows.length - historyVisibleCount))}`;
+    }
+    if (less) less.hidden = historyVisibleCount <= HISTORY_PAGE_SIZE;
+    const historyProgress = document.getElementById('historyProgress');
+    if (historyProgress) historyProgress.textContent = `Показано ${visibleRows.length} из ${rows.length}`;
+  } else {
+    historyFingerprint = null;
+    historyVisibleCount = HISTORY_PAGE_SIZE;
+    const historyProgress = document.getElementById('historyProgress');
+    if (historyProgress) historyProgress.textContent = 'Показано 0';
+    const pager = document.getElementById('historyPager');
+    if (pager) pager.hidden = true;
   }
   // сколько preseason-строк отдано и исключено из статистики: показываем честно,
   // чтобы выпавшие матчи не выглядели подчисткой убыточных прогнозов
@@ -1442,14 +1492,29 @@ function syncTrialButtons() {
 syncTrialButtons();
 
 // фильтр статистики: Все / Базовый ИИ / VIP
-document.querySelectorAll('.f-btn').forEach(b => {
+document.querySelectorAll('#view-history .filter-row .f-btn').forEach(b => {
   b.onclick = () => {
     statFilter = b.dataset.f;
+    historyVisibleCount = HISTORY_PAGE_SIZE;
     haptic();
     document.querySelectorAll('.f-btn').forEach(x => x.classList.toggle('on', x === b));
     render();
   };
 });
+
+const historyMore = document.getElementById('historyMore');
+const historyLess = document.getElementById('historyLess');
+if (historyMore) historyMore.onclick = () => {
+  historyVisibleCount += HISTORY_PAGE_SIZE;
+  haptic();
+  render();
+};
+if (historyLess) historyLess.onclick = () => {
+  historyVisibleCount = HISTORY_PAGE_SIZE;
+  haptic();
+  render();
+  document.getElementById('view-history')?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+};
 
 document.querySelectorAll('.tab').forEach(btn => {
   btn.onclick = () => {
@@ -1589,20 +1654,19 @@ async function autoRefresh() {
     const freshness = feedFresh(d);
     if (freshness) {
       REAL.status = freshness;
-      REAL.feedTargets = d.targets || { free: CONFIG.FREE_DAILY, pro: CONFIG.PRO_DAILY };
-      REAL.feedShortfall = d.shortfall || {
-        free: Math.max(0, (d.targets?.free ?? CONFIG.FREE_DAILY) - availablePredictions(d.predictions.filter(p => !p.tier || p.tier === 'free')).length),
-        pro: Math.max(0, (d.targets?.pro ?? CONFIG.PRO_DAILY) - (Number(d.proCount) || 0)),
-      };
-      REAL.error = freshness === 'grace' ? `Показываем последний реальный выпуск за ${d.date}; ждём сегодняшнее обновление.` : null;
+      REAL.feedTargets = { free: 3, pro: 3 };
+      const visibleFree = availablePredictions(d.predictions.filter(p => !p.tier || p.tier === 'free'));
+      const reportedProCount = freshness === 'fresh' ? Math.min(3, Number(d.proCount) || 0) : 0;
+      REAL.feedShortfall = { free: Math.max(0, 3 - Math.min(3, visibleFree.length)), pro: freshness === 'fresh' ? Math.max(0, 3 - reportedProCount) : 3 };
+      REAL.error = freshness === 'grace' ? `Показываем предыдущий реальный выпуск за ${d.date}; ждём обновлённый выпуск.` : null;
       REAL.loaded = true;
       REAL.date = d.date;
       REAL.lastUpdate = d.generated || null;
-      REAL.free = availablePredictions(d.predictions.filter(p => !p.tier || p.tier === 'free'));
-      REAL.proCount = Number(d.proCount) || 0;
+      REAL.free = visibleFree;
+      REAL.proCount = reportedProCount;
       REAL.botdLegs = Number(d.botdLegs) || 0;
       freeToday = REAL.free.slice(0, CONFIG.FREE_DAILY).map(p => ({ ...p, kind: 'free', league: p.lgName }));
-      proTotalToday = freshness === 'fresh' ? REAL.proCount : 0;
+      proTotalToday = reportedProCount;
     } else {
       REAL.status = 'stale';
       REAL.error = `Данные прогнозов устарели: ${d.date || 'неизвестная дата'}`;

@@ -21,7 +21,7 @@ assert.deepEqual(slots.shortfall, { free: 0, pro: 0 });
 assert.equal(new Set([...slots.free, ...slots.pro].map(p => p.id)).size, 6);
 assert.ok(slots.pro.every(p => p.value && p.confidence >= 60));
 const noValues = assignDailyTiers(valid.map(p => ({ ...p, value: false })));
-assert.equal(noValues.free.length, 3);
+assert.equal(noValues.free.length, 5);
 assert.equal(noValues.pro.length, 0);
 assert.deepEqual(noValues.shortfall, { free: 0, pro: 3 });
 const tooFew = assignDailyTiers(valid.slice(0, 4));

@@ -82,8 +82,8 @@
 
   <div class="stats">
     <div class="stat"><div class="v" id="statRate">—</div><div class="l">заходов 14д</div></div>
-    <div class="stat"><div class="v" id="statFree">5</div><div class="l">бесплатно сегодня</div></div>
-    <div class="stat"><div class="v" style="color:var(--gold)" id="statProCnt">5</div><div class="l">в PRO</div></div>
+    <div class="stat"><div class="v" id="statFree">—</div><div class="l">бесплатно сегодня</div></div>
+    <div class="stat"><div class="v" style="color:var(--gold)" id="statProCnt">—</div><div class="l">в PRO</div></div>
   </div>
 
   <div class="collect-chip" id="collectChip" hidden><span class="pulse"></span><span id="collectTxt"></span></div>
@@ -182,6 +182,7 @@
   </div>
 
   <div class="section-title" id="histTitle">Прошедшие прогнозы ИИ</div>
+  <div class="history-count" id="historyCount">— результатов</div>
   <div class="pre-note" id="preNote" hidden></div>
   <div class="filter-row">
     <button class="f-btn on" data-f="all">Все</button>
@@ -196,6 +197,13 @@
   <div class="verdict neutral" id="verdict"></div>
 
   <div class="h-list" id="historyList"></div>
+  <div class="history-pager" id="historyPager" hidden>
+    <div class="history-progress" id="historyProgress">Показано 0</div>
+    <div class="history-pager-actions">
+      <button class="f-btn" id="historyMore" type="button">Показать ещё 20</button>
+      <button class="f-btn" id="historyLess" type="button" hidden>Свернуть</button>
+    </div>
+  </div>
 
   
 <div class="ecosystem">
@@ -336,6 +344,7 @@
 
 <div class="toast" id="toast"></div>
 
+<script src="history-ui.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

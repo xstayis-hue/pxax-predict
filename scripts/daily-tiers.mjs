@@ -1,7 +1,7 @@
 export const DAILY_MIN_FREE = 3;
 export const DAILY_MIN_PRO = 3;
-export const DAILY_MAX_FREE = 3;
-export const DAILY_MAX_PRO = 3;
+export const DAILY_MAX_FREE = 5;
+export const DAILY_MAX_PRO = 5;
 export const FREE_MIN_CONFIDENCE = 55;
 export const PRO_MIN_CONFIDENCE = 60;
 

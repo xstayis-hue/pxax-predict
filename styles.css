@@ -602,6 +602,13 @@
   .h-item.miss { border-left:3px solid var(--warn); }
   .h-item.push { border-left:3px solid var(--gold); }
 
+  .history-count { padding:0 16px 8px; color:var(--muted); font-size:11px; text-align:right; }
+  .history-pager { display:flex; flex-direction:column; gap:6px; padding:8px 16px 12px; }
+  .history-progress { color:var(--muted); font-size:11px; text-align:center; }
+  .history-pager-actions { display:flex; gap:8px; }
+  .history-pager-actions .f-btn { min-height:42px; }
+  .history-pager[hidden] { display:none !important; }
+
   /* ---------- stats filter ---------- */
   .filter-row { display:flex; gap:8px; padding: 2px 16px 10px; }
   .f-btn {
