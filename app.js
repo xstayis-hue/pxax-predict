@@ -40,12 +40,6 @@ const REAL = { loaded: false, status: 'loading', error: null, proError: null, da
 // отпечатки загруженных файлов — чтобы автообновление не перерисовывало UI, когда данные не изменились
 let feedFingerprint = null, resultsFp = null, backtestFp = null, proFp = null;
 function resultsFingerprint(j) { return j.map(r => r.id + '|' + r.result).join(';'); }
-function dailyProCount(feed, predictions, freshness) {
-  if (freshness !== 'fresh' || !Array.isArray(feed?.predictions)) return 0;
-  const ids = new Set(feed.predictions.map(p => String(p.id)));
-  const visibleIds = new Set((predictions || []).map(p => String(p.id)));
-  return [...ids].filter(id => visibleIds.has(id)).length;
-}
 function historyCountForFilter(filter) {
   return visibleHistoryCount(REAL.results,
     filter,
@@ -89,16 +83,11 @@ async function loadReal() {
       REAL.status = freshness;
       REAL.feedTargets = { free: 3, pro: 3 };
       const visibleFree = availablePredictions(d.predictions.filter(p => !p.tier || p.tier === 'free'));
-      const visibleProFromPublic = availablePredictions(d.proPredictions || []);
-      const reportedProCount = dailyProCount(d, visibleProFromPublic, freshness);
-      REAL.feedShortfall = {
-        free: Math.max(0, 3 - Math.min(3, visibleFree.length)),
-        pro: Math.max(0, 3 - reportedProCount),
-      };
+      const reportedProCount = freshness === 'fresh' ? Math.min(5, Number(d.proCount) || 0) : 0;
+      REAL.feedShortfall = { free: Math.max(0, 3 - Math.min(3, visibleFree.length)), pro: freshness === 'fresh' ? Math.max(0, 3 - reportedProCount) : 3 };
       REAL.error = freshness === 'grace' ? `Показываем предыдущий реальный выпуск за ${d.date}; ждём сегодняшний обновлённый выпуск.` : null;
       REAL.date = d.date;
       REAL.free = visibleFree;
-      REAL.pro = visibleProFromPublic;
       REAL.proCount = reportedProCount;
       proTotalToday = REAL.proCount;
       REAL.botdLegs = Number(d.botdLegs) || 0;
@@ -794,6 +783,9 @@ let freeDeckObj, proDeckObj;
 function render() {
   const pro = store.pro;
   const isFreshFeed = REAL.status === 'fresh';
+  const reportedPro = isFreshFeed ? Math.max(0, Math.min(5, Number(REAL.proCount) || 0)) : null;
+  const pageTarget = { free: CONFIG.FREE_DAILY, pro: CONFIG.PRO_DAILY };
+  const visibleHistoryLabelCount = historyCountForFilter(statFilter);
   document.getElementById('subBadge').className = 'sub-badge ' + (pro ? 'pro' : 'free');
   document.getElementById('subBadge').textContent = pro ? 'pro' : 'free';
   document.getElementById('profSub').textContent = pro ? 'PRO активна' : 'нет';
@@ -833,9 +825,7 @@ function render() {
   const cEl = document.getElementById('collectChip');
   if (cEl) cEl.hidden = true;
   document.getElementById('statFree').textContent = freeToday.length;
-  const quotaTarget = REAL.feedTargets?.pro ?? CONFIG.PRO_DAILY;
-  const proQuotaFeedCount = isFreshFeed ? Math.min(quotaTarget, proTotalToday) : null;
-  document.getElementById('statProCnt').textContent = isFreshFeed ? quotaStatus(proQuotaFeedCount, quotaTarget) : '—';
+  document.getElementById('statProCnt').textContent = reportedPro == null ? '—' : quotaStatus(reportedPro, 3);
   document.getElementById('hHits').textContent = hasReal ? statsView.hits : '—';
   document.getElementById('hMiss').textContent = hasReal ? statsView.miss : '—';
   document.getElementById('hRate').textContent = hasReal ? statsView.rate + '%' : '—';
@@ -844,11 +834,10 @@ function render() {
   document.getElementById('pMiss').textContent = hasReal ? statsAll.miss : '—';
   document.getElementById('pRate').textContent = hasReal ? statsAll.rate + '%' : '—';
   // динамические счётчики вместо захардкоженных
-  document.getElementById('payProTitle').innerHTML = `${ic('diamond')} PRO сегодня · ${isFreshFeed ? quotaStatus(proQuotaFeedCount, quotaTarget) : REAL.status === 'legacy' ? 'legacy · цель не подтверждена' : 'квота обновляется'}`;
-  document.getElementById('proCnt').textContent = isFreshFeed
-    ? `PRO сегодня · ${quotaStatus(proQuotaFeedCount, quotaTarget)}`
-    : REAL.status === 'legacy' ? 'Старый выпуск · квота 3+3 не указана'
-      : 'Сегодняшняя PRO-квота ещё не загружена';
+  document.getElementById('payProTitle').textContent = 'Pro-ИИ · отбор value-сигналов';
+  document.getElementById('proCnt').textContent = reportedPro == null
+    ? REAL.status === 'legacy' ? 'Старый выпуск · квота не подтверждена' : 'Сегодняшняя PRO-квота ещё не загружена'
+    : quotaStatus(reportedPro, 3);
   renderBetOfTheDay();
 
   // колоды (+ честные пустые состояния, если матчей в окне нет)
@@ -874,27 +863,23 @@ function render() {
     pt.innerHTML = `<div class="empty" style="margin:0">${ic('lock')} Сегодня ${proTotalToday} ${plural(proTotalToday, 'сигнал Pro-ИИ', 'сигнала Pro-ИИ', 'сигналов Pro-ИИ')} — открываются с подпиской.</div>`;
     document.getElementById('proNav').innerHTML = '';
   } else {
-    const target = REAL.feedTargets || { free: CONFIG.FREE_DAILY, pro: CONFIG.PRO_DAILY };
-    const miss = (REAL.feedShortfall?.pro ?? Math.max(0, target.pro - proTotalToday));
     const reason = REAL.proError || REAL.error || (REAL.status === 'fresh'
-      ? `Сегодня ${quotaStatus(Math.min(3, proTotalToday), target.pro)} после фильтров качества.`
+      ? `PRO: ${quotaStatus(Math.min(5, proTotalToday), Math.max(3, proTotalToday), 3)} после фильтра качества.`
       : 'PRO-фид ещё обновляется.');
     pt.innerHTML = `<div class="empty" style="margin:0">${ic(REAL.proError ? 'x' : 'diamond')} ${reason}</div>`;
     document.getElementById('proNav').innerHTML = '';
   }
-  const target = REAL.feedTargets || { free: CONFIG.FREE_DAILY, pro: CONFIG.PRO_DAILY };
-  const shortfall = REAL.feedShortfall || { free: Math.max(0, target.free - freeToday.length), pro: Math.max(0, target.pro - proTotalToday) };
-  const availableHistory = historyCountForFilter(statFilter);
+  const shortfall = { free: Math.max(0, pageTarget.free - freeToday.length), pro: Math.max(0, pageTarget.pro - proTotalToday) };
+  const shownProCount = isFreshFeed ? Math.min(5, proTotalToday) : 0;
   const historyCount = document.getElementById('historyCount');
-  if (historyCount) historyCount.textContent = `${availableHistory} результатов за ${CONFIG.STAT_DAYS} дней`;
+  if (historyCount) historyCount.textContent = `${visibleHistoryLabelCount} результатов за ${CONFIG.STAT_DAYS} дней`;
   document.getElementById('paywallCta').style.display = (pro || !proTotalToday) ? 'none' : 'block';
   document.getElementById('proPaywall').style.display = (pro || !proTotalToday) ? 'none' : 'block';
-  const payProTitle = document.getElementById('payProTitle');
-  if (shortfall.pro > 0 && isFreshFeed) payProTitle.textContent = `PRO сегодня · ${quotaStatus(proQuotaFeedCount, quotaTarget)} после фильтра качества`;
   const proCountLabel = document.getElementById('proCnt');
+  if (payProTitle && isFreshFeed && shortfall.pro > 0) payProTitle.textContent = `Pro-ИИ · расчётный перевес; ${shortfall.pro} сигналов не достигли порога качества`;
   if (proCountLabel) proCountLabel.textContent = isFreshFeed
-    ? `PRO сегодня · ${quotaStatus(proQuotaFeedCount, quotaTarget)}`
-    : REAL.status === 'legacy' ? 'Данные старого формата; ожидается новая квота'
+    ? `PRO-сигналы · ${quotaStatus(shownProCount, Math.max(3, shownProCount), 3)}`
+    : REAL.status === 'legacy' ? 'Старый выпуск · квота не подтверждена'
       : 'Сегодняшняя PRO-квота ещё не загружена';
 
   // статистика прошедших прогнозов
@@ -1656,7 +1641,8 @@ async function autoRefresh() {
       REAL.status = freshness;
       REAL.feedTargets = { free: 3, pro: 3 };
       const visibleFree = availablePredictions(d.predictions.filter(p => !p.tier || p.tier === 'free'));
-      const reportedProCount = freshness === 'fresh' ? Math.min(3, Number(d.proCount) || 0) : 0;
+      const rawProCount = Number(d.proCount) || 0;
+      const reportedProCount = freshness === 'fresh' ? Math.min(5, rawProCount) : 0;
       REAL.feedShortfall = { free: Math.max(0, 3 - Math.min(3, visibleFree.length)), pro: freshness === 'fresh' ? Math.max(0, 3 - reportedProCount) : 3 };
       REAL.error = freshness === 'grace' ? `Показываем предыдущий реальный выпуск за ${d.date}; ждём обновлённый выпуск.` : null;
       REAL.loaded = true;
