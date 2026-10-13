@@ -1,71 +1,26 @@
 {
-  "generated": "2026-10-12T07:23:58.186Z",
-  "windowDays": 90,
-  "leagues": [
-    "АПЛ",
-    "Ла Лига",
-    "Серия A",
-    "Бундеслига",
-    "Лига 1",
-    "Бразилия · Серия A",
-    "Аргентина",
-    "MLS"
-  ],
-  "matches": 699,
-  "signals": 680,
-  "hits": 420,
-  "hitRate": 0.618,
-  "brier": 0.6456,
-  "signalThreshold": 0.55,
-  "byLeague": {
-    "АПЛ": {
-      "matches": 49,
-      "signals": 49,
-      "hits": 33,
-      "rate": 0.673
-    },
-    "Ла Лига": {
-      "matches": 66,
-      "signals": 65,
-      "hits": 45,
-      "rate": 0.692
-    },
-    "Серия A": {
-      "matches": 48,
-      "signals": 47,
-      "hits": 32,
-      "rate": 0.681
-    },
-    "Бундеслига": {
-      "matches": 36,
-      "signals": 36,
-      "hits": 27,
-      "rate": 0.75
-    },
-    "Лига 1": {
-      "matches": 45,
-      "signals": 44,
-      "hits": 24,
-      "rate": 0.545
-    },
-    "Бразилия · Серия A": {
-      "matches": 109,
-      "signals": 104,
-      "hits": 53,
-      "rate": 0.51
-    },
-    "Аргентина": {
-      "matches": 162,
-      "signals": 157,
-      "hits": 87,
-      "rate": 0.554
-    },
-    "MLS": {
-      "matches": 184,
-      "signals": 178,
-      "hits": 119,
-      "rate": 0.669
-    }
+  "mode": "archived-production",
+  "generated": "2026-10-13T07:40:59.690Z",
+  "evaluationWindowDays": 7,
+  "source": "committed archived public prediction snapshots joined by event id to resolved results",
+  "snapshots": 85,
+  "resolved": 40,
+  "signals": 40,
+  "hits": 27,
+  "losses": 13,
+  "hitRate": 0.675,
+  "brier": 0.2246,
+  "roi": 24.38,
+  "roiBets": 38,
+  "pushes": 0,
+  "halfResults": 0,
+  "coverage": {
+    "tiers": [
+      "free"
+    ],
+    "firstDate": "2026-10-05",
+    "lastDate": "2026-10-11",
+    "includesPro": false
   },
-  "note": "Бэктест модели по реальным прошедшим результативам: только форма до матча + средний тотал лиги, без заглядывания в будущее и без линий"
+  "note": "Оценка только фактически сохранённых публичных прогнозов; PRO-снимки и архивные входные признаки отсутствуют. Не является 90-дневным replay или доказательством будущей доходности."
 }
