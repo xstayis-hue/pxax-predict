@@ -1,6 +1,6 @@
 {
   "mode": "archived-production",
-  "generated": "2026-10-13T07:40:59.690Z",
+  "generated": "2026-10-14T06:07:30.497Z",
   "evaluationWindowDays": 7,
   "source": "committed archived public prediction snapshots joined by event id to resolved results",
   "snapshots": 85,
