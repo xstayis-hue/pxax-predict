@@ -854,7 +854,7 @@ function render() {
   document.getElementById('pMiss').textContent = hasReal ? statsAll.miss : '—';
   document.getElementById('pRate').textContent = hasReal ? statsAll.rate + '%' : '—';
   // динамические счётчики вместо захардкоженных
-  const quotaLabel = isFreshFeed ? ` · ${quotaStatus(proCount, Math.max(DAILY_MAX_PRO, proCount), DAILY_MIN_PRO)}` : '';
+  const quotaLabel = isFreshFeed ? ` · ${quotaStatus(reportedPro, limit, 3)}` : '';
   document.getElementById('payProTitle').textContent = `Pro-ИИ · value-отбор${quotaLabel}`;
   document.getElementById('proCnt').textContent = reportedPro == null
     ? REAL.status === 'legacy' ? 'Старый выпуск · квота не подтверждена' : 'Сегодняшняя PRO-квота ещё не загружена'
