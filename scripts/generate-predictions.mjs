@@ -778,6 +778,8 @@ writeFileSync('data/pro-feed.json', JSON.stringify({
   date: dateStr,
   generated: new Date().toISOString(),
   count: pro.length,
+  freeCount: free.length,
+  proCount: pro.length,
   targets: assignment.targets,
   limits: assignment.limits,
   shortfall: assignment.shortfall,
