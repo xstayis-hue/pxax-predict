@@ -137,7 +137,7 @@ async function loadReal() {
 
 /* ================= settings ================= */
 const CONFIG = {
-  VERSION: '0.9.5', // версия приложения для отслеживания обновлений
+  VERSION: '0.9.7', // версия приложения для отслеживания обновлений
   SUBSCRIBE_URL: 'https://t.me/pxaxbetai_bot',
   /* Адрес бэкенда оплаты. Держим его здесь, потому что мини-апп — один файл без сборки.
      Сейчас это Cloudflare Worker (worker/ в репозитории) — у него постоянный адрес,
@@ -872,7 +872,7 @@ function render() {
     document.getElementById('proNav').innerHTML = '';
   } else {
     const reason = REAL.proError || REAL.error || (REAL.status === 'fresh'
-      ? `PRO: ${quotaStatus(Math.min(5, proTotalToday), Math.max(3, proTotalToday), 3)} после фильтра качества.`
+      ? 'Сегодня нет доступных PRO-карточек. Новые прогнозы появятся после обновления ленты.'
       : 'PRO-фид ещё обновляется.');
     pt.innerHTML = `<div class="empty" style="margin:0">${ic(REAL.proError ? 'x' : 'diamond')} ${reason}</div>`;
     document.getElementById('proNav').innerHTML = '';
@@ -1322,6 +1322,7 @@ async function loadProFeed() {
     proToday = [];
     proFp = null;
     REAL.proError = null;
+    if (store.pro && (!isTg || !user || !apiReady())) proTotalToday = 0;
     return false;
   }
   try {
@@ -1343,7 +1344,7 @@ async function loadProFeed() {
     REAL.proError = null;
   const list = Array.isArray(j.predictions) ? j.predictions : [];
     const visibleList = availablePredictions(list);
-    const fp = (j.date || '') + ':' + (j.generated || '') + ':' + visibleList.length;
+    const fp = (j.date || '') + ':' + (j.generated || '') + ':' + visibleList.map(p => String(p.id)).join(',');
     const changed = fp !== proFp;
     proFp = fp;
     REAL.pro = visibleList;

@@ -251,15 +251,30 @@ await test('повторный триал не выдаётся: активны�
   const d = initDataFor(1001);
   const first = await (await call(worker, post('/api/trial', {}, { 'X-Telegram-Init-Data': d }), e)).json();
   assert.equal(first.ok, true);
-  // пока триал действует, пользователь уже PRO — второй раз не начисляем
+  const initialUntil = new Date(first.until).getTime();
+  assert.ok(initialUntil > Date.now());
+  // повторный запрос в том же активном периоде не должен продлевать дату ещё раз
   const again = await (await call(worker, post('/api/trial', {}, { 'X-Telegram-Init-Data': d }), e)).json();
   assert.equal(again.reason, 'active');
-  // после истечения триала флаг trial не даёт взять его снова
+  assert.equal((await getU(e, 1001)).until, first.until);
+  // после истечения пробного доступа отметка trial запрещает активировать его снова
   const u = await getU(e, 1001);
   u.until = new Date(Date.now() - 86400000).toISOString();
   await putU(e, 1001, u);
   const expired = await (await call(worker, post('/api/trial', {}, { 'X-Telegram-Init-Data': d }), e)).json();
   assert.equal(expired.reason, 'used');
+});
+
+await test('параллельные запросы не выдают пробный период дважды на D1', async () => {
+  const e = envD1();
+  const d = initDataFor(1002);
+  const responses = await Promise.all([
+    call(worker, post('/api/trial', {}, { 'X-Telegram-Init-Data': d }), e),
+    call(worker, post('/api/trial', {}, { 'X-Telegram-Init-Data': d }), e),
+  ]);
+  const results = await Promise.all(responses.map(r => r.json()));
+  assert.equal(results.filter(result => result.ok).length, 1);
+  assert.equal(results.filter(result => result.reason === 'active').length, 1);
 });
 
 await test('статус отдаёт pro/until/цену, чужой uid не видит историю платежей', async () => {
