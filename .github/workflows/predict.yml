@@ -8,6 +8,7 @@ on:
       - 'scripts/check-daily-feeds.mjs'
       - 'scripts/daily-tiers.mjs'
       - 'scripts/forecast-copy.mjs'
+      - 'scripts/forecast-order.js'
       - 'scripts/generate-predictions.mjs'
       - 'scripts/publish-pro.mjs'
       - 'scripts/score-adjustments.mjs'

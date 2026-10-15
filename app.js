@@ -1,5 +1,6 @@
 /* ================= Telegram SDK ================= */
 const { quotaStatus, visibleHistoryCount } = window.PxaxHistoryUi;
+const { sortByKickoff } = window.PxaxForecastOrdering;
 const tg = window.Telegram?.WebApp;
 const isTg = !!tg;
 if (tg) { try { tg.expand(); tg.disableVerticalSwipes?.(); tg.setHeaderColor?.('#0a0d16'); tg.setBackgroundColor?.('#0a0d16'); } catch(e) {} }
@@ -137,7 +138,7 @@ async function loadReal() {
 
 /* ================= settings ================= */
 const CONFIG = {
-  VERSION: '0.10.0', // версия приложения для отслеживания обновлений
+  VERSION: '0.10.1', // версия приложения для отслеживания обновлений
   SUBSCRIBE_URL: 'https://t.me/pxaxbetai_bot',
   /* Адрес бэкенда оплаты. Держим его здесь, потому что мини-апп — один файл без сборки.
      Сейчас это Cloudflare Worker (worker/ в репозитории) — у него постоянный адрес,
@@ -853,8 +854,8 @@ function render() {
   renderBetOfTheDay();
 
   // колоды (+ честные пустые состояния, если матчей в окне нет)
-  const freeView = applySportFilter(freeToday);
-  const proView = applySportFilter(proToday);
+  const freeView = sortByKickoff(applySportFilter(freeToday));
+  const proView = sortByKickoff(applySportFilter(proToday));
   renderSportFilter();
   const EMPTY_DECK = `<div class="empty" style="margin:0">${ic(REAL.status === 'error' ? 'x' : 'clock')} ${REAL.error || 'В ближайшие 72 часа нет реальных матчей, прошедших фильтры качества.'}</div>`;
   const ft = document.getElementById('freeTrack');

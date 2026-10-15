@@ -5,7 +5,8 @@ import { readFileSync } from 'node:fs';
 const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const app = readFileSync(new URL('../app.js', import.meta.url), 'utf8');
 const historyUi = readFileSync(new URL('../history-ui.js', import.meta.url), 'utf8');
-const scriptSrc = html.match(/<script src="history-ui\.js[^"]*"><\/script>\s*<script src="app\.js[^"]*"><\/script>/)?.[0];
+const orderUi = readFileSync(new URL('../forecast-order.js', import.meta.url), 'utf8');
+const scriptSrc = html.match(/<script src="history-ui\.js[^\"]*"><\/script>\s*<script src="forecast-order\.js[^\"]*"><\/script>\s*<script src="app\.js[^\"]*"><\/script>/)?.[0];
 assert.ok(scriptSrc, 'index must load history UI before app');
 
 const sandbox = {
@@ -16,6 +17,7 @@ const sandbox = {
 };
 vm.createContext(sandbox);
 vm.runInContext(historyUi, sandbox);
+vm.runInContext(orderUi, sandbox);
 
 const start = app.indexOf('function matchDateInfo(iso)');
 const end = app.indexOf('\n// русская плюрализация', start);

@@ -6,6 +6,16 @@ export const FREE_MIN_CONFIDENCE = 55;
 export const PRO_MIN_CONFIDENCE = 60;
 export const MIN_DECIMAL_ODDS = 1.4;
 
+export function sortByKickoff(predictions) {
+  return [...(predictions || [])].sort((a, b) => {
+    const aTime = new Date(a?.matchDate || '').getTime();
+    const bTime = new Date(b?.matchDate || '').getTime();
+    const safeA = Number.isFinite(aTime) ? aTime : Number.POSITIVE_INFINITY;
+    const safeB = Number.isFinite(bTime) ? bTime : Number.POSITIVE_INFINITY;
+    return safeA - safeB || String(a?.id ?? '').localeCompare(String(b?.id ?? ''));
+  });
+}
+
 export function assignDailyTiers(predictions, options = {}) {
   const minFree = options.minFree ?? DAILY_MIN_FREE;
   const minPro = options.minPro ?? DAILY_MIN_PRO;
@@ -23,10 +33,10 @@ export function assignDailyTiers(predictions, options = {}) {
   const desiredPro = Math.min(maxPro, eligiblePro.length);
   const proCount = Math.min(desiredPro, Math.max(0, candidates.length - Math.min(minFree, maxFree)));
   const proIds = new Set(eligiblePro.slice(0, proCount).map(p => String(p.id)));
-  const pro = eligiblePro.filter(p => proIds.has(String(p.id))).map(p => ({ ...p, tier: 'pro' }));
+  const pro = sortByKickoff(eligiblePro.filter(p => proIds.has(String(p.id))).map(p => ({ ...p, tier: 'pro' })));
   const remaining = candidates.filter(p => !proIds.has(String(p.id)));
   const freeCount = Math.min(maxFree, remaining.length);
-  const free = remaining.slice(0, freeCount).map(p => ({ ...p, tier: 'free' }));
+  const free = sortByKickoff(remaining.slice(0, freeCount).map(p => ({ ...p, tier: 'free' })));
   const predictionIds = [...free, ...pro].map(p => String(p.id));
   if (new Set(predictionIds).size !== predictionIds.length) throw new Error('A match cannot be assigned to both tiers');
   const shortfall = { free: Math.max(0, minFree - free.length), pro: Math.max(0, minPro - pro.length) };

@@ -16,7 +16,7 @@ import {
 } from './model.mjs';
 import { applySoccerLowScoreGuard } from './score-adjustments.mjs';
 import { normalizeScoreProbabilities } from './score-adjustments.mjs';
-import { assignDailyTiers, FREE_MIN_CONFIDENCE, PRO_MIN_CONFIDENCE, MIN_DECIMAL_ODDS } from './daily-tiers.mjs';
+import { assignDailyTiers, FREE_MIN_CONFIDENCE, PRO_MIN_CONFIDENCE, MIN_DECIMAL_ODDS, sortByKickoff } from './daily-tiers.mjs';
 import { proValueExplanation } from './forecast-copy.mjs';
 
 /* ---- калибровка: читаем посчитанное резолвером (data/calibration.json) ---- */
@@ -704,7 +704,7 @@ const FREE_MIN = FREE_MIN_CONFIDENCE, PRO_MIN = PRO_MIN_CONFIDENCE;
 const assignment = assignDailyTiers(preds);
 const free = assignment.free;
 const pro = assignment.pro;
-const final = [...free, ...pro].sort((a, b) => b.confidence - a.confidence);
+const final = sortByKickoff([...free, ...pro]);
 if (!final.length) {
   console.error('FAIL: no real predictions met the confidence threshold; previous feeds remain untouched.');
   process.exit(1);
