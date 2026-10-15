@@ -137,7 +137,7 @@ async function loadReal() {
 
 /* ================= settings ================= */
 const CONFIG = {
-  VERSION: '0.9.3', // версия приложения для отслеживания обновлений
+  VERSION: '0.9.4', // версия приложения для отслеживания обновлений
   SUBSCRIBE_URL: 'https://t.me/pxaxbetai_bot',
   /* Адрес бэкенда оплаты. Держим его здесь, потому что мини-апп — один файл без сборки.
      Сейчас это Cloudflare Worker (worker/ в репозитории) — у него постоянный адрес,
@@ -568,19 +568,8 @@ if (last !== today) {
 }
 // запоминаем последний открытый таб
 let lastTab = localStorage.getItem('pxax_last_tab') || 'home';
-// проверка новой версии
-const lastVersion = localStorage.getItem('pxax_version');
-if (lastVersion !== CONFIG.VERSION) {
-  localStorage.setItem('pxax_version', CONFIG.VERSION);
-  if (lastVersion) {
-    // версия изменилась - покажем уведомление при первом рендере
-    setTimeout(() => {
-      haptic('success');
-      toast(`Обновлено до v${CONFIG.VERSION}`);
-      setTimeout(() => toast('Новый интерфейс: свои иконки вместо эмодзи, спокойные цвета и анимации'), 2500);
-    }, 2000);
-  }
-}
+// сохраняем версию приложения для возможной диагностики; уведомления при обновлении не показываем
+localStorage.setItem('pxax_version', CONFIG.VERSION);
 
 let freeToday = [];
 let proToday = [];
