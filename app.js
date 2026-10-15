@@ -5,9 +5,8 @@ const isTg = !!tg;
 if (tg) { try { tg.expand(); tg.disableVerticalSwipes?.(); tg.setHeaderColor?.('#0a0d16'); tg.setBackgroundColor?.('#0a0d16'); } catch(e) {} }
 const user = tg?.initDataUnsafe?.user;
 
-/* Иконки: эмодзи убраны из интерфейса — они рендерятся по-разному в iOS и Android
-   и читаются как «наклейка». Спрайт (#icon-sprite) масштабируется от font-size и
-   наследует currentColor, поэтому ведёт себя как обычный глиф. */
+/* Вид спорта приходит из data/*.json — эмодзи оставляем на карточках прогнозов,
+   штриховые иконки используем в фильтрах, истории и небольших UI-элементах. */
 function ic(name, cls) {
   return `<svg class="ic${cls ? ' ' + cls : ''}" aria-hidden="true"><use href="#i-${name}"/></svg>`;
 }
@@ -18,8 +17,7 @@ const SPORTS = {
 };
 function sportIcon(s) { return ic(SPORTS[s] ? SPORTS[s][0] : 'trophy'); }
 function sportName(s) { return SPORTS[s] ? SPORTS[s][1] : 'Спорт'; }
-// эмодзи вида спорта — только для водяного знака на карточке (3D-эффект фона);
-// в интерфейсе остаётся штриховая иконка: эмодзи там выглядит наклейкой
+// Эмодзи вида спорта используются в карточках прогнозов и фоновом водяном знаке.
 function sportEmoji(s) { return SPORTS[s] ? s : '🏆'; }
 
 /* Тактильный отклик: на ощупь Mini App отличается от веб-страницы не меньше, чем
@@ -139,7 +137,7 @@ async function loadReal() {
 
 /* ================= settings ================= */
 const CONFIG = {
-  VERSION: '0.9.2', // версия приложения для отслеживания обновлений
+  VERSION: '0.9.3', // версия приложения для отслеживания обновлений
   SUBSCRIBE_URL: 'https://t.me/pxaxbetai_bot',
   /* Адрес бэкенда оплаты. Держим его здесь, потому что мини-апп — один файл без сборки.
      Сейчас это Cloudflare Worker (worker/ в репозитории) — у него постоянный адрес,
@@ -663,7 +661,7 @@ function makeDeck(trackEl, navEl, count, deckId) {
 /* ================= cards ================= */
 function teamBadge(logo, sport) {
   const safeLogo = typeof logo === 'string' && /^https:\/\/a\.espncdn\.com\//.test(logo) ? logo : '';
-  const fallback = `<span${safeLogo ? ' hidden' : ''}>${sportIcon(sport)}</span>`;
+  const fallback = `<span${safeLogo ? ' hidden' : ''}>${sportEmoji(sport)}</span>`;
   const image = safeLogo
     ? `<img src="${safeLogo}" alt="" loading="lazy" decoding="async" onerror="this.hidden=true;this.nextElementSibling.hidden=false">`
     : '';
@@ -727,7 +725,7 @@ function slideHTML(p, unlocked, isPro, isHistory) {
   // CSS-фильтром, и в кадре до/во время применения blur VIP-ставка читалась.
   const maskedBody = `
         <div class="p-top">
-          <span class="sport">${sportIcon(p.sport)}</span><span>${p.league}</span>
+          <span class="sport">${sportEmoji(p.sport)}</span><span>${p.league}</span>
           <span class="ai-tag pro">${ic('diamond')} Pro AI</span>
         </div>
         <div class="p-body">
@@ -745,7 +743,7 @@ function slideHTML(p, unlocked, isPro, isHistory) {
         </div>`;
   const openBody = `
           <div class="p-top">
-            <span class="sport">${sportIcon(p.sport)}</span><span>${p.league}</span>
+            <span class="sport">${sportEmoji(p.sport)}</span><span>${p.league}</span>
             <span class="ai-tag ${isPro ? 'pro' : ''}">${isPro ? ic('diamond') + ' Pro AI' : ic('cpu') + ' AI'}</span>
             ${statusTag}
             ${valBadge}
@@ -1637,7 +1635,7 @@ function tickFresh() {
   const mins = Math.max(0, Math.floor((Date.now() - generated) / 60000));
   const freshLabel = REAL.status === 'grace'
     ? `Последний реальный выпуск за ${REAL.date || 'предыдущий день'} · ждём обновления.`
-    : `${mins < 120 ? `Обновлено ${mins} мин. назад` : `Обновлено ${Math.floor(mins / 60)} ч. назад`} · цель — 3 Free и 3 PRO.`;
+    : `${mins < 120 ? `Обновлено ${mins} мин. назад` : `Обновлено ${Math.floor(mins / 60)} ч. назад`}.`;
   text.textContent = freshLabel;
 }
 setInterval(tickFresh, 30000);
