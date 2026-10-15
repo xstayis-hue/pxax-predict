@@ -17,6 +17,7 @@ import {
 import { applySoccerLowScoreGuard } from './score-adjustments.mjs';
 import { normalizeScoreProbabilities } from './score-adjustments.mjs';
 import { assignDailyTiers, FREE_MIN_CONFIDENCE, PRO_MIN_CONFIDENCE } from './daily-tiers.mjs';
+import { proValueExplanation } from './forecast-copy.mjs';
 
 /* ---- калибровка: читаем посчитанное резолвером (data/calibration.json) ---- */
 // Резолвер считает Brier и корзины «предсказано -> фактически» по решённой
@@ -626,6 +627,7 @@ for (const lg of LEAGUES) {
             ? ` Линия ${ru(best.dec)} недооценивает исход: перевес модели +${Math.round(best.edge * 100)}%.`
             : ` Линия ${ru(best.dec)} примерно совпадает с моделью.`)
         : '';
+      const proValueTxt = proValueExplanation(value, best.edge, best.p, best.i);
       // травмы из ESPN (если у лиги есть актуальный список) и xG-форма из Understat
       const injParts = [];
       const injH = injFor(injMap, home.team.id, home.team.displayName);
@@ -639,7 +641,7 @@ for (const lg of LEAGUES) {
       const modelLbl = statsUsed ? (xgInfo ? 'таблица лиги + xG-форма' : 'таблица лиги') : 'форма';
       const note = `${SCORE_LABEL[kind] || 'Ожидаемый счёт'}: ${ru(lh)} : ${ru(la)} (модель ${modelLbl}). `
         + `Исходы: П1 ${pct(oc.p1)}%${oc.px ? ` · Х ${pct(oc.px)}%` : ''} · П2 ${pct(oc.p2)}%. `
-        + `Модель даёт ${pct(best.p)}% на «${best.m}».${valTxt}${extra}${injNote}${xgNote}`;
+        + `Модель даёт ${pct(best.p)}% на «${best.m}».${proValueTxt || valTxt}${extra}${injNote}${xgNote}`;
 
       preds.push({
         id: `${e.id}`,

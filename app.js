@@ -137,7 +137,7 @@ async function loadReal() {
 
 /* ================= settings ================= */
 const CONFIG = {
-  VERSION: '0.9.7', // версия приложения для отслеживания обновлений
+  VERSION: '0.9.8', // версия приложения для отслеживания обновлений
   SUBSCRIBE_URL: 'https://t.me/pxaxbetai_bot',
   /* Адрес бэкенда оплаты. Держим его здесь, потому что мини-апп — один файл без сборки.
      Сейчас это Cloudflare Worker (worker/ в репозитории) — у него постоянный адрес,
@@ -195,18 +195,19 @@ function dayKey(d = new Date()) {
 }
 // дата матчасти: только цифры в чипе + относительность (сегодня/завтра/скорость) отдельным тегом
 function matchDateInfo(iso) {
-  if (!iso) return { chip: '', rel: null, hours: null };
+  if (!iso) return { chip: '', rel: null, days: null, hours: null };
   const ms = new Date(iso).getTime();
+  if (!Number.isFinite(ms)) return { chip: '', rel: null, days: null, hours: null };
   const d = new Date(ms + 3 * 3600e3); // -> МСК
   const dm = d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', timeZone: 'UTC' });
   const hours = (ms - Date.now()) / 3600e3;
   const dd = d.toISOString().slice(0, 10);
   const todayMsk = new Date(Date.now() + 3 * 3600e3).toISOString().slice(0, 10);
-  const tomorrowMsk = new Date(Date.now() + 3 * 3600e3 + 86400e3).toISOString().slice(0, 10);
-  let rel = null;
-  if (dd === todayMsk) rel = 'today';
-  else if (dd === tomorrowMsk) rel = 'tomorrow';
-  return { chip: `${dm} · `, rel, hours };
+  const todayStart = Date.parse(`${todayMsk}T00:00:00Z`);
+  const matchDay = Date.parse(`${dd}T00:00:00Z`);
+  const days = Math.max(0, Math.floor((matchDay - todayStart) / 86400e3));
+  const rel = days === 0 ? 'today' : days === 1 ? 'tomorrow' : null;
+  return { chip: `${dm} · `, rel, days, hours };
 }
 // русская плюрализация: plural(5, 'прогноз', 'прогноза', 'прогнозов')
 function plural(n, one, few, many) {
@@ -660,12 +661,15 @@ function teamBadge(logo, sport) {
 function slideHTML(p, unlocked, isPro, isHistory) {
   const res = isHistory && p.result ? `<div class="res-chip ${p.result.cls}">${ic(p.result.label)}</div>` : '';
   const mdi = matchDateInfo(p.matchDate);
-  // тег срочности: <24ч — красный пульсирующий «через N ч», иначе нейтральное «завтра»
+  // Матч менее чем через сутки получает срочный тег; остальные получают дату
+  // из календаря МСК, а не угадываются как «завтра» по умолчанию.
   let statusTag = '';
-  if (!isHistory && mdi.hours !== null) {
+  if (!isHistory && mdi.hours !== null && mdi.hours > 0) {
     statusTag = mdi.hours < 24
       ? `<span class="soon-tag">${ic('bolt')} через ${Math.max(1, Math.round(mdi.hours))} ч</span>`
-      : `<span class="rel-tag">завтра</span>`;
+      : mdi.rel === 'today' ? `<span class="rel-tag">сегодня</span>`
+        : mdi.rel === 'tomorrow' ? `<span class="rel-tag">завтра</span>`
+          : `<span class="rel-tag">через ${mdi.days} ${plural(mdi.days, 'день', 'дня', 'дней')}</span>`;
   }
   // VALUE-бейдж и сравнение с линией — это оплачиваемый сигнал PRO: генератор
   // больше не кладёт value/edge/impliedProb в публичный файл, поэтому на
