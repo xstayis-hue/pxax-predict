@@ -4,6 +4,7 @@ export const DAILY_MAX_FREE = 5;
 export const DAILY_MAX_PRO = 5;
 export const FREE_MIN_CONFIDENCE = 55;
 export const PRO_MIN_CONFIDENCE = 60;
+export const MIN_DECIMAL_ODDS = 1.4;
 
 export function assignDailyTiers(predictions, options = {}) {
   const minFree = options.minFree ?? DAILY_MIN_FREE;
@@ -12,8 +13,10 @@ export function assignDailyTiers(predictions, options = {}) {
   const maxPro = options.maxPro ?? DAILY_MAX_PRO;
   const minFreeConfidence = options.minFreeConfidence ?? FREE_MIN_CONFIDENCE;
   const minProConfidence = options.minProConfidence ?? PRO_MIN_CONFIDENCE;
+  const minOdds = options.minOdds ?? MIN_DECIMAL_ODDS;
   const candidates = [...(predictions || [])]
-    .filter(p => p?.id != null && Number.isFinite(Number(p.confidence)) && Number(p.confidence) >= minFreeConfidence)
+    .filter(p => p?.id != null && Number.isFinite(Number(p.confidence)) && Number(p.confidence) >= minFreeConfidence
+      && Number.isFinite(Number(p.odds)) && Number(p.odds) >= minOdds)
     .sort((a, b) => Number(b.confidence) - Number(a.confidence));
   const eligiblePro = candidates.filter(p => p.value === true && Number(p.confidence) >= minProConfidence)
     .sort((a, b) => (Number(b.edge) || 0) - (Number(a.edge) || 0) || Number(b.confidence) - Number(a.confidence));

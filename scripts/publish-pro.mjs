@@ -8,6 +8,7 @@
 //   PXAX_WORKER_URL=https://... PXAX_ADMIN_KEY=... node scripts/publish-pro.mjs
 // Оба значения приходят из секретов репозитория, в коде их нет.
 import { readFileSync, existsSync } from 'node:fs';
+import { MIN_DECIMAL_ODDS } from './daily-tiers.mjs';
 
 const url = (process.env.PXAX_WORKER_URL || '').replace(/\/+$/, '');
 const key = process.env.PXAX_ADMIN_KEY || '';
@@ -50,8 +51,8 @@ if (!feed.targets || !feed.limits || !feed.shortfall || feed.targets.free !== 3 
   console.error('publish-pro: quota metadata is inconsistent with 3–5 target');
   process.exit(1);
 }
-if (feed.predictions.length > 5 || feed.predictions.some(p => Number(p.confidence) < 60 || p.value !== true || p.odds == null)) {
-  console.error('publish-pro: PRO feed must contain at most five qualified value predictions (confidence >= 60%)');
+if (feed.predictions.length > 5 || feed.predictions.some(p => Number(p.confidence) < 60 || p.value !== true || !Number.isFinite(Number(p.odds)) || Number(p.odds) < MIN_DECIMAL_ODDS)) {
+  console.error(`publish-pro: PRO feed must contain at most five qualified value predictions (confidence >= 60%, odds >= ${MIN_DECIMAL_ODDS.toFixed(2)})`);
   process.exit(1);
 }
 

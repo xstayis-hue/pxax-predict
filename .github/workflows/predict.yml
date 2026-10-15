@@ -7,8 +7,10 @@ on:
     paths:
       - 'scripts/check-daily-feeds.mjs'
       - 'scripts/daily-tiers.mjs'
+      - 'scripts/forecast-copy.mjs'
       - 'scripts/generate-predictions.mjs'
       - 'scripts/publish-pro.mjs'
+      - 'scripts/score-adjustments.mjs'
       - '.github/workflows/predict.yml'
   workflow_dispatch:
 permissions:

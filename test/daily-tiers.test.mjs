@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { assignDailyTiers } from '../scripts/daily-tiers.mjs';
+import { assignDailyTiers, MIN_DECIMAL_ODDS } from '../scripts/daily-tiers.mjs';
 import { normalizeScoreProbabilities, applySoccerLowScoreGuard } from '../scripts/score-adjustments.mjs';
 import { clampExpectedGoals } from '../scripts/model.mjs';
 
@@ -19,7 +19,16 @@ assert.equal(slots.free.length, 5);
 assert.equal(slots.pro.length, 5);
 assert.deepEqual(slots.shortfall, { free: 0, pro: 0 });
 assert.equal(new Set([...slots.free, ...slots.pro].map(p => p.id)).size, 10);
-assert.ok(slots.pro.every(p => p.value && p.confidence >= 60));
+assert.ok(slots.pro.every(p => p.value && p.confidence >= 60 && p.odds >= MIN_DECIMAL_ODDS));
+assert.equal(MIN_DECIMAL_ODDS, 1.4);
+const belowOdds = assignDailyTiers([
+  { id: 'low', confidence: 80, value: true, edge: 0.2, odds: 1.39 },
+  { id: 'minimum', confidence: 70, value: true, edge: 0.1, odds: 1.4 },
+  { id: 'free-low', confidence: 75, value: false, odds: 1.2 },
+]);
+assert.deepEqual(belowOdds.free.map(p => p.id), ['minimum']);
+assert.equal(belowOdds.pro.length, 0);
+assert.deepEqual(belowOdds.shortfall, { free: 2, pro: 3 });
 const noValues = assignDailyTiers(valid.map(p => ({ ...p, value: false })));
 assert.equal(noValues.free.length, 5);
 assert.equal(noValues.pro.length, 0);

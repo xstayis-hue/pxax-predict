@@ -466,12 +466,12 @@ await test('PRO feed reports unavailable and stale data instead of empty success
 
 await test('VIP auth принимается только из заголовка, query string не поддерживается', async () => {
   const e = env();
-  await putFeed(e, todayMsk(), { date: todayMsk(), generated: new Date().toISOString(), predictions: [{ id: 'header-only', tier: 'pro', confidence: 65, value: true }] });
+  await putFeed(e, todayMsk(), { date: todayMsk(), generated: new Date().toISOString(), predictions: [{ id: 'header-only', tier: 'pro', confidence: 65, value: true, odds: 1.8 }] });
   const r = await call(worker, new Request('https://px.example.test/api/pro?initData=' + encodeURIComponent(initDataFor(6999))), e);
   assert.equal(r.status, 401);
 });
 
-await test('залить фид можно только с админ-ключом, и только PRO-прогнозы', async () => {
+await test('залить фид можно только с админ-ключом, с PRO-тиром и коэффициентом от 1.40', async () => {
   const e = env();
   const url = 'https://px.example.test/api/admin/pro-feed?key=admin-key';
   const good = { date: todayMsk(), generated: new Date().toISOString(), ...quotaMeta(1, 3), predictions: [{ id: '3', tier: 'pro', confidence: 65, value: true, odds: 1.8 }] };
@@ -493,6 +493,14 @@ await test('залить фид можно только с админ-ключо
   const ok = await call(worker, post(good), e);
   assert.equal(ok.status, 200);
   assert.equal((await ok.json()).count, 1);
+  const belowMinimum = await call(worker, post({ ...good, generated: new Date().toISOString(), predictions: [{ ...good.predictions[0], odds: 1.39 }] }), e);
+  assert.equal(belowMinimum.status, 400);
+  assert.equal((await belowMinimum.json()).error, 'unqualified_pro_prediction');
+  const atMinimum = await call(worker, post({ ...good, generated: new Date().toISOString(), predictions: [{ ...good.predictions[0], odds: 1.4 }] }), e);
+  assert.equal(atMinimum.status, 200);
+  assert.equal((await atMinimum.json()).count, 1);
+  const belowMinimumNoValue = await call(worker, post({ ...good, generated: new Date().toISOString(), predictions: [{ ...good.predictions[0], odds: 1.39, value: false }] }), e);
+  assert.equal(belowMinimumNoValue.status, 400);
 
   // фид с бесплатным прогнозом не принимаем: иначе VIP-файл утечёт целиком
   const bad = await call(worker, post({ date: todayMsk(), generated: new Date().toISOString(), ...quotaMeta(1), predictions: [{ id: '4', tier: 'free', confidence: 65, value: true, odds: 1.8 }] }), e);
@@ -507,7 +515,7 @@ await test('залить фид можно только с админ-ключо
 
 await test('без подписки /api/pro не отдаёт даже число прогнозов', async () => {
   const e = env();
-  await putFeed(e, todayMsk(), { date: todayMsk(), generated: new Date().toISOString(), count: 2, ...quotaMeta(2), predictions: [{ id: '5', tier: 'pro', confidence: 65, value: true }, { id: '6', tier: 'pro', confidence: 65, value: true }] });
+  await putFeed(e, todayMsk(), { date: todayMsk(), generated: new Date().toISOString(), count: 2, ...quotaMeta(2), predictions: [{ id: '5', tier: 'pro', confidence: 65, value: true, odds: 1.8 }, { id: '6', tier: 'pro', confidence: 65, value: true, odds: 1.9 }] });
   const r = await call(worker, new Request('https://px.example.test/api/pro', { headers: { 'X-Telegram-Init-Data': initDataFor(6003) } }), e);
   const body = await r.text();
   assert.equal(r.status, 403);

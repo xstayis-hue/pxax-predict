@@ -19,6 +19,7 @@
    по ключу pro:<дата> — VIP-прогнозы дня (в публичный репозиторий не попадают). */
 
 const JSON_HEADERS = { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' };
+const MIN_DECIMAL_ODDS = 1.4;
 
 const cors = () => ({
   'Access-Control-Allow-Origin': '*',
@@ -325,7 +326,7 @@ async function handleProFeedAdmin(request, env, cfg) {
     || !Number.isInteger(shortfall.pro) || shortfall.pro !== Math.max(0, 3 - proCount)) {
     return json({ error: 'bad_quota_metadata' }, 400);
   }
-  if (body.predictions.length > 5 || body.predictions.some(p => Number(p.confidence) < 60 || p.value !== true || p.odds == null)) {
+  if (body.predictions.length > 5 || body.predictions.some(p => Number(p.confidence) < 60 || p.value !== true || !Number.isFinite(Number(p.odds)) || Number(p.odds) < MIN_DECIMAL_ODDS)) {
     return json({ error: 'unqualified_pro_prediction' }, 400);
   }
   // в VIP-фиде не должно быть бесплатных прогнозов: иначе он утечёт целиком

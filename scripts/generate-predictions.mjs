@@ -16,7 +16,7 @@ import {
 } from './model.mjs';
 import { applySoccerLowScoreGuard } from './score-adjustments.mjs';
 import { normalizeScoreProbabilities } from './score-adjustments.mjs';
-import { assignDailyTiers, FREE_MIN_CONFIDENCE, PRO_MIN_CONFIDENCE } from './daily-tiers.mjs';
+import { assignDailyTiers, FREE_MIN_CONFIDENCE, PRO_MIN_CONFIDENCE, MIN_DECIMAL_ODDS } from './daily-tiers.mjs';
 import { proValueExplanation } from './forecast-copy.mjs';
 
 /* ---- калибровка: читаем посчитанное резолвером (data/calibration.json) ---- */
@@ -605,8 +605,11 @@ for (const lg of LEAGUES) {
       // Раньше сортировка была строго по edge, и карточку всегда забирал самый
       // несогласный с линией рынок — а это чаще всего ошибка модели, а не
       // находка: в истории заходы с большим edge были хуже (80% против 53%).
-      const withLine = cand.filter(c => c.i != null && c.p >= 0.45);
-      const pool = withLine.length ? withLine : cand.filter(c => c.p >= 0.5);
+      // Коэффициенты ниже 1.40 исключены для обоих тарифов: допустимая
+      // альтернативная линия этого же матча может остаться кандидатом.
+      const eligibleCand = cand.filter(c => Number.isFinite(c.dec) && c.dec >= MIN_DECIMAL_ODDS);
+      const withLine = eligibleCand.filter(c => c.i != null && c.p >= 0.45);
+      const pool = withLine.length ? withLine : eligibleCand.filter(c => c.p >= 0.5);
       if (!pool.length) continue;
       pool.sort((a, b) => selectionScore(b.p, b.edge) - selectionScore(a.p, a.edge)
         || (b.edge ?? -1) - (a.edge ?? -1) || b.p - a.p);
@@ -789,6 +792,6 @@ writeFileSync('data/pro-feed.json', JSON.stringify({
   predictions: pro,
 }, null, 2));
 
-console.log(`OK: ${final.length} real predictions (pro=${pro.length}, free=${free.length}, shortfall free=${assignment.shortfall.free}, pro=${assignment.shortfall.pro}, value=${final.filter(p => p.value).length}${botd ? `, bet-of-the-day: ${botd.legs.length} legs @ ${botd.combinedOdds}` : ''}) for ${dateStr} [free>=${FREE_MIN}%, pro>=${PRO_MIN}%]`
+console.log(`OK: ${final.length} real predictions (pro=${pro.length}, free=${free.length}, shortfall free=${assignment.shortfall.free}, pro=${assignment.shortfall.pro}, value=${final.filter(p => p.value).length}${botd ? `, bet-of-the-day: ${botd.legs.length} legs @ ${botd.combinedOdds}` : ''}) for ${dateStr} [free>=${FREE_MIN}%, pro>=${PRO_MIN}%, odds>=${MIN_DECIMAL_ODDS.toFixed(2)}]`
   + `; публично free=${free.length}, PRO уходит в data/pro-feed.json`);
 if (skippedPreseason) console.log(`preseason skipped: ${skippedPreseason} матчей (модель считает только регулярный сезон)`);

@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { MIN_DECIMAL_ODDS } from './daily-tiers.mjs';
 
 const publicFeed = JSON.parse(readFileSync('data/predictions.json', 'utf8'));
 const proFeed = JSON.parse(readFileSync('data/pro-feed.json', 'utf8'));
@@ -16,8 +17,9 @@ assert.equal(Number(publicFeed.proCount), Number(proFeed.proCount ?? proFeed.cou
 assert.equal(Number(proFeed.count), proFeed.predictions.length, 'PRO count must match PRO predictions');
 assert.equal(Number(proFeed.proCount ?? proFeed.count), proFeed.predictions.length, 'private PRO count must match private predictions');
 assert.ok(publicFeed.predictions.every(p => Number(p.confidence) >= 55), 'Free predictions must respect the 55% model threshold');
+assert.ok(publicFeed.predictions.every(p => p.odds == null || (Number.isFinite(Number(p.odds)) && Number(p.odds) >= MIN_DECIMAL_ODDS)), `Free odds must be at least ${MIN_DECIMAL_ODDS.toFixed(2)} when provided`);
 assert.ok(proFeed.predictions.length <= Number(proFeed.limits?.pro ?? 5) && proFeed.predictions.every(p => p.tier === 'pro'), 'PRO feed must respect tier and configured cap');
-assert.ok(proFeed.predictions.length <= 5 && proFeed.predictions.every(p => Number(p.confidence) >= 60 && p.value === true && Number(p.odds) > 1), 'PRO feed must contain at most five qualified value predictions with odds');
+assert.ok(proFeed.predictions.length <= 5 && proFeed.predictions.every(p => Number(p.confidence) >= 60 && p.value === true && Number.isFinite(Number(p.odds)) && Number(p.odds) >= MIN_DECIMAL_ODDS), `PRO feed must contain at most five qualified value predictions with odds >= ${MIN_DECIMAL_ODDS.toFixed(2)}`);
 assert.ok(publicFeed.predictions.every(p => !p.tier || p.tier === 'free'), 'public feed must not contain PRO tier predictions');
 const freeIds = new Set(publicFeed.predictions.map(p => String(p.id)));
 const proIds = new Set(proFeed.predictions.map(p => String(p.id)));
