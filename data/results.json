@@ -1446,5 +1446,22 @@
     "settlementParts": [
       "win"
     ]
+  },
+  {
+    "date": "2026-10-15",
+    "id": "401915572",
+    "kind": "pro",
+    "sport": "⚽",
+    "lgKey": "soccer/uefa.europa",
+    "league": "Лига Европы",
+    "home": "Stade Rennais",
+    "away": "OFI Crete",
+    "market": "Х2",
+    "confidence": 63,
+    "modelProb": 0.63,
+    "odds": 4.7560975609756095,
+    "score": "2:1",
+    "result": "miss",
+    "profitUnits": -1
   }
 ]
