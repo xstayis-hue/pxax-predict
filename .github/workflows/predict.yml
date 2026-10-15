@@ -2,6 +2,14 @@ name: daily-predictions
 on:
   schedule:
     - cron: '5 */2 * * *'   # каждые 2 часа (05:05, 07:05, 09:05 МСК...) — витрина всегда свежая, события минимум за 6 часов до старта
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/check-daily-feeds.mjs'
+      - 'scripts/daily-tiers.mjs'
+      - 'scripts/generate-predictions.mjs'
+      - 'scripts/publish-pro.mjs'
+      - '.github/workflows/predict.yml'
   workflow_dispatch:
 permissions:
   contents: write

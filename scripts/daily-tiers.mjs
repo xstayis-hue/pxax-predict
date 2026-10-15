@@ -17,13 +17,16 @@ export function assignDailyTiers(predictions, options = {}) {
     .sort((a, b) => Number(b.confidence) - Number(a.confidence));
   const eligiblePro = candidates.filter(p => p.value === true && Number(p.confidence) >= minProConfidence)
     .sort((a, b) => (Number(b.edge) || 0) - (Number(a.edge) || 0) || Number(b.confidence) - Number(a.confidence));
-  const proCount = Math.min(maxPro, eligiblePro.length, Math.max(0, candidates.length - minFree));
+  const desiredPro = Math.min(maxPro, eligiblePro.length);
+  const proCount = Math.min(desiredPro, Math.max(0, candidates.length - Math.min(minFree, maxFree)));
   const proIds = new Set(eligiblePro.slice(0, proCount).map(p => String(p.id)));
   const pro = eligiblePro.filter(p => proIds.has(String(p.id))).map(p => ({ ...p, tier: 'pro' }));
   const remaining = candidates.filter(p => !proIds.has(String(p.id)));
-  const freeCount = Math.min(maxFree, Math.max(minFree, remaining.length));
+  const freeCount = Math.min(maxFree, remaining.length);
   const free = remaining.slice(0, freeCount).map(p => ({ ...p, tier: 'free' }));
+  const predictionIds = [...free, ...pro].map(p => String(p.id));
+  if (new Set(predictionIds).size !== predictionIds.length) throw new Error('A match cannot be assigned to both tiers');
   const shortfall = { free: Math.max(0, minFree - free.length), pro: Math.max(0, minPro - pro.length) };
-  return { free, pro, targets: { free: minFree, pro: minPro }, shortfall,
+  return { free, pro, targets: { free: minFree, pro: minPro }, limits: { free: maxFree, pro: maxPro }, shortfall,
     candidateCount: candidates.length, eligibleProCount: eligiblePro.length };
 }

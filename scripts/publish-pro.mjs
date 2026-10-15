@@ -42,14 +42,16 @@ if (leaked.length) {
   console.error(`publish-pro: в фиде ${leaked.length} не-PRO прогнозов — не публикую`);
   process.exit(1);
 }
-if (!feed.targets || !feed.shortfall || Number(feed.targets.pro) !== 3
-  || Number(feed.shortfall.pro) !== Math.max(0, 3 - feed.predictions.length)
-  || Number(feed.targets.free) !== 3) {
-  console.error('publish-pro: PRO target metadata is inconsistent');
+const proCount = Number(feed.proCount ?? feed.count);
+if (!feed.targets || !feed.limits || !feed.shortfall || feed.targets.free !== 3 || feed.targets.pro !== 3
+  || feed.limits.free !== 5 || feed.limits.pro !== 5
+  || !Number.isInteger(proCount) || proCount !== feed.predictions.length || proCount > 5
+  || Number(feed.shortfall.pro) !== Math.max(0, 3 - proCount)) {
+  console.error('publish-pro: quota metadata is inconsistent with 3–5 target');
   process.exit(1);
 }
-if (feed.predictions.length > 3 || feed.predictions.some(p => Number(p.confidence) < 60 || p.value !== true)) {
-  console.error('publish-pro: PRO feed must contain at most three qualified value predictions (confidence >= 60%)');
+if (feed.predictions.length > 5 || feed.predictions.some(p => Number(p.confidence) < 60 || p.value !== true || p.odds == null)) {
+  console.error('publish-pro: PRO feed must contain at most five qualified value predictions (confidence >= 60%)');
   process.exit(1);
 }
 

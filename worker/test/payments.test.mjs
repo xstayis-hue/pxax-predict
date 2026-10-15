@@ -381,7 +381,11 @@ await test('админ-сводка требует ключ', async () => {
 /* ---------- VIP-фид: главное — без подписки прогнозы не отдаются ---------- */
 
 const todayMsk = () => new Date(Date.now() + 3 * 3600e3).toISOString().slice(0, 10);
-const quotaMeta = (count, freeCount = 0) => ({ targets: { free: 3, pro: 3 }, shortfall: { free: Math.max(0, 3 - freeCount), pro: Math.max(0, 3 - count) } });
+const quotaMeta = (count, freeCount = 0) => ({
+  count, proCount: count, freeCount,
+  targets: { free: 3, pro: 3 }, limits: { free: 5, pro: 5 },
+  shortfall: { free: Math.max(0, 3 - freeCount), pro: Math.max(0, 3 - count) },
+});
 
 await test('VIP-фид не отдаётся без подписки и без валидного initData', async () => {
   const e = env();
@@ -455,7 +459,7 @@ await test('VIP auth принимается только из заголовка
 await test('залить фид можно только с админ-ключом, и только PRO-прогнозы', async () => {
   const e = env();
   const url = 'https://px.example.test/api/admin/pro-feed?key=admin-key';
-  const good = { date: todayMsk(), generated: new Date().toISOString(), count: 1, ...quotaMeta(1), predictions: [{ id: '3', tier: 'pro', confidence: 65, value: true }] };
+  const good = { date: todayMsk(), generated: new Date().toISOString(), ...quotaMeta(1, 3), predictions: [{ id: '3', tier: 'pro', confidence: 65, value: true, odds: 1.8 }] };
 
   const noKey = await call(worker, new Request('https://px.example.test/api/admin/pro-feed?key=wrong', {
     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(good),
@@ -476,7 +480,7 @@ await test('залить фид можно только с админ-ключо
   assert.equal((await ok.json()).count, 1);
 
   // фид с бесплатным прогнозом не принимаем: иначе VIP-файл утечёт целиком
-  const bad = await call(worker, post({ date: todayMsk(), generated: new Date().toISOString(), ...quotaMeta(1), predictions: [{ id: '4', tier: 'free', confidence: 65, value: true }] }), e);
+  const bad = await call(worker, post({ date: todayMsk(), generated: new Date().toISOString(), ...quotaMeta(1), predictions: [{ id: '4', tier: 'free', confidence: 65, value: true, odds: 1.8 }] }), e);
   assert.equal(bad.status, 400);
   assert.equal((await bad.json()).error, 'feed_contains_free');
 
@@ -552,7 +556,7 @@ await test('D1: старые дни фида вычищаются, свежие 
   const url = 'https://px.example.test/api/admin/pro-feed?key=admin-key';
   await call(worker, new Request(url, {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ date: day(1), generated: new Date().toISOString(), targets: { free: 3, pro: 3 }, shortfall: { free: 0, pro: 2 }, predictions: [{ id: 'yesterday', tier: 'pro', confidence: 65, value: true }] }),
+    body: JSON.stringify({ date: day(1), generated: new Date().toISOString(), ...quotaMeta(1, 3), predictions: [{ id: 'yesterday', tier: 'pro', confidence: 65, value: true, odds: 1.8 }] }),
   }), e);
   assert.ok(await getFeed(e, day(0)), 'сегодняшний фид должен остаться');
   assert.ok(await getFeed(e, day(1)), 'вчерашний фид должен остаться');

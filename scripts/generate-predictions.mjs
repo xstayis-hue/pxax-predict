@@ -764,10 +764,12 @@ writeFileSync('data/predictions.json', JSON.stringify({
   generated: new Date().toISOString(),
   model: 'pxax-v2 @ ESPN standings + odds',
   count: free.length,
-  proCount: pro.length,          // только число: сколько сигналов Pro-ИИ сегодня
+  freeCount: free.length,
+  proCount: pro.length,
   botdLegs: botd ? botd.legs.length : 0, // тоже только число — для пейвол-тизера
   thresholds: { freeMin: FREE_MIN, proMin: PRO_MIN },
   targets: assignment.targets,
+  limits: assignment.limits,
   shortfall: assignment.shortfall,
   predictions: free.map(publicFree),
 }, null, 2));
@@ -777,6 +779,7 @@ writeFileSync('data/pro-feed.json', JSON.stringify({
   generated: new Date().toISOString(),
   count: pro.length,
   targets: assignment.targets,
+  limits: assignment.limits,
   shortfall: assignment.shortfall,
   botd,
   predictions: pro,

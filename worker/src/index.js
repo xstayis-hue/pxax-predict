@@ -315,12 +315,17 @@ async function handleProFeedAdmin(request, env, cfg) {
   if (![today, yesterday].includes(body.date)) return json({ error: 'stale_feed_date' }, 400);
   const ids = body.predictions.map(p => String(p.id ?? ''));
   if (ids.some(id => !id) || new Set(ids).size !== ids.length) return json({ error: 'duplicate_prediction_ids' }, 400);
-  if (!body.targets || !body.shortfall || Number(body.targets.pro) !== 3
-    || Number(body.shortfall.pro) !== Math.max(0, 3 - body.predictions.length)
-    || Number(body.targets.free) !== 3 || Number(body.shortfall.free) < 0) {
+  const targets = body.targets, limits = body.limits, shortfall = body.shortfall;
+  const freeCount = Number(body.freeCount), proCount = Number(body.proCount ?? body.count);
+  if (!targets || !limits || !shortfall || targets.free !== 3 || targets.pro !== 3
+    || limits.free !== 5 || limits.pro !== 5
+    || !Number.isInteger(freeCount) || freeCount < 0 || freeCount > 5
+    || !Number.isInteger(proCount) || proCount !== ids.length || proCount > 5
+    || !Number.isInteger(shortfall.free) || shortfall.free !== Math.max(0, 3 - freeCount)
+    || !Number.isInteger(shortfall.pro) || shortfall.pro !== Math.max(0, 3 - proCount)) {
     return json({ error: 'bad_quota_metadata' }, 400);
   }
-  if (body.predictions.length > 3 || body.predictions.some(p => Number(p.confidence) < 60 || p.value !== true)) {
+  if (body.predictions.length > 5 || body.predictions.some(p => Number(p.confidence) < 60 || p.value !== true || p.odds == null)) {
     return json({ error: 'unqualified_pro_prediction' }, 400);
   }
   // в VIP-фиде не должно быть бесплатных прогнозов: иначе он утечёт целиком

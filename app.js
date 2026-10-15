@@ -53,8 +53,20 @@ function feedFresh(d) {
   const priorDay = Number.isFinite(feedDay) && todayDay - feedDay === 86400e3;
   if (!Array.isArray(d?.predictions) || !d?.date || !Number.isFinite(generated) || generated > Date.now() + 5 * 60 * 1000
     || age > 30 * 3600 * 1000 || (d.date !== today && !priorDay)) return null;
-  if (d.date !== today) return 'grace';
-  if (age > 6 * 3600 * 1000) return 'grace';
+  if (d.date !== today || age > 6 * 3600 * 1000) return 'grace';
+  const targetPro = Number(d.targets?.pro);
+  const targetFree = Number(d.targets?.free);
+  const limitPro = Number(d.limits?.pro);
+  const limitFree = Number(d.limits?.free);
+  const freeCount = Number(d.freeCount ?? d.count);
+  const proCount = Number(d.proCount);
+  const shortfallPro = Number(d.shortfall?.pro);
+  const shortfallFree = Number(d.shortfall?.free);
+  if ([targetPro, targetFree, limitPro, limitFree, freeCount, proCount, shortfallPro, shortfallFree].some(value => !Number.isFinite(value))) return 'legacy';
+  if (targetPro !== 3 || targetFree !== 3 || limitPro !== 5 || limitFree !== 5
+    || freeCount < 0 || freeCount > limitFree || proCount < 0 || proCount > limitPro
+    || freeCount !== d.predictions.length || shortfallFree !== Math.max(0, 3 - freeCount)
+    || shortfallPro !== Math.max(0, 3 - proCount)) return 'legacy';
   return 'fresh';
 }
 function availablePredictions(predictions) {
@@ -81,15 +93,22 @@ async function loadReal() {
     REAL.lastUpdate = d.generated || null;
     if (freshness) {
       REAL.status = freshness;
-      REAL.feedTargets = { free: 3, pro: 3 };
+      REAL.feedTargets = d.targets || { free: 3, pro: 3 };
+      REAL.feedLimits = d.limits || { free: 5, pro: 5 };
       const visibleFree = availablePredictions(d.predictions.filter(p => !p.tier || p.tier === 'free'));
-      const reportedProCount = freshness === 'fresh' ? Math.min(5, Number(d.proCount) || 0) : 0;
-      REAL.feedShortfall = { free: Math.max(0, 3 - Math.min(3, visibleFree.length)), pro: freshness === 'fresh' ? Math.max(0, 3 - reportedProCount) : 3 };
-      REAL.error = freshness === 'grace' ? `Показываем предыдущий реальный выпуск за ${d.date}; ждём сегодняшний обновлённый выпуск.` : null;
+      const publishedProCount = freshness === 'fresh' ? Math.min(REAL.feedLimits.pro, Number(d.proCount) || 0) : 0;
+      const freeCount = Number(d.freeCount ?? d.count);
+      const legacySchema = freshness === 'legacy';
+      REAL.feedShortfall = {
+        free: freshness === 'fresh' ? Number(d.shortfall.free) : Math.max(0, 3 - Math.min(3, visibleFree.length)),
+        pro: freshness === 'fresh' ? Number(d.shortfall.pro) : 3,
+      };
+      REAL.error = freshness === 'grace' ? `Показываем предыдущий выпуск за ${d.date}; ждём новый выпуск.`
+        : legacySchema ? `Обнаружена старая структура ленты (${freeCount} кандидатов, ${publishedProCount} PRO-сигналов); ждём публикации обновлённой квоты.` : null;
       REAL.date = d.date;
       REAL.free = visibleFree;
-      REAL.proCount = reportedProCount;
-      proTotalToday = REAL.proCount;
+      REAL.proCount = publishedProCount;
+      proTotalToday = publishedProCount;
       REAL.botdLegs = Number(d.botdLegs) || 0;
     } else {
       REAL.status = 'stale';
@@ -128,8 +147,8 @@ const CONFIG = {
      и из-за этого «отваливалась» оплата. Пока адрес не вписан, кнопки оплаты уводят
      в чат бота. */
   API_BASE: 'https://pxaxbet-payments.xstayis.workers.dev',
-  FREE_DAILY: 3,   // целевой минимум бесплатных прогнозов
-  PRO_DAILY: 3,    // целевой минимум сигналов Pro-ИИ
+  FREE_DAILY: 5,   // максимум отображаемых Free прогнозов; фактическая квота приходит из feed.targets
+  PRO_DAILY: 5,    // максимум отображаемых PRO прогнозов; фактическая квота приходит из feed.targets
   STAT_DAYS: 14,   // окно статистики и списка истории (должны совпадать)
   // Минимум решённых прогнозов у каждого вида, чтобы сравнивать Базовый и VIP.
   // Меньше — разница объясняется случайностью, и писать «заходят чаще» нельзя.
@@ -825,7 +844,8 @@ function render() {
   const cEl = document.getElementById('collectChip');
   if (cEl) cEl.hidden = true;
   document.getElementById('statFree').textContent = freeToday.length;
-  document.getElementById('statProCnt').textContent = reportedPro == null ? '—' : quotaStatus(reportedPro, 3);
+  const limit = REAL.feedLimits?.pro ?? CONFIG.PRO_DAILY;
+  document.getElementById('statProCnt').textContent = reportedPro == null ? '—' : quotaStatus(reportedPro, limit, 3);
   document.getElementById('hHits').textContent = hasReal ? statsView.hits : '—';
   document.getElementById('hMiss').textContent = hasReal ? statsView.miss : '—';
   document.getElementById('hRate').textContent = hasReal ? statsView.rate + '%' : '—';
@@ -834,10 +854,11 @@ function render() {
   document.getElementById('pMiss').textContent = hasReal ? statsAll.miss : '—';
   document.getElementById('pRate').textContent = hasReal ? statsAll.rate + '%' : '—';
   // динамические счётчики вместо захардкоженных
-  document.getElementById('payProTitle').textContent = 'Pro-ИИ · отбор value-сигналов';
+  const quotaLabel = isFreshFeed ? ` · ${quotaStatus(proCount, Math.max(DAILY_MAX_PRO, proCount), DAILY_MIN_PRO)}` : '';
+  document.getElementById('payProTitle').textContent = `Pro-ИИ · value-отбор${quotaLabel}`;
   document.getElementById('proCnt').textContent = reportedPro == null
     ? REAL.status === 'legacy' ? 'Старый выпуск · квота не подтверждена' : 'Сегодняшняя PRO-квота ещё не загружена'
-    : quotaStatus(reportedPro, 3);
+    : `PRO-сигналы${quotaLabel}`;
   renderBetOfTheDay();
 
   // колоды (+ честные пустые состояния, если матчей в окне нет)
