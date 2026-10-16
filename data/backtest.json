@@ -1,17 +1,17 @@
 {
   "mode": "archived-production",
-  "generated": "2026-10-15T05:53:03.762Z",
-  "evaluationWindowDays": 7,
+  "generated": "2026-10-16T05:49:29.602Z",
+  "evaluationWindowDays": 9,
   "source": "committed archived public prediction snapshots joined by event id to resolved results",
-  "snapshots": 85,
-  "resolved": 40,
-  "signals": 40,
-  "hits": 27,
-  "losses": 13,
-  "hitRate": 0.675,
-  "brier": 0.2246,
-  "roi": 24.38,
-  "roiBets": 38,
+  "snapshots": 95,
+  "resolved": 52,
+  "signals": 52,
+  "hits": 35,
+  "losses": 17,
+  "hitRate": 0.6731,
+  "brier": 0.2241,
+  "roi": 26.68,
+  "roiBets": 47,
   "pushes": 0,
   "halfResults": 0,
   "coverage": {
@@ -19,7 +19,7 @@
       "free"
     ],
     "firstDate": "2026-10-05",
-    "lastDate": "2026-10-11",
+    "lastDate": "2026-10-13",
     "includesPro": false
   },
   "note": "Оценка только фактически сохранённых публичных прогнозов; PRO-снимки и архивные входные признаки отсутствуют. Не является 90-дневным replay или доказательством будущей доходности."
