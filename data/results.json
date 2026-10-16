@@ -1463,5 +1463,45 @@
     "score": "2:1",
     "result": "miss",
     "profitUnits": -1
+  },
+  {
+    "date": "2026-10-16",
+    "id": "401884770",
+    "kind": "free",
+    "sport": "⚽",
+    "lgKey": "soccer/ger.1",
+    "league": "Бундеслига",
+    "home": "Eintracht Frankfurt",
+    "away": "FC Cologne",
+    "market": "ТБ 2.5",
+    "confidence": 71,
+    "modelProb": 0.71,
+    "odds": 1.8695652173913042,
+    "score": "1:0",
+    "result": "miss",
+    "profitUnits": -1,
+    "settlementParts": [
+      "loss"
+    ]
+  },
+  {
+    "date": "2026-10-16",
+    "id": "401885084",
+    "kind": "free",
+    "sport": "⚽",
+    "lgKey": "soccer/ger.2",
+    "league": "2. Бундеслига",
+    "home": "Energie Cottbus",
+    "away": "1. FC Nürnberg",
+    "market": "ТБ 2.5",
+    "confidence": 69,
+    "modelProb": 0.69,
+    "odds": 1.8333333333333335,
+    "score": "1:1",
+    "result": "miss",
+    "profitUnits": -1,
+    "settlementParts": [
+      "loss"
+    ]
   }
 ]
