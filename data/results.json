@@ -1503,5 +1503,105 @@
     "settlementParts": [
       "loss"
     ]
+  },
+  {
+    "date": "2026-10-17",
+    "id": "401875582",
+    "kind": "free",
+    "sport": "⚽",
+    "lgKey": "soccer/ned.1",
+    "league": "Эредивизи",
+    "home": "ADO Den Haag",
+    "away": "PSV Eindhoven",
+    "market": "ТБ 2.5",
+    "confidence": 68,
+    "modelProb": 0.68,
+    "odds": 1.606060606060606,
+    "score": "2:1",
+    "result": "hit",
+    "profitUnits": 0.606060606060606,
+    "settlementParts": [
+      "win"
+    ]
+  },
+  {
+    "date": "2026-10-17",
+    "id": "401884764",
+    "kind": "free",
+    "sport": "⚽",
+    "lgKey": "soccer/ger.1",
+    "league": "Бундеслига",
+    "home": "SV Elversberg",
+    "away": "FC Augsburg",
+    "market": "ТБ 2.5",
+    "confidence": 67,
+    "modelProb": 0.67,
+    "odds": 2.05,
+    "score": "4:3",
+    "result": "hit",
+    "profitUnits": 1.0499999999999998,
+    "settlementParts": [
+      "win"
+    ]
+  },
+  {
+    "date": "2026-10-17",
+    "id": "401884769",
+    "kind": "pro",
+    "sport": "⚽",
+    "lgKey": "soccer/ger.1",
+    "league": "Бундеслига",
+    "home": "1. FC Union Berlin",
+    "away": "Borussia Dortmund",
+    "market": "ТБ 2.5",
+    "confidence": 67,
+    "modelProb": 0.67,
+    "odds": 2.25,
+    "score": "0:0",
+    "result": "miss",
+    "profitUnits": -1,
+    "settlementParts": [
+      "loss"
+    ]
+  },
+  {
+    "date": "2026-10-17",
+    "id": "401885085",
+    "kind": "pro",
+    "sport": "⚽",
+    "lgKey": "soccer/ger.2",
+    "league": "2. Бундеслига",
+    "home": "SpVgg Greuther Fürth",
+    "away": "TSV Eintracht Braunschweig",
+    "market": "ТБ 2.5",
+    "confidence": 60,
+    "modelProb": 0.6,
+    "odds": 2.3,
+    "score": "2:0",
+    "result": "miss",
+    "profitUnits": -1,
+    "settlementParts": [
+      "loss"
+    ]
+  },
+  {
+    "date": "2026-10-17",
+    "id": "401885092",
+    "kind": "free",
+    "sport": "⚽",
+    "lgKey": "soccer/ger.2",
+    "league": "2. Бундеслига",
+    "home": "VfL Wolfsburg",
+    "away": "1. FC Heidenheim 1846",
+    "market": "ТБ 2.5",
+    "confidence": 68,
+    "modelProb": 0.68,
+    "odds": 1.8333333333333335,
+    "score": "3:1",
+    "result": "hit",
+    "profitUnits": 0.8333333333333335,
+    "settlementParts": [
+      "win"
+    ]
   }
 ]
